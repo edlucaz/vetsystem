@@ -1,0 +1,53 @@
+<!--
+  VETSystem — Sistema de Agendamento Veterinário
+  ATIVO PET | Projeto Integrador UNIVESP 2026 — PJI110
+
+  Arquivo : agendamentos/templates/agendamentos/animal_confirm_delete.html
+  Função  : Página de confirmação antes de excluir um animal.
+            Alerta que todas as consultas vinculadas também serão excluídas.
+
+  Autor   : Lucas Eduardo Rocha (RA 24217901)
+  Data    : 2026-03-11
+-->
+{% extends 'base.html' %}
+
+{% block title %}Excluir Animal — VETSystem{% endblock %}
+
+{% block content %}
+
+<div class="max-w-md mx-auto">
+  <div class="bg-white rounded-xl shadow p-6">
+
+    <div class="text-center mb-4">
+      <span class="text-5xl">⚠️</span>
+    </div>
+
+    <h1 class="text-xl font-bold text-red-600 text-center mb-2">Excluir Animal</h1>
+
+    <p class="text-gray-600 text-center text-sm mb-4">
+      Tem certeza que deseja excluir <strong>{{ animal.nome }}</strong>?
+    </p>
+
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">
+      <strong>Atenção:</strong> Esta ação também excluirá permanentemente
+      todo o histórico de consultas deste animal. Esta operação não pode ser desfeita.
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="flex gap-3">
+        <button type="submit"
+          class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition-colors">
+          Sim, excluir
+        </button>
+        <a href="{% url 'agendamentos:animal-detail' animal.pk %}"
+           class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition-colors text-center">
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

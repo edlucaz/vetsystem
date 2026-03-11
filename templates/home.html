@@ -1,0 +1,256 @@
+<!--
+  VETSystem — Sistema de Agendamento Veterinário
+  ATIVO PET | Projeto Integrador UNIVESP 2026 — PJI110
+
+  Arquivo : templates/home.html
+  Função  : Frontpage pública da ATIVO PET. Página inicial acessível sem login.
+            v2 — corrigido: hero sem margem negativa, contraste de cores ajustado.
+
+  Autor   : Lucas Eduardo Rocha (RA 24217901)
+  Data    : 2026-03-11
+-->
+{% extends 'base.html' %}
+
+{% block title %}ATIVO PET — Fisioterapia e Bem-Estar Animal{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Animação de entrada suave */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up   { animation: fadeUp 0.65s ease both; }
+  .delay-1   { animation-delay: 0.1s; }
+  .delay-2   { animation-delay: 0.25s; }
+  .delay-3   { animation-delay: 0.4s; }
+  .delay-4   { animation-delay: 0.55s; }
+
+  /* Card de serviço com hover */
+  .service-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 32px rgba(49,161,167,0.15);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     SEÇÃO 1 — HERO
+     Fundo roxo escuro com headline branca e botão laranja.
+     Sem margem negativa — funciona dentro do container base.
+     ============================================================ -->
+<section style="background: linear-gradient(135deg, #4A2C7A 0%, #31A1A7 100%);"
+         class="rounded-3xl px-8 py-20 mb-16 text-center overflow-hidden relative">
+
+  <!-- Círculo decorativo de fundo -->
+  <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
+       style="background: #F26A2E; transform: translate(30%, -30%);"></div>
+  <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10"
+       style="background: white; transform: translate(-30%, 30%);"></div>
+
+  <div class="relative max-w-3xl mx-auto">
+
+    <!-- Badge de localização -->
+    <div class="fade-up delay-1 inline-flex items-center gap-2 mb-6
+                bg-white/20 text-white text-sm font-medium px-4 py-2 rounded-full">
+      📍 Limeira/SP — dentro do Hospital Veterinário Pet&amp;Company
+    </div>
+
+    <!-- Headline -->
+    <h1 class="fade-up delay-2 text-4xl sm:text-5xl font-bold text-white leading-tight mb-5">
+      Cuidado especializado<br>
+      <span style="color: #F9A96B;">para o seu melhor amigo</span>
+    </h1>
+
+    <!-- Subtítulo -->
+    <p class="fade-up delay-3 text-white/90 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+      Fisioterapia, acupuntura e bem-estar animal com atendimento humanizado.
+      Agende online e garanta o horário do seu pet.
+    </p>
+
+    <!-- CTAs -->
+    <div class="fade-up delay-4 flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+      <a href="{% url 'agendamentos:proprietario-create' %}"
+         style="background: #F26A2E;"
+         class="hover:opacity-90 text-white font-bold text-lg py-4 px-10 rounded-xl
+                shadow-lg transition-all">
+        🐾 Agendar Consulta
+      </a>
+      <a href="#servicos"
+         class="bg-white/20 hover:bg-white/30 text-white font-semibold
+                text-base py-4 px-8 rounded-xl transition-all">
+        Conheça os serviços ↓
+      </a>
+    </div>
+
+    <!-- Credenciais -->
+    <div class="fade-up delay-4 flex flex-wrap justify-center gap-6 text-white/80 text-sm">
+      <span>✅ Profissionais especializados</span>
+      <span>✅ Equipamentos modernos</span>
+      <span>✅ Atendimento humanizado</span>
+      <span>✅ Seg a sex, 8h às 19h</span>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SEÇÃO 2 — SERVIÇOS
+     ============================================================ -->
+<section id="servicos" class="mb-20">
+
+  <div class="text-center mb-12">
+    <span class="text-sm font-bold uppercase tracking-widest" style="color: #31A1A7;">
+      O que oferecemos
+    </span>
+    <h2 class="text-3xl font-bold mt-2 mb-3" style="color: #4A2C7A;">Nossos Serviços</h2>
+    <p class="text-gray-500 max-w-xl mx-auto text-base">
+      Tratamentos modernos e eficazes para reabilitação, prevenção e bem-estar do seu animal.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    <!-- Consulta -->
+    <div class="service-card bg-white rounded-2xl shadow p-8 text-center">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-5"
+           style="background: #EAF7F7;">🩺</div>
+      <h3 class="text-xl font-bold mb-3" style="color: #4A2C7A;">Consulta</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">
+        Avaliação clínica completa para identificar e tratar as necessidades
+        do seu pet com diagnóstico preciso e cuidado individualizado.
+      </p>
+      <div class="mt-6 pt-5 border-t border-gray-100">
+        <span class="text-sm font-semibold" style="color: #31A1A7;">~60 minutos</span>
+      </div>
+    </div>
+
+    <!-- Fisioterapia — destaque -->
+    <div class="service-card bg-white rounded-2xl shadow-lg p-8 text-center relative"
+         style="border: 2px solid #31A1A7;">
+      <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 text-xs font-bold
+                  px-4 py-1 rounded-full text-white whitespace-nowrap"
+           style="background: #31A1A7;">Mais procurado</div>
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-5"
+           style="background: #EAF7F7;">🦮</div>
+      <h3 class="text-xl font-bold mb-3" style="color: #4A2C7A;">Fisioterapia</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">
+        Reabilitação física especializada para recuperação pós-cirúrgica,
+        tratamento de dores e melhora da mobilidade e qualidade de vida.
+      </p>
+      <div class="mt-6 pt-5 border-t border-gray-100">
+        <span class="text-sm font-semibold" style="color: #31A1A7;">~60 minutos</span>
+      </div>
+    </div>
+
+    <!-- Acupuntura -->
+    <div class="service-card bg-white rounded-2xl shadow p-8 text-center">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-5"
+           style="background: #EAF7F7;">🌿</div>
+      <h3 class="text-xl font-bold mb-3" style="color: #4A2C7A;">Acupuntura</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">
+        Técnica milenar aplicada à medicina veterinária para alívio da dor,
+        controle de estresse e equilíbrio energético do seu animal.
+      </p>
+      <div class="mt-6 pt-5 border-t border-gray-100">
+        <span class="text-sm font-semibold" style="color: #31A1A7;">~60 minutos</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SEÇÃO 3 — SOBRE A CLÍNICA
+     ============================================================ -->
+<section class="mb-20 bg-white rounded-3xl shadow-sm p-10 lg:p-14">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+    <div>
+      <span class="text-sm font-bold uppercase tracking-widest" style="color: #31A1A7;">
+        Sobre nós
+      </span>
+      <h2 class="text-3xl font-bold mt-2 mb-6" style="color: #4A2C7A;">
+        ATIVO PET —<br>Fisioterapia e Bem-Estar Animal
+      </h2>
+      <p class="text-gray-600 leading-relaxed mb-4">
+        Localizada dentro do Hospital Veterinário Pet&amp;Company em Limeira/SP,
+        a ATIVO PET oferece atendimento especializado com foco no cuidado integral do paciente.
+      </p>
+      <p class="text-gray-600 leading-relaxed mb-8">
+        Nossa missão é proporcionar qualidade de vida, recuperação eficaz e bem-estar
+        para animais de estimação, com técnicas modernas e atendimento humanizado.
+      </p>
+      <div class="space-y-3 text-sm">
+        <div class="flex items-start gap-3">
+          <span class="text-lg mt-0.5" style="color: #31A1A7;">📍</span>
+          <span class="text-gray-600">Av. Maria Thereza Silveira de Barros Camargo, 1525 — Limeira/SP</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-lg" style="color: #31A1A7;">📱</span>
+          <a href="https://wa.me/5519987286814" target="_blank"
+             class="font-semibold hover:underline" style="color: #31A1A7;">
+            (19) 99872-86814
+          </a>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-lg" style="color: #31A1A7;">🕐</span>
+          <span class="text-gray-600">Segunda a sexta, das 8h às 19h</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Números em destaque -->
+    <div class="rounded-2xl p-8" style="background: #F5F6F7;">
+      <h3 class="font-bold mb-6 text-lg" style="color: #4A2C7A;">Por que escolher a ATIVO PET?</h3>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <p class="text-4xl font-bold" style="color: #31A1A7;">62+</p>
+          <p class="text-gray-500 text-sm mt-1">Atendimentos mensais</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <p class="text-4xl font-bold" style="color: #31A1A7;">3</p>
+          <p class="text-gray-500 text-sm mt-1">Tipos de tratamento</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <p class="text-4xl font-bold" style="color: #31A1A7;">5</p>
+          <p class="text-gray-500 text-sm mt-1">Dias por semana</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <p class="text-4xl font-bold" style="color: #31A1A7;">11h</p>
+          <p class="text-gray-500 text-sm mt-1">De atendimento diário</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SEÇÃO 4 — CTA FINAL
+     ============================================================ -->
+<section class="mb-4 rounded-3xl p-12 text-center" style="background: #4A2C7A;">
+  <h2 class="text-3xl font-bold text-white mb-4">
+    Pronto para cuidar do seu pet?
+  </h2>
+  <p class="text-white/80 text-lg mb-8 max-w-xl mx-auto">
+    Agende agora mesmo e garanta o melhor atendimento para o seu animal.
+  </p>
+  <a href="{% url 'agendamentos:proprietario-create' %}"
+     style="background: #F26A2E;"
+     class="inline-block hover:opacity-90 text-white font-bold
+            text-lg py-4 px-12 rounded-xl shadow-lg transition-all">
+    🐾 Agendar Consulta
+  </a>
+  <p class="text-white/50 text-sm mt-4">Agendamento online rápido e sem filas.</p>
+</section>
+
+{% endblock %}

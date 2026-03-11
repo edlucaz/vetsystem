@@ -1,0 +1,88 @@
+<!--
+  VETSystem — Sistema de Agendamento Veterinário
+  ATIVO PET | Projeto Integrador UNIVESP 2026 — PJI110
+
+  Arquivo : templates/registration/login.html
+  Função  : Tela de login do sistema. Exibida quando um usuário não autenticado
+            tenta acessar uma página protegida, ou ao acessar /login/ diretamente.
+            Usa o formulário de autenticação embutido do Django.
+
+  Autor   : Lucas Eduardo Rocha (RA 24217901)
+  Data    : 2026-03-11
+-->
+{% extends 'base.html' %}
+
+{% block title %}Login — VETSystem{% endblock %}
+
+{% block content %}
+
+<!-- Centraliza o card de login na tela -->
+<div class="min-h-[60vh] flex items-center justify-center">
+  <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+
+    <!-- Cabeçalho do card -->
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold text-ativo-roxo mb-1">🐾 VETSystem</h1>
+      <p class="text-gray-500 text-sm">ATIVO PET — Fisioterapia e Bem-Estar Animal</p>
+    </div>
+
+    <!-- Exibe erros de autenticação (usuário/senha incorretos) -->
+    {% if form.errors %}
+      <div class="bg-red-100 border border-red-300 text-red-700 text-sm rounded-md px-4 py-3 mb-4">
+        Usuário ou senha incorretos. Tente novamente.
+      </div>
+    {% endif %}
+
+    <!-- Formulário de login — action aponta para a view de login do Django -->
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Campo de usuário -->
+      <div class="mb-4">
+        <label for="id_username" class="block text-sm font-medium text-gray-700 mb-1">
+          Usuário
+        </label>
+        <input
+          type="text"
+          name="username"
+          id="id_username"
+          autofocus
+          required
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa"
+          placeholder="Seu usuário"
+        />
+      </div>
+
+      <!-- Campo de senha -->
+      <div class="mb-6">
+        <label for="id_password" class="block text-sm font-medium text-gray-700 mb-1">
+          Senha
+        </label>
+        <input
+          type="password"
+          name="password"
+          id="id_password"
+          required
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa"
+          placeholder="Sua senha"
+        />
+      </div>
+
+      <!-- Preserva a URL de destino após o login (next) -->
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+      {% endif %}
+
+      <!-- Botão de submit com cor laranja da identidade visual -->
+      <button
+        type="submit"
+        class="w-full bg-ativo-laranja hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg transition-colors">
+        Entrar
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

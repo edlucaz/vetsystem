@@ -1,0 +1,48 @@
+<!--
+  VETSystem — Sistema de Agendamento Veterinário
+  ATIVO PET | Projeto Integrador UNIVESP 2026 — PJI110
+
+  Arquivo : agendamentos/templates/agendamentos/animal_form.html
+  Função  : Formulário de cadastro e edição de animal.
+            Reutilizado pelo AnimalCreateView e AnimalUpdateView.
+
+  Autor   : Lucas Eduardo Rocha (RA 24217901)
+  Data    : 2026-03-11
+-->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  {% if object %}Editar Animal{% else %}Novo Animal{% endif %} — VETSystem
+{% endblock %}
+
+{% block content %}
+
+<!-- ===== BREADCRUMB ===== -->
+<nav class="text-sm text-gray-400 mb-6">
+  <a href="{% url 'agendamentos:animal-list' %}" class="hover:text-ativo-turquesa">Animais</a>
+  <span class="mx-2">/</span>
+  <span class="text-gray-600">
+    {% if object %}Editar: {{ object.nome }}{% else %}Novo Animal{% endif %}
+  </span>
+</nav>
+
+<!-- ===== CARD DO FORMULÁRIO ===== -->
+<div class="bg-white rounded-xl shadow p-6 max-w-2xl">
+
+  <h1 class="text-xl font-bold text-ativo-roxo mb-6">
+    {% if object %}Editar Animal{% else %}Cadastrar Novo Animal{% endif %}
+  </h1>
+
+  {% crispy form %}
+
+  <div class="mt-4">
+    <a href="{% url 'agendamentos:animal-list' %}"
+       class="text-sm text-gray-400 hover:text-gray-600">
+      ← Cancelar e voltar
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}

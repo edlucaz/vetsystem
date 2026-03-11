@@ -1,0 +1,163 @@
+<!--
+  VETSystem — Sistema de Agendamento Veterinário
+  ATIVO PET | Projeto Integrador UNIVESP 2026 — PJI110
+
+  Arquivo : agendamentos/templates/agendamentos/animal_list.html
+  Função  : Lista todos os animais cadastrados com busca por nome/proprietário
+            e filtro por espécie (cão, gato, outro).
+
+  Autor   : Lucas Eduardo Rocha (RA 24217901)
+  Data    : 2026-03-11
+-->
+{% extends 'base.html' %}
+
+{% block title %}Animais — VETSystem{% endblock %}
+
+{% block content %}
+
+<!-- ===== CABEÇALHO DA PÁGINA ===== -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-ativo-roxo">Animais</h1>
+    <p class="text-gray-500 text-sm mt-1">Pacientes cadastrados na ATIVO PET</p>
+  </div>
+  <a href="{% url 'agendamentos:animal-create' %}"
+     class="bg-ativo-laranja hover:bg-orange-600 text-white font-bold py-2 px-5 rounded-lg transition-colors text-sm">
+    + Novo Animal
+  </a>
+</div>
+
+<!-- ===== FILTROS: busca + espécie ===== -->
+<form method="get" class="mb-6 flex flex-wrap gap-2">
+
+  <!-- Campo de busca por nome ou proprietário -->
+  <input
+    type="text"
+    name="q"
+    value="{{ query }}"
+    placeholder="Buscar por nome do animal ou tutor..."
+    class="flex-1 min-w-48 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa"
+  />
+
+  <!-- Filtro por espécie -->
+  <select name="especie"
+    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa bg-white">
+    <option value="" {% if not especie_selecionada %}selected{% endif %}>Todas as espécies</option>
+    <option value="cao"   {% if especie_selecionada == 'cao' %}selected{% endif %}>🐕 Cão</option>
+    <option value="gato"  {% if especie_selecionada == 'gato' %}selected{% endif %}>🐈 Gato</option>
+    <option value="outro" {% if especie_selecionada == 'outro' %}selected{% endif %}>🐾 Outro</option>
+  </select>
+
+  <button type="submit"
+    class="bg-ativo-turquesa hover:bg-teal-600 text-white font-bold py-2 px-5 rounded-lg transition-colors text-sm">
+    Filtrar
+  </button>
+
+  {% if query or especie_selecionada %}
+    <a href="{% url 'agendamentos:animal-list' %}"
+       class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors text-sm">
+      Limpar
+    </a>
+  {% endif %}
+</form>
+
+<!-- ===== TABELA DE ANIMAIS ===== -->
+{% if animais %}
+  <div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead class="bg-ativo-turquesa text-white">
+        <tr>
+          <th class="px-6 py-3 text-left font-semibold">Animal</th>
+          <th class="px-6 py-3 text-left font-semibold hidden sm:table-cell">Espécie / Raça</th>
+          <th class="px-6 py-3 text-left font-semibold hidden md:table-cell">Proprietário</th>
+          <th class="px-6 py-3 text-center font-semibold">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for animal in animais %}
+        <tr class="hover:bg-gray-50 transition-colors">
+
+          <!-- Nome do animal com ícone de espécie -->
+          <td class="px-6 py-4 font-medium">
+            <a href="{% url 'agendamentos:animal-detail' animal.pk %}"
+               class="text-ativo-turquesa hover:underline flex items-center gap-2">
+              <span>
+                {% if animal.especie == 'cao' %}🐕
+                {% elif animal.especie == 'gato' %}🐈
+                {% else %}🐾{% endif %}
+              </span>
+              {{ animal.nome }}
+            </a>
+          </td>
+
+          <td class="px-6 py-4 text-gray-600 hidden sm:table-cell">
+            {{ animal.get_especie_display }}
+            {% if animal.raca %}<span class="text-gray-400">— {{ animal.raca }}</span>{% endif %}
+          </td>
+
+          <td class="px-6 py-4 hidden md:table-cell">
+            <a href="{% url 'agendamentos:proprietario-detail' animal.proprietario.pk %}"
+               class="text-ativo-roxo hover:underline">
+              {{ animal.proprietario.nome }}
+            </a>
+          </td>
+
+          <td class="px-6 py-4 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <a href="{% url 'agendamentos:animal-detail' animal.pk %}"
+                 class="text-ativo-turquesa hover:underline text-xs font-medium">Ver</a>
+              <span class="text-gray-300">|</span>
+              <a href="{% url 'agendamentos:animal-update' animal.pk %}"
+                 class="text-ativo-roxo hover:underline text-xs font-medium">Editar</a>
+              <span class="text-gray-300">|</span>
+              <a href="{% url 'agendamentos:animal-delete' animal.pk %}"
+                 class="text-red-500 hover:underline text-xs font-medium">Excluir</a>
+            </div>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== PAGINAÇÃO ===== -->
+  {% if is_paginated %}
+  <div class="flex justify-center gap-2 mt-6">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if especie_selecionada %}&especie={{ especie_selecionada }}{% endif %}"
+         class="px-3 py-1 rounded bg-white border border-gray-300 text-sm hover:bg-gray-50">
+        ← Anterior
+      </a>
+    {% endif %}
+    <span class="px-3 py-1 text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if especie_selecionada %}&especie={{ especie_selecionada }}{% endif %}"
+         class="px-3 py-1 rounded bg-white border border-gray-300 text-sm hover:bg-gray-50">
+        Próxima →
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+{% else %}
+  <!-- Estado vazio -->
+  <div class="text-center py-16 text-gray-400">
+    <p class="text-4xl mb-3">🐾</p>
+    {% if query or especie_selecionada %}
+      <p class="text-lg font-medium">Nenhum animal encontrado com os filtros aplicados.</p>
+      <a href="{% url 'agendamentos:animal-list' %}" class="text-ativo-turquesa hover:underline text-sm mt-2 inline-block">
+        Ver todos os animais
+      </a>
+    {% else %}
+      <p class="text-lg font-medium">Nenhum animal cadastrado ainda.</p>
+      <a href="{% url 'agendamentos:animal-create' %}" class="text-ativo-laranja hover:underline text-sm mt-2 inline-block font-bold">
+        Cadastrar o primeiro animal →
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% endblock %}

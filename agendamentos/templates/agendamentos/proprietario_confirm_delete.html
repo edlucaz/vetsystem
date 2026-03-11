@@ -1,0 +1,64 @@
+<!--
+  VETSystem — Sistema de Agendamento Veterinário
+  ATIVO PET | Projeto Integrador UNIVESP 2026 — PJI110
+
+  Arquivo : agendamentos/templates/agendamentos/proprietario_confirm_delete.html
+  Função  : Página de confirmação antes de excluir um proprietário.
+            Alerta que a exclusão também removerá todos os animais e
+            consultas vinculados (CASCADE definido no model).
+
+  Autor   : Lucas Eduardo Rocha (RA 24217901)
+  Data    : 2026-03-11
+-->
+{% extends 'base.html' %}
+
+{% block title %}Excluir Proprietário — VETSystem{% endblock %}
+
+{% block content %}
+
+<div class="max-w-md mx-auto">
+
+  <!-- ===== CARD DE CONFIRMAÇÃO ===== -->
+  <div class="bg-white rounded-xl shadow p-6">
+
+    <!-- Ícone de alerta -->
+    <div class="text-center mb-4">
+      <span class="text-5xl">⚠️</span>
+    </div>
+
+    <h1 class="text-xl font-bold text-red-600 text-center mb-2">
+      Excluir Proprietário
+    </h1>
+
+    <p class="text-gray-600 text-center text-sm mb-4">
+      Tem certeza que deseja excluir <strong>{{ proprietario.nome }}</strong>?
+    </p>
+
+    <!-- Alerta de exclusão em cascata -->
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">
+      <strong>Atenção:</strong> Esta ação também excluirá permanentemente
+      todos os animais e consultas vinculados a este proprietário.
+      Esta operação não pode ser desfeita.
+    </div>
+
+    <!-- Botões de confirmação e cancelamento -->
+    <form method="post">
+      {% csrf_token %}
+      <div class="flex gap-3">
+        <!-- Confirmar exclusão -->
+        <button type="submit"
+          class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition-colors">
+          Sim, excluir
+        </button>
+        <!-- Cancelar e voltar -->
+        <a href="{% url 'agendamentos:proprietario-detail' proprietario.pk %}"
+           class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition-colors text-center">
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
