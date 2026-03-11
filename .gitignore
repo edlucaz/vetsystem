@@ -1,0 +1,49 @@
+# =============================================================================
+# VETSystem — .gitignore
+# =============================================================================
+
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Variáveis de ambiente e segredos
+.env
+*.env
+
+# Banco de dados local
+db.sqlite3
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Mídia enviada por usuários
+media/
+
+# Estáticos coletados (collectstatic)
+staticfiles/
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testes
+.coverage
+htmlcov/
+
+# Distribuição
+dist/
+build/
+*.egg-info/
