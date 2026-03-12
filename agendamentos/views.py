@@ -26,8 +26,8 @@ from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 )
 
-from .models import Proprietario, Animal
-from .forms import ProprietarioForm, AnimalForm
+from .models import Proprietario, Animal, Consulta
+from .forms import ProprietarioForm, AnimalForm, ConsultaForm
 
 
 # =============================================================================
@@ -356,3 +356,134 @@ class HomeView(TemplateView):
     Template: templates/home.html
     """
     template_name = 'home.html'
+# =============================================================================
+# VETSystem — views de Consulta
+# Adicionar ao final de agendamentos/views.py
+# =============================================================================
+# Adicione 'Consulta' ao import do models no topo:
+#   from .models import Proprietario, Animal, Consulta, Consulta
+# Adicione 'ConsultaForm' ao import do forms no topo:
+#   from .forms import ProprietarioForm, AnimalForm, ConsultaForm, ConsultaForm
+# =============================================================================
+
+
+class ConsultaListView(LoginRequiredMixin, ListView):
+    """
+    Lista todas as consultas com filtros opcionais por status e data.
+
+    GET /consultas/
+    GET /consultas/?status=agendado
+    GET /consultas/?data=2026-04-10
+
+    Template: agendamentos/consulta_list.html
+    Context: object_list, status_choices, status_atual, data_filtro
+    """
+    model = Consulta
+    template_name = 'agendamentos/consulta_list.html'
+    context_object_name = 'consultas'
+    ordering = ['data_hora']
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related('animal__proprietario')
+        status = self.request.GET.get('status')
+        data = self.request.GET.get('data')
+        if status:
+            qs = qs.filter(status=status)
+        if data:
+            qs = qs.filter(data_hora__date=data)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['status_choices'] = Consulta.STATUS_CHOICES
+        ctx['status_atual'] = self.request.GET.get('status', '')
+        ctx['data_filtro'] = self.request.GET.get('data', '')
+        return ctx
+
+
+class ConsultaDetailView(LoginRequiredMixin, DetailView):
+    """
+    Exibe os detalhes de uma consulta específica.
+
+    GET /consultas/<pk>/
+    Template: agendamentos/consulta_detail.html
+    Context: object (Consulta com animal e proprietário)
+    """
+    model = Consulta
+    template_name = 'agendamentos/consulta_detail.html'
+    context_object_name = 'consulta'
+
+    def get_queryset(self):
+        # Carrega animal e proprietário em uma única query (evita N+1)
+        return super().get_queryset().select_related('animal__proprietario')
+
+
+class ConsultaCreateView(LoginRequiredMixin, CreateView):
+    """
+    Formulário de criação de nova consulta (agendamento).
+
+    GET  /consultas/nova/           → exibe formulário vazio
+    GET  /consultas/nova/?animal=1  → pré-seleciona animal
+    POST /consultas/nova/           → salva e redireciona para o detalhe
+
+    Template: agendamentos/consulta_form.html
+    """
+    model = Consulta
+    form_class = ConsultaForm
+    template_name = 'agendamentos/consulta_form.html'
+    success_url = reverse_lazy('agendamentos:consulta-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Repassa o animal_pk da querystring para o form pré-selecionar
+        kwargs['animal_pk'] = self.request.GET.get('animal')
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Consulta agendada com sucesso!')
+        return super().form_valid(form)
+
+
+class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Formulário de edição de consulta existente.
+
+    GET  /consultas/<pk>/editar/ → formulário preenchido
+    POST /consultas/<pk>/editar/ → salva e redireciona para o detalhe
+
+    Template: agendamentos/consulta_form.html (mesmo do create)
+    """
+    model = Consulta
+    form_class = ConsultaForm
+    template_name = 'agendamentos/consulta_form.html'
+
+    def get_success_url(self):
+        return reverse_lazy('agendamentos:consulta-detail', kwargs={'pk': self.object.pk})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['animal_pk'] = None  # já vem preenchido do objeto
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Consulta atualizada com sucesso!')
+        return super().form_valid(form)
+
+
+class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Página de confirmação de cancelamento/exclusão de consulta.
+
+    GET  /consultas/<pk>/cancelar/ → tela de confirmação
+    POST /consultas/<pk>/cancelar/ → exclui e redireciona para lista
+
+    Template: agendamentos/consulta_confirm_delete.html
+    """
+    model = Consulta
+    template_name = 'agendamentos/consulta_confirm_delete.html'
+    success_url = reverse_lazy('agendamentos:consulta-list')
+    context_object_name = 'consulta'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Consulta cancelada.')
+        return super().form_valid(form)

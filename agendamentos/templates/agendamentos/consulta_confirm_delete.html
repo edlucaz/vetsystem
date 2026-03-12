@@ -1,0 +1,34 @@
+<!--
+  VETSystem — agendamentos/templates/agendamentos/consulta_confirm_delete.html
+  Confirmação de cancelamento/exclusão de consulta.
+  Autor: Lucas Eduardo Rocha (RA 24217901) | 2026-03-11
+-->
+{% extends 'base.html' %}
+{% block title %}Cancelar Consulta — VETSystem{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto mt-10">
+  <div class="bg-white rounded-2xl shadow-sm p-10 text-center">
+    <div class="text-5xl mb-4">⚠️</div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">Cancelar consulta?</h1>
+    <p class="text-gray-500 mb-2">
+      Você está prestes a cancelar a consulta de
+      <strong>{{ consulta.animal.nome }}</strong>
+      agendada para
+      <strong>{{ consulta.data_hora|date:"d/m/Y \à\s H:i" }}</strong>.
+    </p>
+    <p class="text-red-500 text-sm mb-8">Esta ação não pode ser desfeita.</p>
+    <form method="post" class="flex flex-col sm:flex-row justify-center gap-4">
+      {% csrf_token %}
+      <button type="submit"
+              class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-xl transition">
+        Sim, cancelar
+      </button>
+      <a href="{% url 'agendamentos:consulta-detail' consulta.pk %}"
+         class="border border-gray-200 text-gray-600 font-semibold py-3 px-8 rounded-xl hover:bg-gray-50 transition">
+        Voltar
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock %}

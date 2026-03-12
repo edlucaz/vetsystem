@@ -14,7 +14,7 @@ Data    : 2026-03-11
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Submit, Div
-from .models import Proprietario, Animal
+from .models import Proprietario, Animal, Consulta
 
 
 class ProprietarioForm(forms.ModelForm):
@@ -165,3 +165,46 @@ class AnimalForm(forms.ModelForm):
                 css_class='mt-4'
             )
         )
+# =============================================================================
+# Adicionar ao final de agendamentos/forms.py
+# Adicione também ao import do topo:
+#   from .models import Proprietario, Animal, Consulta, Consulta
+# E aos imports do crispy-forms, adicione Layout, Row, Column se ainda não tem:
+#   from crispy_forms.layout import Layout, Row, Column
+# =============================================================================
+
+class ConsultaForm(forms.ModelForm):
+    """
+    Formulário de agendamento/edição de Consulta.
+
+    Campos: animal, data_hora, tipo, status, observacoes.
+    Validação: data_hora deve ser no futuro.
+    """
+
+    class Meta:
+        model = Consulta
+        fields = ['animal', 'data_hora', 'tipo', 'status', 'observacoes']
+        widgets = {
+            'data_hora': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M'
+            ),
+            'observacoes': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        # animal_pk pode vir da URL (?animal=1) para pré-selecionar o animal
+        animal_pk = kwargs.pop('animal_pk', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        if animal_pk:
+            self.fields['animal'].initial = animal_pk
+
+    def clean_data_hora(self):
+        """Impede agendamento em datas passadas."""
+        from django.utils import timezone
+        data_hora = self.cleaned_data.get('data_hora')
+        if data_hora and data_hora < timezone.now():
+            raise forms.ValidationError('A data e hora devem ser no futuro.')
+        return data_hora
