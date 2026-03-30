@@ -227,3 +227,19 @@ LOGIN_URL = '/login/'
 
 # Página para onde o usuário é redirecionado após fazer logout.
 LOGOUT_REDIRECT_URL = '/login/'
+
+
+# =============================================================================
+# SEGURANÇA EM PRODUÇÃO
+# =============================================================================
+# Ativado apenas quando DEBUG=False (produção no Render).
+
+if not DEBUG:
+    # HTTPS — o Render termina SSL no proxy, então confiamos nos headers dele
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_TRUSTED_ORIGINS = [
+        f'https://{host}' for host in ALLOWED_HOSTS if host not in ('localhost', '127.0.0.1')
+    ]

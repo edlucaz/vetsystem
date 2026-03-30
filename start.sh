@@ -1,5 +1,5 @@
 #!/bin/bash
-# VETSystem — Script de inicialização em produção (Railway)
+# VETSystem — Script de inicialização em produção (Render / Railway)
 # Executa migrações e coleta estáticos antes de subir o servidor.
 set -e
 
