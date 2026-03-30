@@ -1,1 +1,1 @@
-web: gunicorn vetsystem.wsgi --log-file -
+web: bash start.sh
