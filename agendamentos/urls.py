@@ -10,9 +10,10 @@ app_name = 'agendamentos'
 urlpatterns = [
 
     # =========================================================================
-    # FRONTPAGE
+    # FRONTPAGE E DASHBOARD
     # =========================================================================
     path('', views.HomeView.as_view(), name='home'),
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
 
     # =========================================================================
     # PROPRIETÁRIO

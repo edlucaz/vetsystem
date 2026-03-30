@@ -20,6 +20,7 @@
         <a href="{% url 'agendamentos:home' %}" class="text-white font-bold text-xl">🐾 VETSystem</a>
         {% if user.is_authenticated %}
         <div class="hidden md:flex items-center gap-6">
+          <a href="{% url 'agendamentos:dashboard' %}" class="text-white hover:text-yellow-200 font-medium transition">Dashboard</a>
           <a href="{% url 'agendamentos:consulta-list' %}" class="text-white hover:text-yellow-200 font-medium transition">Consultas</a>
           <a href="{% url 'agendamentos:proprietario-list' %}" class="text-white hover:text-yellow-200 font-medium transition">Proprietários</a>
           <a href="{% url 'agendamentos:animal-list' %}" class="text-white hover:text-yellow-200 font-medium transition">Animais</a>

@@ -16,6 +16,7 @@ Data    : 2026-03-11
 
 from pathlib import Path
 from decouple import config, Csv
+import dj_database_url
 
 # --- Raiz do projeto ---
 # BASE_DIR aponta para a pasta raiz do projeto (onde está o manage.py).
@@ -71,6 +72,7 @@ INSTALLED_APPS = [
 # Executados em ordem, do primeiro ao último na entrada, e inverso na saída.
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',            # Cabeçalhos de segurança HTTP
+    'whitenoise.middleware.WhiteNoiseMiddleware',               # Serve arquivos estáticos em produção
     'django.contrib.sessions.middleware.SessionMiddleware',     # Gerencia sessões de usuário
     'django.middleware.common.CommonMiddleware',                # Normaliza URLs (ex: adiciona barra final)
     'django.middleware.csrf.CsrfViewMiddleware',               # Proteção contra ataques CSRF
@@ -125,12 +127,10 @@ WSGI_APPLICATION = 'vetsystem.wsgi.application'
 # Em desenvolvimento usamos SQLite (arquivo local, sem necessidade de instalar nada).
 # Em produção no Railway, DATABASE_URL aponta para PostgreSQL automaticamente.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-
-        # Caminho do arquivo SQLite — fica na raiz do projeto, ignorado pelo .gitignore.
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
 }
 
 
@@ -182,6 +182,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Pasta de destino do comando 'collectstatic' (usado no deploy em produção).
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # =============================================================================
@@ -219,7 +220,7 @@ CRISPY_TEMPLATE_PACK = 'tailwind'
 # =============================================================================
 
 # Página para onde o usuário é redirecionado após fazer login com sucesso.
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 # Página de login — usada quando uma view protegida exige autenticação.
 LOGIN_URL = '/login/'

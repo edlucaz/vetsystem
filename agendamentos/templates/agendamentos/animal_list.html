@@ -18,11 +18,12 @@
 <!-- ===== CABEÇALHO DA PÁGINA ===== -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
   <div>
-    <h1 class="text-2xl font-bold text-ativo-roxo">Animais</h1>
+    <h1 class="text-2xl font-bold style="color:#4A2C7A"">Animais</h1>
     <p class="text-gray-500 text-sm mt-1">Pacientes cadastrados na ATIVO PET</p>
   </div>
   <a href="{% url 'agendamentos:animal-create' %}"
-     class="bg-ativo-laranja hover:bg-orange-600 text-white font-bold py-2 px-5 rounded-lg transition-colors text-sm">
+     class="inline-flex items-center gap-2 text-white font-bold px-5 py-2.5 rounded-xl shadow hover:opacity-90 transition"
+     style="background: #31A1A7;">
     + Novo Animal
   </a>
 </div>
@@ -36,12 +37,12 @@
     name="q"
     value="{{ query }}"
     placeholder="Buscar por nome do animal ou tutor..."
-    class="flex-1 min-w-48 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa"
+    class="flex-1 min-w-48 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 "
   />
 
   <!-- Filtro por espécie -->
   <select name="especie"
-    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa bg-white">
+    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2  bg-white">
     <option value="" {% if not especie_selecionada %}selected{% endif %}>Todas as espécies</option>
     <option value="cao"   {% if especie_selecionada == 'cao' %}selected{% endif %}>🐕 Cão</option>
     <option value="gato"  {% if especie_selecionada == 'gato' %}selected{% endif %}>🐈 Gato</option>
@@ -49,7 +50,7 @@
   </select>
 
   <button type="submit"
-    class="bg-ativo-turquesa hover:bg-teal-600 text-white font-bold py-2 px-5 rounded-lg transition-colors text-sm">
+    class="style="background:#31A1A7" hover:bg-teal-600 text-white font-bold py-2 px-5 rounded-lg transition-colors text-sm">
     Filtrar
   </button>
 
@@ -65,7 +66,7 @@
 {% if animais %}
   <div class="bg-white rounded-xl shadow overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200 text-sm">
-      <thead class="bg-ativo-turquesa text-white">
+      <thead class="style="background:#31A1A7" text-white">
         <tr>
           <th class="px-6 py-3 text-left font-semibold">Animal</th>
           <th class="px-6 py-3 text-left font-semibold hidden sm:table-cell">Espécie / Raça</th>
@@ -80,7 +81,7 @@
           <!-- Nome do animal com ícone de espécie -->
           <td class="px-6 py-4 font-medium">
             <a href="{% url 'agendamentos:animal-detail' animal.pk %}"
-               class="text-ativo-turquesa hover:underline flex items-center gap-2">
+               class="style="color:#31A1A7" hover:underline flex items-center gap-2">
               <span>
                 {% if animal.especie == 'cao' %}🐕
                 {% elif animal.especie == 'gato' %}🐈
@@ -97,7 +98,7 @@
 
           <td class="px-6 py-4 hidden md:table-cell">
             <a href="{% url 'agendamentos:proprietario-detail' animal.proprietario.pk %}"
-               class="text-ativo-roxo hover:underline">
+               class="style="color:#4A2C7A" hover:underline">
               {{ animal.proprietario.nome }}
             </a>
           </td>
@@ -105,10 +106,10 @@
           <td class="px-6 py-4 text-center">
             <div class="flex items-center justify-center gap-2">
               <a href="{% url 'agendamentos:animal-detail' animal.pk %}"
-                 class="text-ativo-turquesa hover:underline text-xs font-medium">Ver</a>
+                 class="style="color:#31A1A7" hover:underline text-xs font-medium">Ver</a>
               <span class="text-gray-300">|</span>
               <a href="{% url 'agendamentos:animal-update' animal.pk %}"
-                 class="text-ativo-roxo hover:underline text-xs font-medium">Editar</a>
+                 class="style="color:#4A2C7A" hover:underline text-xs font-medium">Editar</a>
               <span class="text-gray-300">|</span>
               <a href="{% url 'agendamentos:animal-delete' animal.pk %}"
                  class="text-red-500 hover:underline text-xs font-medium">Excluir</a>
@@ -148,12 +149,12 @@
     <p class="text-4xl mb-3">🐾</p>
     {% if query or especie_selecionada %}
       <p class="text-lg font-medium">Nenhum animal encontrado com os filtros aplicados.</p>
-      <a href="{% url 'agendamentos:animal-list' %}" class="text-ativo-turquesa hover:underline text-sm mt-2 inline-block">
+      <a href="{% url 'agendamentos:animal-list' %}" class="style="color:#31A1A7" hover:underline text-sm mt-2 inline-block">
         Ver todos os animais
       </a>
     {% else %}
       <p class="text-lg font-medium">Nenhum animal cadastrado ainda.</p>
-      <a href="{% url 'agendamentos:animal-create' %}" class="text-ativo-laranja hover:underline text-sm mt-2 inline-block font-bold">
+      <a href="{% url 'agendamentos:animal-create' %}" class="style="color:#F26A2E" hover:underline text-sm mt-2 inline-block font-bold">
         Cadastrar o primeiro animal →
       </a>
     {% endif %}

@@ -126,7 +126,7 @@ class ProprietarioCreateView(LoginRequiredMixin, CreateView):
     template_name = 'agendamentos/proprietario_form.html'
 
     # Para onde redirecionar após salvar com sucesso
-    success_url = reverse_lazy('proprietario-list')
+    success_url = reverse_lazy('agendamentos:proprietario-list')
 
     def form_valid(self, form):
         """Exibe mensagem de sucesso após salvar o proprietário."""
@@ -149,7 +149,7 @@ class ProprietarioUpdateView(LoginRequiredMixin, UpdateView):
     model = Proprietario
     form_class = ProprietarioForm
     template_name = 'agendamentos/proprietario_form.html'
-    success_url = reverse_lazy('proprietario-list')
+    success_url = reverse_lazy('agendamentos:proprietario-list')
 
     def form_valid(self, form):
         """Exibe mensagem de sucesso após atualizar o proprietário."""
@@ -175,7 +175,7 @@ class ProprietarioDeleteView(LoginRequiredMixin, DeleteView):
     model = Proprietario
     template_name = 'agendamentos/proprietario_confirm_delete.html'
     context_object_name = 'proprietario'
-    success_url = reverse_lazy('proprietario-list')
+    success_url = reverse_lazy('agendamentos:proprietario-list')
 
     def form_valid(self, form):
         """Exibe mensagem de sucesso após excluir o proprietário."""
@@ -278,7 +278,7 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'agendamentos/animal_form.html'
-    success_url = reverse_lazy('animal-list')
+    success_url = reverse_lazy('agendamentos:animal-list')
 
     def get_initial(self):
         """
@@ -310,7 +310,7 @@ class AnimalUpdateView(LoginRequiredMixin, UpdateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'agendamentos/animal_form.html'
-    success_url = reverse_lazy('animal-list')
+    success_url = reverse_lazy('agendamentos:animal-list')
 
     def form_valid(self, form):
         """Exibe mensagem de sucesso após atualizar o animal."""
@@ -331,7 +331,7 @@ class AnimalDeleteView(LoginRequiredMixin, DeleteView):
     model = Animal
     template_name = 'agendamentos/animal_confirm_delete.html'
     context_object_name = 'animal'
-    success_url = reverse_lazy('animal-list')
+    success_url = reverse_lazy('agendamentos:animal-list')
 
     def form_valid(self, form):
         """Exibe mensagem de sucesso após excluir o animal."""
@@ -487,3 +487,59 @@ class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Consulta cancelada.')
         return super().form_valid(form)
+
+
+# =============================================================================
+# VIEW: Dashboard interno
+# =============================================================================
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    """
+    Dashboard interno — tela inicial pós-login da Sra. Fernanda.
+
+    Exibe:
+      - Totais de consultas por status (agendado, confirmado, realizado, cancelado)
+      - Consultas agendadas para hoje
+      - Próximas consultas dos próximos 7 dias (excluindo hoje)
+
+    Rota: GET /dashboard/
+    Template: templates/dashboard.html
+    """
+    template_name = 'dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        from django.utils import timezone
+        import datetime
+
+        ctx = super().get_context_data(**kwargs)
+        hoje = timezone.localdate()
+        sete_dias = hoje + datetime.timedelta(days=7)
+
+        # Totais por status — usados nos cards de resumo
+        ctx['total_agendado']   = Consulta.objects.filter(status='agendado').count()
+        ctx['total_confirmado'] = Consulta.objects.filter(status='confirmado').count()
+        ctx['total_realizado']  = Consulta.objects.filter(status='realizado').count()
+        ctx['total_cancelado']  = Consulta.objects.filter(status='cancelado').count()
+
+        # Consultas de hoje ordenadas por horário
+        ctx['consultas_hoje'] = (
+            Consulta.objects
+            .filter(data_hora__date=hoje)
+            .select_related('animal__proprietario')
+            .order_by('data_hora')
+        )
+
+        # Próximas consultas: amanhã até 7 dias, só ativas (agendado ou confirmado)
+        ctx['proximas_consultas'] = (
+            Consulta.objects
+            .filter(
+                data_hora__date__gt=hoje,
+                data_hora__date__lte=sete_dias,
+                status__in=['agendado', 'confirmado'],
+            )
+            .select_related('animal__proprietario')
+            .order_by('data_hora')[:10]
+        )
+
+        ctx['hoje'] = hoje
+        return ctx

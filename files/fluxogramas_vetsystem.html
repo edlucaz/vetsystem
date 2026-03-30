@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Fluxogramas VETSystem — ATIVO PET</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 40px; }
+  .page { background: white; width: 680px; margin: 0 auto 60px; padding: 30px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+  h2 { color: #4A2C7A; font-size: 14px; margin: 0 0 6px; }
+  p { color: #888; font-size: 12px; margin: 0 0 20px; }
+  .print-tip { text-align: center; color: #888; font-size: 12px; margin-bottom: 30px; }
+  @media print { body { background: white; padding: 0; } .page { box-shadow: none; margin: 0; page-break-after: always; } .print-tip { display: none; } }
+</style>
+</head>
+<body>
+<p class="print-tip">💡 Para exportar como imagem: Ctrl+P → "Salvar como PDF" | ou clique direito no SVG → "Salvar imagem"</p>
+
+<div class="page">
+  <h2>Fluxo simplificado — VETSystem</h2>
+  <p>Ator único: Sra. Fernanda (veterinária/proprietária) | Projeto Integrador UNIVESP 2026</p>
+  <svg width="100%" viewBox="0 0 680 870" xmlns="http://www.w3.org/2000/svg" style="font-family: Arial, sans-serif;">
+  <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <rect x="255" y="12" width="170" height="40" rx="20" fill="#E8E8E4" stroke="#888" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#333" x="340" y="37" text-anchor="middle">Início</text>
+  <line x1="340" y1="52" x2="340" y2="76" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/>
+  <rect x="220" y="76" width="240" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#085041" x="340" y="99" text-anchor="middle">Acessar o VETSystem</text><text font-size="11" fill="#0F6E56" x="340" y="117" text-anchor="middle">URL pública (Railway)</text>
+  <line x1="340" y1="128" x2="340" y2="152" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/>
+  <rect x="220" y="152" width="240" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#085041" x="340" y="175" text-anchor="middle">Efetuar login</text><text font-size="11" fill="#0F6E56" x="340" y="193" text-anchor="middle">Usuário e senha Django</text>
+  <line x1="340" y1="204" x2="340" y2="228" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/>
+  <rect x="200" y="228" width="280" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#633806" x="340" y="251" text-anchor="middle">Proprietário cadastrado?</text><text font-size="11" fill="#854F0B" x="340" y="269" text-anchor="middle">Buscar por nome ou CPF</text>
+  <line x1="200" y1="254" x2="140" y2="254" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/><text font-size="11" fill="#555" x="167" y="246" text-anchor="middle">Não</text>
+  <rect x="40" y="228" width="100" height="52" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-size="12" font-weight="bold" fill="#3C3489" x="90" y="248" text-anchor="middle">Cadastrar</text><text font-size="11" fill="#534AB7" x="90" y="266" text-anchor="middle">proprietário</text>
+  <line x1="90" y1="280" x2="90" y2="358" stroke="#888" stroke-width="1"/><line x1="90" y1="358" x2="220" y2="358" stroke="#888" stroke-width="1" marker-end="url(#a1)"/>
+  <line x1="340" y1="280" x2="340" y2="304" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/><text font-size="11" fill="#555" x="352" y="296">Sim</text>
+  <rect x="200" y="304" width="280" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#633806" x="340" y="327" text-anchor="middle">Animal cadastrado?</text><text font-size="11" fill="#854F0B" x="340" y="345" text-anchor="middle">Vincular ao proprietário</text>
+  <line x1="480" y1="330" x2="540" y2="330" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/><text font-size="11" fill="#555" x="512" y="322" text-anchor="middle">Não</text>
+  <rect x="540" y="304" width="100" height="52" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-size="12" font-weight="bold" fill="#3C3489" x="590" y="324" text-anchor="middle">Cadastrar</text><text font-size="11" fill="#534AB7" x="590" y="342" text-anchor="middle">animal</text>
+  <line x1="590" y1="356" x2="590" y2="398" stroke="#888" stroke-width="1"/><line x1="590" y1="398" x2="480" y2="398" stroke="#888" stroke-width="1" marker-end="url(#a1)"/>
+  <line x1="340" y1="356" x2="340" y2="380" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/><text font-size="11" fill="#555" x="352" y="372">Sim</text>
+  <rect x="200" y="380" width="280" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#085041" x="340" y="403" text-anchor="middle">Agendar consulta</text><text font-size="11" fill="#0F6E56" x="340" y="421" text-anchor="middle">Tipo, data/hora, observações</text>
+  <line x1="340" y1="432" x2="340" y2="456" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/>
+  <rect x="200" y="456" width="280" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#633806" x="340" y="479" text-anchor="middle">Data e hora válidas?</text><text font-size="11" fill="#854F0B" x="340" y="497" text-anchor="middle">Não permite datas passadas</text>
+  <line x1="480" y1="482" x2="530" y2="482" stroke="#888" stroke-width="1"/><line x1="530" y1="482" x2="530" y2="406" stroke="#888" stroke-width="1"/><line x1="530" y1="406" x2="482" y2="406" stroke="#888" stroke-width="1" marker-end="url(#a1)"/><text font-size="11" fill="#555" x="512" y="474" text-anchor="middle">Não</text>
+  <line x1="340" y1="508" x2="340" y2="532" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/><text font-size="11" fill="#555" x="352" y="524">Sim</text>
+  <rect x="200" y="532" width="280" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#085041" x="340" y="555" text-anchor="middle">Consulta agendada</text><text font-size="11" fill="#0F6E56" x="340" y="573" text-anchor="middle">Status: agendado</text>
+  <line x1="340" y1="584" x2="340" y2="608" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/>
+  <rect x="180" y="608" width="320" height="52" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#3C3489" x="340" y="631" text-anchor="middle">Atualizar status</text><text font-size="11" fill="#534AB7" x="340" y="649" text-anchor="middle">Confirmado → realizado / cancelado</text>
+  <line x1="340" y1="660" x2="340" y2="684" stroke="#555" stroke-width="1.2" marker-end="url(#a1)"/>
+  <rect x="255" y="684" width="170" height="40" rx="20" fill="#E8E8E4" stroke="#888" stroke-width="0.5"/><text font-size="13" font-weight="bold" fill="#333" x="340" y="709" text-anchor="middle">Fim</text>
+  <!-- Legenda -->
+  <rect x="20" y="742" width="640" height="56" rx="8" fill="#F9F9F9" stroke="#DDD" stroke-width="0.5"/>
+  <text font-size="11" font-weight="bold" fill="#555" x="36" y="760">Legenda</text>
+  <rect x="36" y="768" width="12" height="12" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text font-size="11" fill="#333" x="54" y="779">Ação no sistema</text>
+  <rect x="170" y="768" width="12" height="12" rx="2" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-size="11" fill="#333" x="188" y="779">Decisão</text>
+  <rect x="280" y="768" width="12" height="12" rx="2" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-size="11" fill="#333" x="298" y="779">Cadastro / atualização</text>
+  <rect x="450" y="768" width="12" height="12" rx="2" fill="#E8E8E4" stroke="#888" stroke-width="0.5"/><text font-size="11" fill="#333" x="468" y="779">Início / fim</text>
+  </svg>
+</div>
+</body>
+</html>
