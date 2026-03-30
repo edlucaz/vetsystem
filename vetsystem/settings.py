@@ -38,7 +38,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Lista de domínios/IPs autorizados a acessar o sistema.
 # Em desenvolvimento: localhost. Em produção: domínio do Railway.
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,vetsystem-gky6.onrender.com', cast=Csv())
 
 
 # =============================================================================
