@@ -29,7 +29,7 @@ services:
       - key: DJANGO_SUPERUSER_EMAIL
         value: "admin@ativamente.vet.br"
       - key: DJANGO_SUPERUSER_PASSWORD
-        generateValue: true
+        value: "AtivoPet@2026"
 
 databases:
   - name: vetsystem-db
