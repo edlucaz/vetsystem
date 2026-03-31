@@ -46,4 +46,12 @@ urlpatterns = [
     path('consultas/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='consulta-update'),
     # Cancelamento com confirmação
     path('consultas/<int:pk>/cancelar/', views.ConsultaDeleteView.as_view(), name='consulta-delete'),
+
+    # =========================================================================
+    # DISPONIBILIDADE — horários de funcionamento da clínica
+    # =========================================================================
+    path('disponibilidade/', views.DisponibilidadeListView.as_view(), name='disponibilidade-list'),
+    path('disponibilidade/novo/', views.DisponibilidadeCreateView.as_view(), name='disponibilidade-create'),
+    path('disponibilidade/<int:pk>/editar/', views.DisponibilidadeUpdateView.as_view(), name='disponibilidade-update'),
+    path('disponibilidade/<int:pk>/excluir/', views.DisponibilidadeDeleteView.as_view(), name='disponibilidade-delete'),
 ]

@@ -14,7 +14,7 @@ Data    : 2026-03-11
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Submit, Div
-from .models import Proprietario, Animal, Consulta
+from .models import Proprietario, Animal, Consulta, Disponibilidade
 
 
 class ProprietarioForm(forms.ModelForm):
@@ -208,3 +208,47 @@ class ConsultaForm(forms.ModelForm):
         if data_hora and data_hora < timezone.now():
             raise forms.ValidationError('A data e hora devem ser no futuro.')
         return data_hora
+
+
+# =============================================================================
+# FORM: Disponibilidade
+# =============================================================================
+
+class DisponibilidadeForm(forms.ModelForm):
+    """
+    Formulário de cadastro/edição dos horários de funcionamento da ATIVO PET.
+
+    A Sra. Fernanda configura quais dias e horários a clínica atende.
+    O ConsultaForm usa esses dados para validar se o horário escolhido
+    está dentro do expediente da clínica.
+
+    Validação: hora_fim deve ser posterior a hora_inicio.
+    """
+
+    class Meta:
+        model = Disponibilidade
+        fields = ['dia_da_semana', 'hora_inicio', 'hora_fim', 'ativo']
+        widgets = {
+            # type="time" exibe o seletor de horário nativo do browser
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time'}),
+            'hora_fim':    forms.TimeInput(attrs={'type': 'time'}),
+        }
+        help_texts = {
+            'ativo': 'Desmarque para indicar que a clínica não atende neste dia (ex: feriado).',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+
+    def clean(self):
+        """Garante que hora_fim seja posterior a hora_inicio."""
+        cleaned = super().clean()
+        inicio = cleaned.get('hora_inicio')
+        fim    = cleaned.get('hora_fim')
+        if inicio and fim and fim <= inicio:
+            raise forms.ValidationError(
+                'O horário de encerramento deve ser posterior ao de início.'
+            )
+        return cleaned

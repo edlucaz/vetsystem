@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Horários de Funcionamento — VETSystem{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-8">
+  <div>
+    <h1 class="text-3xl font-bold" style="color:#4A2C7A;">Horários de Funcionamento</h1>
+    <p class="text-gray-500 text-sm mt-1">Configure os dias e horários de atendimento da ATIVO PET</p>
+  </div>
+  <a href="{% url 'agendamentos:disponibilidade-create' %}"
+     class="inline-flex items-center gap-2 text-white font-bold px-5 py-2.5 rounded-xl shadow hover:opacity-90 transition"
+     style="background:#31A1A7;">
+    + Novo Horário
+  </a>
+</div>
+
+{% if disponibilidades %}
+<div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+  <table class="w-full text-sm">
+    <thead style="background:#F5F6F7;">
+      <tr>
+        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">Dia da semana</th>
+        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">Início</th>
+        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">Fim</th>
+        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+        <th class="px-6 py-4"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for d in disponibilidades %}
+      <tr class="hover:bg-gray-50 transition-colors">
+        <td class="px-6 py-4 font-semibold text-gray-800">{{ d.get_dia_da_semana_display }}</td>
+        <td class="px-6 py-4 text-gray-600">{{ d.hora_inicio|time:"H:i" }}</td>
+        <td class="px-6 py-4 text-gray-600">{{ d.hora_fim|time:"H:i" }}</td>
+        <td class="px-6 py-4">
+          {% if d.ativo %}
+            <span class="text-xs font-semibold px-3 py-1 rounded-full" style="background:#EAF7F7;color:#31A1A7;">Ativo</span>
+          {% else %}
+            <span class="bg-red-100 text-red-500 text-xs font-semibold px-3 py-1 rounded-full">Inativo</span>
+          {% endif %}
+        </td>
+        <td class="px-6 py-4 text-right flex gap-3 justify-end">
+          <a href="{% url 'agendamentos:disponibilidade-update' d.pk %}"
+             class="text-xs font-semibold text-gray-400 hover:text-gray-700">Editar</a>
+          <a href="{% url 'agendamentos:disponibilidade-delete' d.pk %}"
+             class="text-xs font-semibold text-red-400 hover:text-red-600">Excluir</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="bg-white rounded-2xl shadow-sm p-12 text-center text-gray-400">
+  <p class="text-4xl mb-3">🕐</p>
+  <p class="font-medium text-gray-500 mb-2">Nenhum horário configurado ainda.</p>
+  <a href="{% url 'agendamentos:disponibilidade-create' %}"
+     class="inline-block mt-3 text-white font-bold px-6 py-3 rounded-xl hover:opacity-90"
+     style="background:#31A1A7;">+ Configurar horários</a>
+</div>
+{% endif %}
+{% endblock %}

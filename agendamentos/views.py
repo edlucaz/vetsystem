@@ -3,20 +3,21 @@ VETSystem — Sistema de Agendamento Veterinário
 ATIVO PET | Projeto Integrador UNIVESP 2026 — PJI110
 
 Arquivo : agendamentos/views.py
-Função  : Define as views (controladores) do sistema. Cada view é responsável
-          por processar uma requisição HTTP e retornar uma resposta — seja
-          renderizando um template HTML ou redirecionando para outra página.
+Função  : Views (controladores) do sistema. Cada view processa uma requisição
+          HTTP e retorna uma resposta — renderizando um template ou redirecionando.
 
-          Usamos CBVs (Class-Based Views) do Django para evitar código repetitivo.
-          O Django já fornece classes prontas para listagem, criação, edição e
-          exclusão — só precisamos configurar model, form e template.
+          Padrão usado: CBVs (Class-Based Views) do Django.
+          Todas as views internas exigem login via LoginRequiredMixin.
 
-          Views implementadas:
-            Proprietário: List, Detail, Create, Update, Delete
-            Animal:       List, Detail, Create, Update, Delete
+          Módulos:
+            Home / Dashboard     : HomeView, DashboardView
+            Proprietário         : List, Detail, Create, Update, Delete
+            Animal               : List, Detail, Create, Update, Delete
+            Consulta             : List, Detail, Create, Update, Delete
+            Disponibilidade      : List, Create, Update, Delete
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
-Data    : 2026-03-11
+Data    : 2026-03-30
 """
 
 from django.urls import reverse_lazy
@@ -26,17 +27,84 @@ from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 )
 
-from .models import Proprietario, Animal, Consulta
-from .forms import ProprietarioForm, AnimalForm, ConsultaForm
+from .models import Proprietario, Animal, Consulta, Disponibilidade
+from .forms import ProprietarioForm, AnimalForm, ConsultaForm, DisponibilidadeForm
 
 
 # =============================================================================
-# MIXIN DE AUTENTICAÇÃO
+# VIEWS PÚBLICAS
 # =============================================================================
 
-# LoginRequiredMixin garante que apenas usuários autenticados acessem as views.
-# Se um usuário não logado tentar acessar, é redirecionado para /login/.
-# Todas as views do sistema herdam este mixin por segurança.
+class HomeView(TemplateView):
+    """
+    Frontpage pública da ATIVO PET — acessível sem login.
+
+    Apresenta a clínica, seus serviços e o CTA para agendamento.
+
+    Rota    : GET /
+    Template: templates/home.html
+    """
+    template_name = 'home.html'
+
+
+# =============================================================================
+# DASHBOARD
+# =============================================================================
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    """
+    Tela inicial pós-login da Sra. Fernanda.
+
+    Exibe totais por status, consultas de hoje e próximos 7 dias.
+
+    Rota    : GET /dashboard/
+    Template: templates/dashboard.html
+    Contexto:
+        hoje               -- Data atual (date)
+        total_agendado     -- Contagem de consultas com status 'agendado'
+        total_confirmado   -- Contagem de consultas com status 'confirmado'
+        total_realizado    -- Contagem de consultas com status 'realizado'
+        total_cancelado    -- Contagem de consultas com status 'cancelado'
+        consultas_hoje     -- QuerySet de consultas de hoje ordenadas por horário
+        proximas_consultas -- QuerySet dos próximos 7 dias (max 10 registros)
+    """
+    template_name = 'dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        from django.utils import timezone
+        import datetime
+
+        ctx = super().get_context_data(**kwargs)
+        hoje = timezone.localdate()
+        sete_dias = hoje + datetime.timedelta(days=7)
+
+        ctx['total_agendado']   = Consulta.objects.filter(status='agendado').count()
+        ctx['total_confirmado'] = Consulta.objects.filter(status='confirmado').count()
+        ctx['total_realizado']  = Consulta.objects.filter(status='realizado').count()
+        ctx['total_cancelado']  = Consulta.objects.filter(status='cancelado').count()
+
+        # Consultas de hoje — usadas na tabela principal do dashboard
+        ctx['consultas_hoje'] = (
+            Consulta.objects
+            .filter(data_hora__date=hoje)
+            .select_related('animal__proprietario')
+            .order_by('data_hora')
+        )
+
+        # Próximas consultas ativas (agendado ou confirmado) nos próximos 7 dias
+        ctx['proximas_consultas'] = (
+            Consulta.objects
+            .filter(
+                data_hora__date__gt=hoje,
+                data_hora__date__lte=sete_dias,
+                status__in=['agendado', 'confirmado'],
+            )
+            .select_related('animal__proprietario')
+            .order_by('data_hora')[:10]
+        )
+
+        ctx['hoje'] = hoje
+        return ctx
 
 
 # =============================================================================
@@ -45,140 +113,102 @@ from .forms import ProprietarioForm, AnimalForm, ConsultaForm
 
 class ProprietarioListView(LoginRequiredMixin, ListView):
     """
-    Exibe a lista de todos os proprietários (tutores) cadastrados.
+    Lista todos os proprietários com busca por nome ou telefone.
 
-    Rota: GET /proprietarios/
+    Rota    : GET /proprietarios/
+              GET /proprietarios/?q=João
     Template: agendamentos/proprietario_list.html
-
-    Contexto disponível no template:
-        object_list -- QuerySet com todos os proprietários ordenados por nome.
-        page_obj    -- Objeto de paginação (10 por página).
+    Contexto: proprietarios (paginado, 10/página), query (termo de busca)
     """
-
     model = Proprietario
     template_name = 'agendamentos/proprietario_list.html'
-    context_object_name = 'proprietarios'  # Nome da variável no template
-    paginate_by = 10  # Exibe 10 proprietários por página
+    context_object_name = 'proprietarios'
+    paginate_by = 10
 
     def get_queryset(self):
-        """
-        Retorna a lista de proprietários, com suporte a busca por nome ou telefone.
-
-        Se o parâmetro 'q' estiver na URL (ex: /proprietarios/?q=João),
-        filtra os resultados pelo nome ou telefone do proprietário.
-        """
-        queryset = Proprietario.objects.order_by('nome')
-
-        # Captura o termo de busca da URL (?q=termo)
-        query = self.request.GET.get('q', '').strip()
-        if query:
-            # Filtra por nome OU telefone — case insensitive (icontains)
-            queryset = queryset.filter(nome__icontains=query) | \
-                       queryset.filter(telefone__icontains=query)
-
-        return queryset
+        qs = Proprietario.objects.order_by('nome')
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            # icontains = busca case-insensitive (maiúsculas/minúsculas ignoradas)
+            qs = qs.filter(nome__icontains=q) | qs.filter(telefone__icontains=q)
+        return qs
 
     def get_context_data(self, **kwargs):
-        """Adiciona o termo de busca ao contexto para manter o valor no campo de pesquisa."""
-        context = super().get_context_data(**kwargs)
-        context['query'] = self.request.GET.get('q', '')
-        return context
+        ctx = super().get_context_data(**kwargs)
+        ctx['query'] = self.request.GET.get('q', '')
+        return ctx
 
 
 class ProprietarioDetailView(LoginRequiredMixin, DetailView):
     """
-    Exibe os detalhes de um proprietário específico e seus animais vinculados.
+    Exibe dados de um proprietário e todos os seus animais.
 
-    Rota: GET /proprietarios/<pk>/
+    Rota    : GET /proprietarios/<pk>/
     Template: agendamentos/proprietario_detail.html
-
-    Contexto disponível no template:
-        proprietario -- Objeto do proprietário.
-        animais      -- Todos os animais vinculados a este proprietário.
+    Contexto: proprietario, animais
     """
-
     model = Proprietario
     template_name = 'agendamentos/proprietario_detail.html'
     context_object_name = 'proprietario'
 
     def get_context_data(self, **kwargs):
-        """Inclui os animais do proprietário no contexto do template."""
-        context = super().get_context_data(**kwargs)
-        # Busca todos os animais deste proprietário via related_name definido no model
-        context['animais'] = self.object.animais.order_by('nome')
-        return context
+        ctx = super().get_context_data(**kwargs)
+        ctx['animais'] = self.object.animais.order_by('nome')
+        return ctx
 
 
 class ProprietarioCreateView(LoginRequiredMixin, CreateView):
     """
-    Exibe o formulário e processa o cadastro de um novo proprietário.
+    Formulário de cadastro de novo proprietário.
 
-    Fluxo:
-        GET  -- Exibe o formulário em branco.
-        POST -- Valida e salva o novo proprietário. Redireciona para a listagem.
-
-    Rota: GET/POST /proprietarios/novo/
+    Rota    : GET/POST /proprietarios/novo/
     Template: agendamentos/proprietario_form.html
+    Sucesso : redireciona para a listagem
     """
-
     model = Proprietario
     form_class = ProprietarioForm
     template_name = 'agendamentos/proprietario_form.html'
-
-    # Para onde redirecionar após salvar com sucesso
     success_url = reverse_lazy('agendamentos:proprietario-list')
 
     def form_valid(self, form):
-        """Exibe mensagem de sucesso após salvar o proprietário."""
         messages.success(self.request, 'Proprietário cadastrado com sucesso!')
         return super().form_valid(form)
 
 
 class ProprietarioUpdateView(LoginRequiredMixin, UpdateView):
     """
-    Exibe o formulário preenchido e processa a edição de um proprietário.
+    Formulário de edição de proprietário existente.
 
-    Fluxo:
-        GET  -- Exibe o formulário com os dados atuais do proprietário.
-        POST -- Valida e atualiza os dados. Redireciona para o detalhe.
-
-    Rota: GET/POST /proprietarios/<pk>/editar/
-    Template: agendamentos/proprietario_form.html (mesmo template do Create)
+    Rota    : GET/POST /proprietarios/<pk>/editar/
+    Template: agendamentos/proprietario_form.html
+    Sucesso : redireciona para a listagem
     """
-
     model = Proprietario
     form_class = ProprietarioForm
     template_name = 'agendamentos/proprietario_form.html'
     success_url = reverse_lazy('agendamentos:proprietario-list')
 
     def form_valid(self, form):
-        """Exibe mensagem de sucesso após atualizar o proprietário."""
         messages.success(self.request, 'Proprietário atualizado com sucesso!')
         return super().form_valid(form)
 
 
 class ProprietarioDeleteView(LoginRequiredMixin, DeleteView):
     """
-    Exibe a página de confirmação e processa a exclusão de um proprietário.
+    Confirmação e exclusão de proprietário.
 
-    ATENÇÃO: A exclusão é em cascata — todos os animais e consultas vinculados
-    a este proprietário também serão deletados (definido no model via CASCADE).
+    ATENÇÃO: exclui em cascata todos os animais e consultas vinculados.
 
-    Fluxo:
-        GET  -- Exibe a página de confirmação de exclusão.
-        POST -- Exclui o proprietário e redireciona para a listagem.
-
-    Rota: GET/POST /proprietarios/<pk>/excluir/
+    Rota    : GET/POST /proprietarios/<pk>/excluir/
     Template: agendamentos/proprietario_confirm_delete.html
+    Sucesso : redireciona para a listagem
     """
-
     model = Proprietario
     template_name = 'agendamentos/proprietario_confirm_delete.html'
     context_object_name = 'proprietario'
     success_url = reverse_lazy('agendamentos:proprietario-list')
 
     def form_valid(self, form):
-        """Exibe mensagem de sucesso após excluir o proprietário."""
         messages.success(self.request, 'Proprietário excluído com sucesso.')
         return super().form_valid(form)
 
@@ -189,194 +219,132 @@ class ProprietarioDeleteView(LoginRequiredMixin, DeleteView):
 
 class AnimalListView(LoginRequiredMixin, ListView):
     """
-    Exibe a lista de todos os animais cadastrados, com busca e filtro por espécie.
+    Lista todos os animais com busca e filtro por espécie.
 
-    Rota: GET /animais/
+    Rota    : GET /animais/
+              GET /animais/?q=Rex&especie=cao
     Template: agendamentos/animal_list.html
-
-    Parâmetros de URL aceitos:
-        q        -- Termo de busca por nome do animal ou do proprietário.
-        especie  -- Filtro por espécie: 'cao', 'gato' ou 'outro'.
+    Contexto: animais, query, especie_selecionada
     """
-
     model = Animal
     template_name = 'agendamentos/animal_list.html'
     context_object_name = 'animais'
     paginate_by = 10
 
     def get_queryset(self):
-        """
-        Retorna animais filtrados por termo de busca e/ou espécie.
-
-        select_related('proprietario') otimiza a query buscando o proprietário
-        junto com o animal em uma única consulta ao banco (evita o problema N+1).
-        """
-        # select_related evita múltiplas queries ao banco para buscar o proprietário
-        queryset = Animal.objects.select_related('proprietario').order_by('nome')
-
-        # Filtra por nome do animal ou nome do proprietário
-        query = self.request.GET.get('q', '').strip()
-        if query:
-            queryset = queryset.filter(nome__icontains=query) | \
-                       queryset.filter(proprietario__nome__icontains=query)
-
-        # Filtra por espécie se o parâmetro estiver presente na URL
+        # select_related evita query extra para buscar o proprietário de cada animal
+        qs = Animal.objects.select_related('proprietario').order_by('nome')
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            qs = qs.filter(nome__icontains=q) | qs.filter(proprietario__nome__icontains=q)
         especie = self.request.GET.get('especie', '').strip()
         if especie:
-            queryset = queryset.filter(especie=especie)
-
-        return queryset
+            qs = qs.filter(especie=especie)
+        return qs
 
     def get_context_data(self, **kwargs):
-        """Adiciona os filtros ativos ao contexto para manter os valores nos campos."""
-        context = super().get_context_data(**kwargs)
-        context['query'] = self.request.GET.get('q', '')
-        context['especie_selecionada'] = self.request.GET.get('especie', '')
-        return context
+        ctx = super().get_context_data(**kwargs)
+        ctx['query'] = self.request.GET.get('q', '')
+        ctx['especie_selecionada'] = self.request.GET.get('especie', '')
+        return ctx
 
 
 class AnimalDetailView(LoginRequiredMixin, DetailView):
     """
-    Exibe os detalhes de um animal específico e seu histórico de consultas.
+    Exibe dados de um animal e seu histórico de consultas.
 
-    Rota: GET /animais/<pk>/
+    Rota    : GET /animais/<pk>/
     Template: agendamentos/animal_detail.html
-
-    Contexto disponível no template:
-        animal    -- Objeto do animal com seu proprietário.
-        consultas -- Histórico de consultas do animal, do mais recente ao mais antigo.
+    Contexto: animal, consultas (do mais recente ao mais antigo)
     """
-
     model = Animal
     template_name = 'agendamentos/animal_detail.html'
     context_object_name = 'animal'
 
     def get_queryset(self):
-        """Inclui o proprietário na query para evitar query extra no template."""
         return Animal.objects.select_related('proprietario')
 
     def get_context_data(self, **kwargs):
-        """Inclui o histórico de consultas do animal no contexto."""
-        context = super().get_context_data(**kwargs)
-        # Ordena do mais recente para o mais antigo — mais útil para a Sra. Fernanda
-        context['consultas'] = self.object.consultas.order_by('-data_hora')
-        return context
+        ctx = super().get_context_data(**kwargs)
+        ctx['consultas'] = self.object.consultas.order_by('-data_hora')
+        return ctx
 
 
 class AnimalCreateView(LoginRequiredMixin, CreateView):
     """
-    Exibe o formulário e processa o cadastro de um novo animal.
+    Formulário de cadastro de novo animal.
 
-    Rota: GET/POST /animais/novo/
+    Aceita ?proprietario=<pk> na URL para pré-selecionar o tutor.
+
+    Rota    : GET/POST /animais/novo/
     Template: agendamentos/animal_form.html
-
-    Suporta pré-seleção de proprietário via parâmetro de URL:
-        /animais/novo/?proprietario=<pk>
-    Útil quando o usuário clica em "Adicionar animal" na página do proprietário.
+    Sucesso : redireciona para a listagem
     """
-
     model = Animal
     form_class = AnimalForm
     template_name = 'agendamentos/animal_form.html'
     success_url = reverse_lazy('agendamentos:animal-list')
 
     def get_initial(self):
-        """
-        Pré-preenche o campo de proprietário se o parâmetro estiver na URL.
-
-        Permite que o fluxo: 'Ver proprietário → Adicionar animal' já venha
-        com o tutor correto selecionado no formulário.
-        """
         initial = super().get_initial()
-        proprietario_pk = self.request.GET.get('proprietario')
-        if proprietario_pk:
-            initial['proprietario'] = proprietario_pk
+        pk = self.request.GET.get('proprietario')
+        if pk:
+            initial['proprietario'] = pk
         return initial
 
     def form_valid(self, form):
-        """Exibe mensagem de sucesso após cadastrar o animal."""
         messages.success(self.request, 'Animal cadastrado com sucesso!')
         return super().form_valid(form)
 
 
 class AnimalUpdateView(LoginRequiredMixin, UpdateView):
     """
-    Exibe o formulário preenchido e processa a edição de um animal.
+    Formulário de edição de animal existente.
 
-    Rota: GET/POST /animais/<pk>/editar/
+    Rota    : GET/POST /animais/<pk>/editar/
     Template: agendamentos/animal_form.html
     """
-
     model = Animal
     form_class = AnimalForm
     template_name = 'agendamentos/animal_form.html'
     success_url = reverse_lazy('agendamentos:animal-list')
 
     def form_valid(self, form):
-        """Exibe mensagem de sucesso após atualizar o animal."""
         messages.success(self.request, 'Animal atualizado com sucesso!')
         return super().form_valid(form)
 
 
 class AnimalDeleteView(LoginRequiredMixin, DeleteView):
     """
-    Exibe a confirmação e processa a exclusão de um animal.
+    Confirmação e exclusão de animal.
 
-    ATENÇÃO: Todas as consultas vinculadas ao animal também serão deletadas (CASCADE).
+    ATENÇÃO: exclui em cascata todas as consultas do animal.
 
-    Rota: GET/POST /animais/<pk>/excluir/
+    Rota    : GET/POST /animais/<pk>/excluir/
     Template: agendamentos/animal_confirm_delete.html
     """
-
     model = Animal
     template_name = 'agendamentos/animal_confirm_delete.html'
     context_object_name = 'animal'
     success_url = reverse_lazy('agendamentos:animal-list')
 
     def form_valid(self, form):
-        """Exibe mensagem de sucesso após excluir o animal."""
         messages.success(self.request, 'Animal excluído com sucesso.')
         return super().form_valid(form)
 
 
 # =============================================================================
-# VIEW: Home (frontpage pública)
+# VIEWS DE CONSULTA
 # =============================================================================
-# Importação necessária — adicionar ao topo do views.py junto com os outros imports
-# from django.views.generic import TemplateView
-
-class HomeView(TemplateView):
-    """
-    View da frontpage pública da ATIVO PET.
-
-    Página inicial do sistema — acessível sem login.
-    Apresenta a clínica, seus serviços e o CTA para agendamento.
-
-    Rota: GET /
-    Template: templates/home.html
-    """
-    template_name = 'home.html'
-# =============================================================================
-# VETSystem — views de Consulta
-# Adicionar ao final de agendamentos/views.py
-# =============================================================================
-# Adicione 'Consulta' ao import do models no topo:
-#   from .models import Proprietario, Animal, Consulta, Consulta
-# Adicione 'ConsultaForm' ao import do forms no topo:
-#   from .forms import ProprietarioForm, AnimalForm, ConsultaForm, ConsultaForm
-# =============================================================================
-
 
 class ConsultaListView(LoginRequiredMixin, ListView):
     """
-    Lista todas as consultas com filtros opcionais por status e data.
+    Lista todas as consultas com filtros por status e data.
 
-    GET /consultas/
-    GET /consultas/?status=agendado
-    GET /consultas/?data=2026-04-10
-
+    Rota    : GET /consultas/
+              GET /consultas/?status=agendado&data=2026-04-10
     Template: agendamentos/consulta_list.html
-    Context: object_list, status_choices, status_atual, data_filtro
+    Contexto: consultas, status_choices, status_atual, data_filtro
     """
     model = Consulta
     template_name = 'agendamentos/consulta_list.html'
@@ -396,36 +364,33 @@ class ConsultaListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['status_choices'] = Consulta.STATUS_CHOICES
-        ctx['status_atual'] = self.request.GET.get('status', '')
-        ctx['data_filtro'] = self.request.GET.get('data', '')
+        ctx['status_atual']   = self.request.GET.get('status', '')
+        ctx['data_filtro']    = self.request.GET.get('data', '')
         return ctx
 
 
 class ConsultaDetailView(LoginRequiredMixin, DetailView):
     """
-    Exibe os detalhes de uma consulta específica.
+    Exibe os detalhes de uma consulta com animal e proprietário.
 
-    GET /consultas/<pk>/
+    Rota    : GET /consultas/<pk>/
     Template: agendamentos/consulta_detail.html
-    Context: object (Consulta com animal e proprietário)
     """
     model = Consulta
     template_name = 'agendamentos/consulta_detail.html'
     context_object_name = 'consulta'
 
     def get_queryset(self):
-        # Carrega animal e proprietário em uma única query (evita N+1)
         return super().get_queryset().select_related('animal__proprietario')
 
 
 class ConsultaCreateView(LoginRequiredMixin, CreateView):
     """
-    Formulário de criação de nova consulta (agendamento).
+    Formulário de agendamento de nova consulta.
 
-    GET  /consultas/nova/           → exibe formulário vazio
-    GET  /consultas/nova/?animal=1  → pré-seleciona animal
-    POST /consultas/nova/           → salva e redireciona para o detalhe
+    Aceita ?animal=<pk> na URL para pré-selecionar o animal.
 
+    Rota    : GET/POST /consultas/nova/
     Template: agendamentos/consulta_form.html
     """
     model = Consulta
@@ -435,7 +400,6 @@ class ConsultaCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Repassa o animal_pk da querystring para o form pré-selecionar
         kwargs['animal_pk'] = self.request.GET.get('animal')
         return kwargs
 
@@ -448,10 +412,8 @@ class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
     """
     Formulário de edição de consulta existente.
 
-    GET  /consultas/<pk>/editar/ → formulário preenchido
-    POST /consultas/<pk>/editar/ → salva e redireciona para o detalhe
-
-    Template: agendamentos/consulta_form.html (mesmo do create)
+    Rota    : GET/POST /consultas/<pk>/editar/
+    Template: agendamentos/consulta_form.html
     """
     model = Consulta
     form_class = ConsultaForm
@@ -462,7 +424,7 @@ class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['animal_pk'] = None  # já vem preenchido do objeto
+        kwargs['animal_pk'] = None
         return kwargs
 
     def form_valid(self, form):
@@ -472,11 +434,9 @@ class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
 
 class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
     """
-    Página de confirmação de cancelamento/exclusão de consulta.
+    Confirmação e cancelamento de consulta.
 
-    GET  /consultas/<pk>/cancelar/ → tela de confirmação
-    POST /consultas/<pk>/cancelar/ → exclui e redireciona para lista
-
+    Rota    : GET/POST /consultas/<pk>/cancelar/
     Template: agendamentos/consulta_confirm_delete.html
     """
     model = Consulta
@@ -490,56 +450,75 @@ class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
 
 
 # =============================================================================
-# VIEW: Dashboard interno
+# VIEWS DE DISPONIBILIDADE
 # =============================================================================
+# Gerencia os horários de funcionamento da ATIVO PET por dia da semana.
+# Configurados uma única vez pela Sra. Fernanda — usados para validar
+# se o horário de um agendamento está dentro do expediente da clínica.
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DisponibilidadeListView(LoginRequiredMixin, ListView):
     """
-    Dashboard interno — tela inicial pós-login da Sra. Fernanda.
+    Lista os horários de funcionamento configurados para cada dia da semana.
 
-    Exibe:
-      - Totais de consultas por status (agendado, confirmado, realizado, cancelado)
-      - Consultas agendadas para hoje
-      - Próximas consultas dos próximos 7 dias (excluindo hoje)
-
-    Rota: GET /dashboard/
-    Template: templates/dashboard.html
+    Rota    : GET /disponibilidade/
+    Template: agendamentos/disponibilidade_list.html
+    Contexto: disponibilidades (ordenadas por dia_da_semana)
     """
-    template_name = 'dashboard.html'
+    model = Disponibilidade
+    template_name = 'agendamentos/disponibilidade_list.html'
+    context_object_name = 'disponibilidades'
+    ordering = ['dia_da_semana']
 
-    def get_context_data(self, **kwargs):
-        from django.utils import timezone
-        import datetime
 
-        ctx = super().get_context_data(**kwargs)
-        hoje = timezone.localdate()
-        sete_dias = hoje + datetime.timedelta(days=7)
+class DisponibilidadeCreateView(LoginRequiredMixin, CreateView):
+    """
+    Formulário de cadastro de horário de funcionamento.
 
-        # Totais por status — usados nos cards de resumo
-        ctx['total_agendado']   = Consulta.objects.filter(status='agendado').count()
-        ctx['total_confirmado'] = Consulta.objects.filter(status='confirmado').count()
-        ctx['total_realizado']  = Consulta.objects.filter(status='realizado').count()
-        ctx['total_cancelado']  = Consulta.objects.filter(status='cancelado').count()
+    Cada dia da semana pode ter apenas um registro (constraint no model).
 
-        # Consultas de hoje ordenadas por horário
-        ctx['consultas_hoje'] = (
-            Consulta.objects
-            .filter(data_hora__date=hoje)
-            .select_related('animal__proprietario')
-            .order_by('data_hora')
-        )
+    Rota    : GET/POST /disponibilidade/novo/
+    Template: agendamentos/disponibilidade_form.html
+    Sucesso : redireciona para a listagem
+    """
+    model = Disponibilidade
+    form_class = DisponibilidadeForm
+    template_name = 'agendamentos/disponibilidade_form.html'
+    success_url = reverse_lazy('agendamentos:disponibilidade-list')
 
-        # Próximas consultas: amanhã até 7 dias, só ativas (agendado ou confirmado)
-        ctx['proximas_consultas'] = (
-            Consulta.objects
-            .filter(
-                data_hora__date__gt=hoje,
-                data_hora__date__lte=sete_dias,
-                status__in=['agendado', 'confirmado'],
-            )
-            .select_related('animal__proprietario')
-            .order_by('data_hora')[:10]
-        )
+    def form_valid(self, form):
+        messages.success(self.request, 'Horário cadastrado com sucesso!')
+        return super().form_valid(form)
 
-        ctx['hoje'] = hoje
-        return ctx
+
+class DisponibilidadeUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Formulário de edição de horário de funcionamento existente.
+
+    Rota    : GET/POST /disponibilidade/<pk>/editar/
+    Template: agendamentos/disponibilidade_form.html
+    """
+    model = Disponibilidade
+    form_class = DisponibilidadeForm
+    template_name = 'agendamentos/disponibilidade_form.html'
+    success_url = reverse_lazy('agendamentos:disponibilidade-list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Horário atualizado com sucesso!')
+        return super().form_valid(form)
+
+
+class DisponibilidadeDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Confirmação e exclusão de horário de funcionamento.
+
+    Rota    : GET/POST /disponibilidade/<pk>/excluir/
+    Template: agendamentos/disponibilidade_confirm_delete.html
+    """
+    model = Disponibilidade
+    template_name = 'agendamentos/disponibilidade_confirm_delete.html'
+    context_object_name = 'disponibilidade'
+    success_url = reverse_lazy('agendamentos:disponibilidade-list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Horário excluído.')
+        return super().form_valid(form)
