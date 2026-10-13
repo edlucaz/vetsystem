@@ -34,6 +34,12 @@
     {% if object %}Editar Animal{% else %}Cadastrar Novo Animal{% endif %}
   </h1>
 
+  {% if fluxo_agendamento %}
+  <p class="border-l-4 text-gray-700 text-sm rounded px-4 py-3 mb-6" style="background:#F5F6F7; border-color:#1E7579;">
+    Etapa 2 de 3 — cadastro do animal. Depois: escolha do horário.
+  </p>
+  {% endif %}
+
   {% crispy form %}
 
   <div class="mt-4">

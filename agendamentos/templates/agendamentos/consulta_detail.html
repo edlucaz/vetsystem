@@ -86,9 +86,15 @@
        class="w-full text-center font-semibold py-3 px-6 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
       ← Voltar à lista
     </a>
-    <a href="{% url 'agendamentos:consulta-delete' consulta.pk %}"
+    {% if consulta.status == 'agendado' or consulta.status == 'confirmado' %}
+    <a href="{% url 'agendamentos:consulta-cancelar' consulta.pk %}"
        class="w-full text-center text-red-500 text-sm font-semibold py-2 hover:underline mt-2">
       Cancelar consulta
+    </a>
+    {% endif %}
+    <a href="{% url 'agendamentos:consulta-delete' consulta.pk %}"
+       class="w-full text-center text-gray-600 text-xs py-1 hover:underline">
+      Excluir registro
     </a>
   </div>
 

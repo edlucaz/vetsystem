@@ -13,14 +13,17 @@ Função  : Views (controladores) do sistema. Cada view processa uma requisiçã
             Home / Dashboard     : HomeView, DashboardView
             Proprietário         : List, Detail, Create, Update, Delete
             Animal               : List, Detail, Create, Update, Delete
-            Consulta             : List, Detail, Create, Update, Delete
+            Consulta             : List, Detail, Create, Update, Cancelar, Delete
             Disponibilidade      : List, Create, Update, Delete
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
 Data    : 2026-03-30
 """
 
-from django.urls import reverse_lazy
+from django.core.exceptions import ValidationError
+from django.db.models import Count, Q
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
@@ -29,6 +32,7 @@ from django.views.generic import (
 
 from .models import Proprietario, Animal, Consulta, Disponibilidade
 from .forms import ProprietarioForm, AnimalForm, ConsultaForm, DisponibilidadeForm
+from .services import atualizar_status
 
 
 # =============================================================================
@@ -113,7 +117,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
 class ProprietarioListView(LoginRequiredMixin, ListView):
     """
-    Lista todos os proprietários com busca por nome ou telefone.
+    Lista todos os proprietários com busca por nome, telefone ou e-mail.
 
     Rota    : GET /proprietarios/
               GET /proprietarios/?q=João
@@ -126,11 +130,11 @@ class ProprietarioListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = Proprietario.objects.order_by('nome')
+        qs = Proprietario.objects.annotate(total_animais=Count('animais')).order_by('nome')
         q = self.request.GET.get('q', '').strip()
         if q:
             # icontains = busca case-insensitive (maiúsculas/minúsculas ignoradas)
-            qs = qs.filter(nome__icontains=q) | qs.filter(telefone__icontains=q)
+            qs = qs.filter(Q(nome__icontains=q) | Q(telefone__icontains=q) | Q(email__icontains=q))
         return qs
 
     def get_context_data(self, **kwargs):
@@ -173,6 +177,17 @@ class ProprietarioCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, 'Proprietário cadastrado com sucesso!')
         return super().form_valid(form)
+
+    def get_success_url(self):
+        # Fluxograma: depois de "Cadastrar proprietário e animal", volta ao agendamento
+        if self.request.GET.get('fluxo') == 'agendamento':
+            return f"{reverse('agendamentos:animal-create')}?proprietario={self.object.pk}&fluxo=agendamento"
+        return super().get_success_url()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['fluxo_agendamento'] = self.request.GET.get('fluxo') == 'agendamento'
+        return ctx
 
 
 class ProprietarioUpdateView(LoginRequiredMixin, UpdateView):
@@ -295,6 +310,17 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, 'Animal cadastrado com sucesso!')
         return super().form_valid(form)
+
+    def get_success_url(self):
+        # Fluxograma: depois de "Cadastrar proprietário e animal", volta ao agendamento
+        if self.request.GET.get('fluxo') == 'agendamento':
+            return f"{reverse('agendamentos:consulta-create')}?animal={self.object.pk}"
+        return super().get_success_url()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['fluxo_agendamento'] = self.request.GET.get('fluxo') == 'agendamento'
+        return ctx
 
 
 class AnimalUpdateView(LoginRequiredMixin, UpdateView):
@@ -432,11 +458,33 @@ class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
+class ConsultaCancelarView(LoginRequiredMixin, DetailView):
     """
-    Confirmação e cancelamento de consulta.
+    Cancela a consulta mudando o status (fluxograma: "Atualizar status — cancelado").
+    O registro continua no histórico e na análise de dados.
 
     Rota    : GET/POST /consultas/<pk>/cancelar/
+    Template: agendamentos/consulta_confirm_cancel.html
+    """
+    model = Consulta
+    template_name = 'agendamentos/consulta_confirm_cancel.html'
+    context_object_name = 'consulta'
+
+    def post(self, request, *args, **kwargs):
+        consulta = self.get_object()
+        try:
+            atualizar_status(consulta, 'cancelado', 'Cancelada pela clínica.')
+            messages.success(request, 'Consulta cancelada. O horário voltou a ficar livre na agenda.')
+        except ValidationError as erro:
+            messages.error(request, erro.messages[0])
+        return redirect('agendamentos:consulta-detail', pk=consulta.pk)
+
+
+class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Confirmação e exclusão definitiva de consulta (para manter o histórico, prefira Cancelar).
+
+    Rota    : GET/POST /consultas/<pk>/excluir/
     Template: agendamentos/consulta_confirm_delete.html
     """
     model = Consulta
@@ -445,7 +493,7 @@ class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
     context_object_name = 'consulta'
 
     def form_valid(self, form):
-        messages.success(self.request, 'Consulta cancelada.')
+        messages.success(self.request, 'Consulta excluída.')
         return super().form_valid(form)
 
 

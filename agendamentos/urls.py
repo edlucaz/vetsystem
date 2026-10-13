@@ -44,8 +44,10 @@ urlpatterns = [
     path('consultas/nova/', views.ConsultaCreateView.as_view(), name='consulta-create'),
     # Edição de consulta existente
     path('consultas/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='consulta-update'),
-    # Cancelamento com confirmação
-    path('consultas/<int:pk>/cancelar/', views.ConsultaDeleteView.as_view(), name='consulta-delete'),
+    # Cancelamento = mudança de status (fluxograma: "Atualizar status — cancelado")
+    path('consultas/<int:pk>/cancelar/', views.ConsultaCancelarView.as_view(), name='consulta-cancelar'),
+    # Exclusão definitiva do registro
+    path('consultas/<int:pk>/excluir/', views.ConsultaDeleteView.as_view(), name='consulta-delete'),
 
     # =========================================================================
     # DISPONIBILIDADE — horários de funcionamento da clínica

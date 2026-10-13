@@ -9,6 +9,9 @@ python manage.py migrate --noinput
 echo "==> Criando superusuário (se não existir)..."
 python manage.py criar_superusuario
 
+echo "==> Expediente padrão..."
+python manage.py criar_horarios_padrao
+
 echo "==> Coletando arquivos estáticos..."
 python manage.py collectstatic --noinput
 

@@ -35,6 +35,12 @@
     {% if object %}Editar Proprietário{% else %}Cadastrar Novo Proprietário{% endif %}
   </h1>
 
+  {% if fluxo_agendamento %}
+  <p class="border-l-4 text-gray-700 text-sm rounded px-4 py-3 mb-6" style="background:#F5F6F7; border-color:#1E7579;">
+    Etapa 1 de 3 — cadastro do tutor. Depois: animal e horário.
+  </p>
+  {% endif %}
+
   <!-- O crispy_forms renderiza os campos com estilo Tailwind automaticamente -->
   {% crispy form %}
 
