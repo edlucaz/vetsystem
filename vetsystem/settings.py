@@ -7,7 +7,7 @@ Função  : Configurações globais do projeto Django. Controla banco de dados,
           apps instalados, templates, arquivos estáticos, fuso horário,
           idioma e segurança. Este arquivo é o "painel de controle" do Django.
 
-          Em produção (Railway), as variáveis sensíveis (SECRET_KEY, DATABASE_URL)
+          Em produção (Render), as variáveis sensíveis (SECRET_KEY, DATABASE_URL)
           são lidas do ambiente via python-decouple — nunca ficam hardcoded aqui.
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
@@ -37,7 +37,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-chave-local-apenas-pa
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Lista de domínios/IPs autorizados a acessar o sistema.
-# Em desenvolvimento: localhost. Em produção: domínio do Railway.
+# Em desenvolvimento: localhost. Em produção: domínio do Render.
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,vetsystem-gky6.onrender.com', cast=Csv())
 
 
@@ -116,7 +116,7 @@ TEMPLATES = [
     },
 ]
 
-# Ponto de entrada para servidores WSGI (usado em produção no Railway).
+# Ponto de entrada para servidores WSGI (usado em produção no Render).
 WSGI_APPLICATION = 'vetsystem.wsgi.application'
 
 
@@ -125,11 +125,12 @@ WSGI_APPLICATION = 'vetsystem.wsgi.application'
 # =============================================================================
 
 # Em desenvolvimento usamos SQLite (arquivo local, sem necessidade de instalar nada).
-# Em produção no Railway, DATABASE_URL aponta para PostgreSQL automaticamente.
+# Em produção no Render, DATABASE_URL aponta para PostgreSQL automaticamente.
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
+        conn_health_checks=True,  # o Neon suspende o banco ocioso; revalida a conexão antes de usar
     )
 }
 
@@ -182,7 +183,11 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Pasta de destino do comando 'collectstatic' (usado no deploy em produção).
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE foi removido no Django 5.1 — o equivalente atual é STORAGES.
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
+}
 
 
 # =============================================================================

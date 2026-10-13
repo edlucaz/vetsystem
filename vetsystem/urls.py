@@ -51,7 +51,7 @@ urlpatterns = [
 ]
 
 # --- Arquivos de mídia em desenvolvimento ---
-# Em produção, o servidor web (nginx/Railway) serve os arquivos de mídia.
+# Em produção, o servidor web (nginx/Render) serve os arquivos de mídia.
 # Em desenvolvimento, o Django serve diretamente via esta configuração.
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

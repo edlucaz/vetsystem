@@ -47,3 +47,9 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Fase 0 — PI II
+*.deb
+.pytest_cache/
+coverage.xml
+docs/metricas/lighthouse/**/*.report.*

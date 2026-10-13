@@ -6,6 +6,8 @@
   <title>{% block title %}VETSystem{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <!-- IMask.js — máscaras de input sem jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js"></script>
   <style>
     body { font-family: 'Lato', sans-serif; }
     h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
@@ -30,7 +32,11 @@
         <div>
           {% if user.is_authenticated %}
             <span class="text-white/70 text-sm mr-3">{{ user.username }}</span>
-            <a href="{% url 'logout' %}" style="background:#F26A2E;" class="text-white text-sm font-bold py-1.5 px-4 rounded-lg hover:opacity-90 transition">Sair</a>
+            <!-- Django 5+/6+ exige POST para logout (segurança CSRF) — não usar <a href> -->
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" style="background:#F26A2E;" class="text-white text-sm font-bold py-1.5 px-4 rounded-lg hover:opacity-90 transition cursor-pointer border-0">Sair</button>
+            </form>
           {% else %}
             <a href="{% url 'login' %}" style="background:#F26A2E;" class="text-white text-sm font-bold py-1.5 px-4 rounded-lg hover:opacity-90 transition">Entrar</a>
           {% endif %}
@@ -59,6 +65,65 @@
   <footer style="background:#4A2C7A;" class="text-white/60 text-center text-xs py-4 mt-auto">
     VETSystem &copy; 2026 — ATIVO PET Fisioterapia e Bem-Estar Animal, Limeira/SP | Projeto Integrador UNIVESP — PJI110
   </footer>
+
+  <!-- =====================================================================
+       Máscaras de input — IMask.js (padrão brasileiro)
+       Aplicadas globalmente: os campos são identificados pelo id gerado
+       pelo Django (id_telefone, id_cpf, id_peso). Se o campo não existir
+       na página atual, o bloco é ignorado silenciosamente.
+  ====================================================================== -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Telefone: dinâmico entre fixo (8 dígitos) e celular (9 dígitos) ---
+    // Exemplos: (19) 3300-0000  |  (19) 99999-9999
+    var telEl = document.getElementById('id_telefone');
+    if (telEl) {
+      IMask(telEl, {
+        mask: [
+          { mask: '(00) 0000-0000' },   // fixo: 8 dígitos
+          { mask: '(00) 00000-0000' }   // celular: 9 dígitos
+        ],
+        dispatch: function (appended, dynamicMasked) {
+          var digits = (dynamicMasked.value + appended).replace(/\D/g, '');
+          // A partir do 11º dígito usa a máscara de celular
+          return dynamicMasked.compiledMasks[digits.length > 10 ? 1 : 0];
+        }
+      });
+    }
+
+    // --- CPF: 000.000.000-00 ---
+    var cpfEl = document.getElementById('id_cpf');
+    if (cpfEl) {
+      IMask(cpfEl, { mask: '000.000.000-00' });
+    }
+
+    // --- Peso (kg): decimal brasileiro com vírgula — ex: 12,50 ---
+    // O widget é TextInput; clean_peso() no forms.py converte vírgula→ponto antes de salvar.
+    var pesoEl = document.getElementById('id_peso');
+    if (pesoEl) {
+      var pesoMask = IMask(pesoEl, {
+        mask: Number,
+        scale: 2,
+        min: 0,
+        max: 999.99,
+        radix: ',',          // separador decimal → vírgula (padrão BR)
+        mapToRadix: ['.'],   // aceita ponto na digitação também
+        normalizeZeros: false,
+        padFractionalZeros: false,
+      });
+
+      // Antes de submeter o formulário, converte "12,50" → "12.50"
+      // para que o Django DecimalField aceite o valor corretamente.
+      pesoEl.closest('form') && pesoEl.closest('form').addEventListener('submit', function () {
+        pesoEl.value = pesoEl.value.replace(',', '.');
+      }, { once: false });
+    }
+
+  });
+  </script>
+
+  {% block extra_js %}{% endblock %}
 
 </body>
 </html>

@@ -1,10 +1,13 @@
 <!--
   VETSystem — agendamentos/templates/agendamentos/consulta_form.html
-  Formulário de criação e edição de consulta (compartilhado).
-  Autor: Lucas Eduardo Rocha (RA 24217901) | 2026-03-11
+  Formulário de criação e edição de consulta.
+
+  Data e hora são exibidos em campos separados (date + time) para melhor UX.
+  A validação de data/hora passada ocorre em tempo real via JS, antes do submit.
+
+  Autor: Lucas Eduardo Rocha (RA 24217901) | 2026-05-09
 -->
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 {% block title %}{% if object %}Editar Consulta{% else %}Nova Consulta{% endif %} — VETSystem{% endblock %}
 
 {% block content %}
@@ -17,18 +20,121 @@
 </nav>
 
 <div class="max-w-2xl">
-  <h1 class="text-2xl font-bold mb-8" style="color: #4A2C7A;">
+  <h1 class="text-2xl font-bold mb-8" style="color:#4A2C7A;">
     {% if object %}Editar Consulta #{{ object.pk }}{% else %}Agendar Nova Consulta{% endif %}
   </h1>
 
+  <!-- Erros gerais do formulário (ex: data no passado vinda do backend) -->
+  {% if form.non_field_errors %}
+    <div class="bg-red-50 border border-red-300 text-red-700 text-sm rounded-lg px-4 py-3 mb-6">
+      {% for erro in form.non_field_errors %}{{ erro }}{% endfor %}
+    </div>
+  {% endif %}
+
   <div class="bg-white rounded-2xl shadow-sm p-8">
-    <form method="post" novalidate>
+    <form method="post" novalidate id="form-consulta">
       {% csrf_token %}
-      {% crispy form %}
-      <div class="flex items-center gap-4 mt-8 pt-6 border-t border-gray-100">
+
+      <!-- ── Animal ─────────────────────────────────────────────── -->
+      <div class="mb-5">
+        <label for="{{ form.animal.id_for_label }}"
+               class="block text-sm font-semibold text-gray-700 mb-1">
+          Animal <span class="text-red-500">*</span>
+        </label>
+        {{ form.animal }}
+        {% for erro in form.animal.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
+        {% endfor %}
+      </div>
+
+      <!-- ── Data e Hora (separados) ───────────────────────────── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
+
+        <!-- Data -->
+        <div>
+          <label for="{{ form.data_consulta.id_for_label }}"
+                 class="block text-sm font-semibold text-gray-700 mb-1">
+            Data <span class="text-red-500">*</span>
+          </label>
+          {{ form.data_consulta }}
+          <p id="erro-data" class="text-red-500 text-xs mt-1 hidden">
+            ⚠ Selecione uma data de hoje em diante.
+          </p>
+          {% for erro in form.data_consulta.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Horário -->
+        <div>
+          <label for="{{ form.hora_consulta.id_for_label }}"
+                 class="block text-sm font-semibold text-gray-700 mb-1">
+            Horário <span class="text-red-500">*</span>
+          </label>
+          {{ form.hora_consulta }}
+          <p id="erro-hora" class="text-red-500 text-xs mt-1 hidden">
+            ⚠ Este horário já passou para hoje.
+          </p>
+          {% for erro in form.hora_consulta.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
+          {% endfor %}
+        </div>
+
+      </div>
+
+      <!-- Aviso visual de data/hora inválida (banner) — oculto por padrão -->
+      <div id="aviso-passado"
+           class="hidden mb-5 flex items-center gap-2 bg-amber-50 border border-amber-300
+                  text-amber-700 text-sm rounded-lg px-4 py-3">
+        <span class="text-lg">⏰</span>
+        <span>Agendamentos devem ser marcados para datas e horários futuros.</span>
+      </div>
+
+      <!-- Separador -->
+      <div class="border-t border-gray-100 my-6"></div>
+
+      <!-- ── Tipo de atendimento ─────────────────────────────────── -->
+      <div class="mb-5">
+        <label for="{{ form.tipo.id_for_label }}"
+               class="block text-sm font-semibold text-gray-700 mb-1">
+          Tipo de atendimento <span class="text-red-500">*</span>
+        </label>
+        {{ form.tipo }}
+        {% for erro in form.tipo.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
+        {% endfor %}
+      </div>
+
+      <!-- ── Status ─────────────────────────────────────────────── -->
+      <div class="mb-5">
+        <label for="{{ form.status.id_for_label }}"
+               class="block text-sm font-semibold text-gray-700 mb-1">
+          Status
+        </label>
+        {{ form.status }}
+        {% for erro in form.status.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
+        {% endfor %}
+      </div>
+
+      <!-- ── Observações ────────────────────────────────────────── -->
+      <div class="mb-6">
+        <label for="{{ form.observacoes.id_for_label }}"
+               class="block text-sm font-semibold text-gray-700 mb-1">
+          Observações
+        </label>
+        {{ form.observacoes }}
+        {% for erro in form.observacoes.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
+        {% endfor %}
+      </div>
+
+      <!-- ── Ações ──────────────────────────────────────────────── -->
+      <div class="flex items-center gap-4 pt-4 border-t border-gray-100">
         <button type="submit"
+                id="btn-agendar"
                 class="text-white font-bold py-3 px-8 rounded-xl hover:opacity-90 transition"
-                style="background: #31A1A7;">
+                style="background:#31A1A7;">
           {% if object %}Salvar alterações{% else %}Agendar consulta{% endif %}
         </button>
         <a href="{% url 'agendamentos:consulta-list' %}"
@@ -36,7 +142,109 @@
           Cancelar
         </a>
       </div>
+
     </form>
   </div>
 </div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+(function () {
+  'use strict';
+
+  var dataEl   = document.getElementById('id_data_consulta');
+  var horaEl   = document.getElementById('id_hora_consulta');
+  var erroData = document.getElementById('erro-data');
+  var erroHora = document.getElementById('erro-hora');
+  var aviso    = document.getElementById('aviso-passado');
+  var btnSubmit = document.getElementById('btn-agendar');
+
+  // Só aplica restrição de data futura em novas consultas (não na edição).
+  var isCreate = {% if not object %}true{% else %}false{% endif %};
+
+  if (!isCreate || !dataEl || !horaEl) return;
+
+  // ── Define o mínimo do date picker como hoje ─────────────────────
+  function isoHoje() {
+    var d = new Date();
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+  var hoje = isoHoje();
+  dataEl.min = hoje;
+
+  // ── Lógica de validação ──────────────────────────────────────────
+  function horaAtualHHMM() {
+    var d = new Date();
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function validar() {
+    var dataSel = dataEl.value;
+    var horaSel = horaEl.value;
+    var dataInvalida = false;
+    var horaInvalida = false;
+
+    // Valida data
+    if (dataSel && dataSel < hoje) {
+      dataInvalida = true;
+    }
+
+    // Valida hora apenas se a data for hoje
+    if (dataSel === hoje && horaSel && horaSel <= horaAtualHHMM()) {
+      horaInvalida = true;
+    }
+
+    // Atualiza estilos do campo de data
+    if (dataInvalida) {
+      erroData.classList.remove('hidden');
+      dataEl.classList.add('border-red-400', 'ring-1', 'ring-red-300');
+      dataEl.classList.remove('border-gray-300');
+    } else {
+      erroData.classList.add('hidden');
+      dataEl.classList.remove('border-red-400', 'ring-1', 'ring-red-300');
+      dataEl.classList.add('border-gray-300');
+    }
+
+    // Atualiza estilos do campo de hora
+    if (horaInvalida) {
+      erroHora.classList.remove('hidden');
+      horaEl.classList.add('border-red-400', 'ring-1', 'ring-red-300');
+      horaEl.classList.remove('border-gray-300');
+    } else {
+      erroHora.classList.add('hidden');
+      horaEl.classList.remove('border-red-400', 'ring-1', 'ring-red-300');
+      horaEl.classList.add('border-gray-300');
+    }
+
+    // Banner de aviso geral
+    var invalido = dataInvalida || horaInvalida;
+    aviso.classList.toggle('hidden', !invalido);
+
+    // Desabilita o botão de submit enquanto inválido
+    btnSubmit.disabled = invalido;
+    btnSubmit.style.opacity  = invalido ? '0.45' : '1';
+    btnSubmit.style.cursor   = invalido ? 'not-allowed' : 'pointer';
+
+    return !invalido;
+  }
+
+  // ── Listeners ────────────────────────────────────────────────────
+  dataEl.addEventListener('change', validar);
+  horaEl.addEventListener('change', validar);
+
+  // Segurança extra: bloqueia submit mesmo se JS foi contornado
+  document.getElementById('form-consulta').addEventListener('submit', function (e) {
+    if (!validar()) e.preventDefault();
+  });
+
+  // Valida imediatamente se já houver valores (ex: volta de erro de servidor)
+  if (dataEl.value || horaEl.value) validar();
+
+}());
+</script>
 {% endblock %}
