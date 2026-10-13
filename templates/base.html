@@ -1,80 +1,85 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}VETSystem{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Paleta ATIVO PET ajustada para WCAG 2.1 AA (contraste ≥ 4,5:1 com branco).
+    tailwind.config = { theme: { extend: { colors: {
+      'ativo-turquesa': '#1E7579', 'ativo-roxo': '#4A2C7A', 'ativo-laranja': '#B9471A', 'ativo-fundo': '#F5F6F7'
+    } } } };
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
-  <!-- IMask.js — máscaras de input sem jQuery -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js"></script>
+  <link rel="stylesheet" href="{% static 'css/vetsystem.css' %}">
   <style>
     body { font-family: 'Lato', sans-serif; }
     h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js"></script>
   {% block extra_head %}{% endblock %}
 </head>
-<body style="background:#F5F6F7; color:#1B1B1B;" class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-ativo-fundo text-[#1B1B1B]">
+  <a href="#conteudo" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-white text-ativo-roxo font-bold px-4 py-2 rounded-lg shadow">Pular para o conteúdo</a>
 
-  <nav style="background:#31A1A7;" class="shadow-md">
+  <header class="bg-ativo-turquesa shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <a href="{% url 'agendamentos:home' %}" class="text-white font-bold text-xl">🐾 VETSystem</a>
+      <div class="flex items-center justify-between h-16 gap-3">
+        <a href="{% url 'agendamentos:home' %}" class="text-white font-bold text-xl"><span aria-hidden="true">🐾 </span>VETSystem</a>
         {% if user.is_authenticated %}
-        <div class="hidden md:flex items-center gap-6">
-          <a href="{% url 'agendamentos:dashboard' %}" class="text-white hover:text-yellow-200 font-medium transition">Dashboard</a>
-          <a href="{% url 'agendamentos:consulta-list' %}" class="text-white hover:text-yellow-200 font-medium transition">Consultas</a>
-          <a href="{% url 'agendamentos:proprietario-list' %}" class="text-white hover:text-yellow-200 font-medium transition">Proprietários</a>
-          <a href="{% url 'agendamentos:animal-list' %}" class="text-white hover:text-yellow-200 font-medium transition">Animais</a>
-          <a href="{% url 'agendamentos:disponibilidade-list' %}" class="text-white hover:text-yellow-200 font-medium transition">Horários</a>
-        </div>
+        <nav aria-label="Navegação principal" class="hidden md:block">{% include 'partials/menu_principal.html' %}</nav>
         {% endif %}
-        <div>
+        <div class="flex items-center gap-2">
           {% if user.is_authenticated %}
-            <span class="text-white/70 text-sm mr-3">{{ user.username }}</span>
-            <!-- Django 5+/6+ exige POST para logout (segurança CSRF) — não usar <a href> -->
-            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            <button type="button" id="botao-menu" class="md:hidden text-white font-semibold border border-white rounded-lg px-3 py-1.5" aria-expanded="false" aria-controls="menu-movel">Menu</button>
+            <span class="hidden sm:inline text-white text-sm">{{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}" class="inline">
               {% csrf_token %}
-              <button type="submit" style="background:#F26A2E;" class="text-white text-sm font-bold py-1.5 px-4 rounded-lg hover:opacity-90 transition cursor-pointer border-0">Sair</button>
+              <button type="submit" class="bg-ativo-laranja text-white text-sm font-bold py-1.5 px-4 rounded-lg hover:opacity-90">Sair</button>
             </form>
           {% else %}
-            <a href="{% url 'login' %}" style="background:#F26A2E;" class="text-white text-sm font-bold py-1.5 px-4 rounded-lg hover:opacity-90 transition">Entrar</a>
+            <a href="{% url 'login' %}" class="bg-ativo-laranja text-white text-sm font-bold py-1.5 px-4 rounded-lg hover:opacity-90">Entrar</a>
           {% endif %}
         </div>
       </div>
+      {% if user.is_authenticated %}
+      <nav id="menu-movel" aria-label="Navegação principal (celular)" class="md:hidden pb-4" hidden>
+        {% include 'partials/menu_principal.html' with vertical=True %}
+      </nav>
+      {% endif %}
     </div>
-  </nav>
+  </header>
 
   {% if messages %}
-  <div class="max-w-7xl mx-auto px-4 mt-4 w-full">
+  <div class="max-w-7xl mx-auto px-4 mt-4 w-full" role="status">
     {% for message in messages %}
-      <div class="rounded-lg px-4 py-3 mb-2 text-sm
-        {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-300
-        {% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-300
-        {% else %}bg-blue-100 text-blue-800 border border-blue-300{% endif %}">
-        {{ message }}
-      </div>
+      <div class="rounded-lg px-4 py-3 mb-2 text-sm {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-300{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-300{% else %}bg-blue-100 text-blue-800 border border-blue-300{% endif %}">{{ message }}</div>
     {% endfor %}
   </div>
   {% endif %}
+  <div id="anuncios" class="sr-only" role="status" aria-live="polite"></div>
 
-  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <main id="conteudo" tabindex="-1" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
     {% block content %}{% endblock %}
   </main>
 
-  <footer style="background:#4A2C7A;" class="text-white/60 text-center text-xs py-4 mt-auto">
-    VETSystem &copy; 2026 — ATIVO PET Fisioterapia e Bem-Estar Animal, Limeira/SP | Projeto Integrador UNIVESP — PJI110
+  <footer class="bg-ativo-roxo text-white text-center text-xs py-4 mt-auto">
+    VETSystem &copy; 2026 — ATIVO PET Fisioterapia e Bem-Estar Animal, Limeira/SP | Projeto Integrador II — UNIVESP
   </footer>
 
-  <!-- =====================================================================
-       Máscaras de input — IMask.js (padrão brasileiro)
-       Aplicadas globalmente: os campos são identificados pelo id gerado
-       pelo Django (id_telefone, id_cpf, id_peso). Se o campo não existir
-       na página atual, o bloco é ignorado silenciosamente.
-  ====================================================================== -->
   <script>
   document.addEventListener('DOMContentLoaded', function () {
-
+    // Menu no celular (WCAG 1.4.10 — todo o conteúdo disponível em telas estreitas)
+    var botaoMenu = document.getElementById('botao-menu');
+    if (botaoMenu) {
+      var menuMovel = document.getElementById('menu-movel');
+      botaoMenu.addEventListener('click', function () {
+        var abrir = botaoMenu.getAttribute('aria-expanded') !== 'true';
+        botaoMenu.setAttribute('aria-expanded', String(abrir));
+        menuMovel.hidden = !abrir;
+      });
+    }
     // --- Telefone: dinâmico entre fixo (8 dígitos) e celular (9 dígitos) ---
     // Exemplos: (19) 3300-0000  |  (19) 99999-9999
     var telEl = document.getElementById('id_telefone');
@@ -119,11 +124,8 @@
         pesoEl.value = pesoEl.value.replace(',', '.');
       }, { once: false });
     }
-
   });
   </script>
-
   {% block extra_js %}{% endblock %}
-
 </body>
 </html>

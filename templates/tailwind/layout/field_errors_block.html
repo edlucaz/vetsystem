@@ -1,0 +1,5 @@
+{% if form_show_errors and field.errors %}
+<div id="{{ field.auto_id }}_error">
+  {% for error in field.errors %}<p class="text-red-700 text-xs mt-1"><strong>{{ error }}</strong></p>{% endfor %}
+</div>
+{% endif %}

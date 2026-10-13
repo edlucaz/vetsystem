@@ -22,13 +22,13 @@
 
     <!-- Cabeçalho do card -->
     <div class="text-center mb-8">
-      <h1 class="text-2xl font-bold text-ativo-roxo mb-1">🐾 VETSystem</h1>
-      <p class="text-gray-500 text-sm">ATIVO PET — Fisioterapia e Bem-Estar Animal</p>
+      <h1 class="text-2xl font-bold text-ativo-roxo mb-1"><span aria-hidden="true">🐾</span> VETSystem</h1>
+      <p class="text-gray-600 text-sm">ATIVO PET — Fisioterapia e Bem-Estar Animal</p>
     </div>
 
     <!-- Exibe erros de autenticação (usuário/senha incorretos) -->
     {% if form.errors %}
-      <div class="bg-red-100 border border-red-300 text-red-700 text-sm rounded-md px-4 py-3 mb-4">
+      <div role="alert" class="bg-red-100 border border-red-300 text-red-700 text-sm rounded-md px-4 py-3 mb-4">
         Usuário ou senha incorretos. Tente novamente.
       </div>
     {% endif %}
@@ -46,6 +46,7 @@
           type="text"
           name="username"
           id="id_username"
+          autocomplete="username"
           autofocus
           required
           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa"
@@ -62,6 +63,7 @@
           type="password"
           name="password"
           id="id_password"
+          autocomplete="current-password"
           required
           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ativo-turquesa"
           placeholder="Sua senha"
@@ -77,7 +79,7 @@
       <!-- bg-ativo-laranja é cor customizada não reconhecida pelo CDN; usando style inline -->
       <button
         type="submit"
-        style="background:#F26A2E;"
+        style="background:#B9471A;"
         class="w-full hover:opacity-90 text-white font-bold py-2.5 rounded-lg transition-opacity">
         Entrar
       </button>

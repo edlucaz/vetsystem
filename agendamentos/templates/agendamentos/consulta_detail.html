@@ -9,10 +9,10 @@
 {% block content %}
 
 <!-- ===== BREADCRUMB ===== -->
-<nav class="text-sm text-gray-400 mb-6">
-  <a href="{% url 'agendamentos:consulta-list' %}" class="hover:underline" style="color:#31A1A7;">Consultas</a>
-  <span class="mx-2">/</span>
-  <span class="text-gray-600">Consulta #{{ consulta.pk }}</span>
+<nav aria-label="Trilha de navegação" class="text-sm text-gray-600 mb-6">
+  <a href="{% url 'agendamentos:consulta-list' %}" class="hover:underline" style="color:#1E7579;">Consultas</a>
+  <span class="mx-2" aria-hidden="true">/</span>
+  <span class="text-gray-600" aria-current="page">Consulta #{{ consulta.pk }}</span>
 </nav>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -24,52 +24,44 @@
         <h1 class="text-2xl font-bold" style="color: #4A2C7A;">
           {{ consulta.get_tipo_display }}
         </h1>
-        <p class="text-gray-400 text-sm mt-1">Consulta #{{ consulta.pk }}</p>
+        <p class="text-gray-600 text-sm mt-1">Consulta #{{ consulta.pk }}</p>
       </div>
-      {% if consulta.status == 'agendado' %}
-        <span class="bg-blue-100 text-blue-700 text-sm font-semibold px-4 py-1.5 rounded-full">Agendado</span>
-      {% elif consulta.status == 'confirmado' %}
-        <span class="text-sm font-semibold px-4 py-1.5 rounded-full" style="background:#EAF7F7; color:#31A1A7;">Confirmado</span>
-      {% elif consulta.status == 'realizado' %}
-        <span class="bg-green-100 text-green-700 text-sm font-semibold px-4 py-1.5 rounded-full">Realizado</span>
-      {% elif consulta.status == 'cancelado' %}
-        <span class="bg-red-100 text-red-600 text-sm font-semibold px-4 py-1.5 rounded-full">Cancelado</span>
-      {% endif %}
+      {% include 'agendamentos/_badge_status.html' %}
     </div>
 
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
       <div>
-        <dt class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Data e Hora</dt>
+        <dt class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Data e Hora</dt>
         <dd class="text-gray-800 font-medium">{{ consulta.data_hora|date:"d/m/Y \à\s H:i" }}</dd>
       </div>
       <div>
-        <dt class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Animal</dt>
+        <dt class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Animal</dt>
         <dd>
           <a href="{% url 'agendamentos:animal-detail' consulta.animal.pk %}"
-             class="font-semibold hover:underline" style="color:#31A1A7;">
+             class="font-semibold hover:underline" style="color:#1E7579;">
             {{ consulta.animal.nome }}
           </a>
-          <span class="text-gray-400 text-sm"> — {{ consulta.animal.get_especie_display }}</span>
+          <span class="text-gray-600 text-sm"> — {{ consulta.animal.get_especie_display }}</span>
         </dd>
       </div>
       <div>
-        <dt class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Proprietário</dt>
+        <dt class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Proprietário</dt>
         <dd>
           <a href="{% url 'agendamentos:proprietario-detail' consulta.animal.proprietario.pk %}"
-             class="hover:underline" style="color:#31A1A7;">
+             class="hover:underline" style="color:#1E7579;">
             {{ consulta.animal.proprietario.nome }}
           </a>
         </dd>
       </div>
       <div>
-        <dt class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Telefone</dt>
+        <dt class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Telefone</dt>
         <dd class="text-gray-700">{{ consulta.animal.proprietario.telefone }}</dd>
       </div>
     </dl>
 
     {% if consulta.observacoes %}
     <div class="border-t border-gray-100 pt-6">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Observações</p>
+      <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Observações</p>
       <p class="text-gray-700 leading-relaxed">{{ consulta.observacoes }}</p>
     </div>
     {% endif %}
@@ -79,16 +71,16 @@
   <div class="flex flex-col gap-4">
     <a href="{% url 'agendamentos:consulta-update' consulta.pk %}"
        class="w-full text-center text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 transition"
-       style="background: #31A1A7;">
+       style="background: #1E7579;">
       Editar Consulta
     </a>
     <a href="{% url 'agendamentos:consulta-list' %}"
        class="w-full text-center font-semibold py-3 px-6 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
-      ← Voltar à lista
+      <span aria-hidden="true">←</span> Voltar à lista
     </a>
     {% if consulta.status == 'agendado' or consulta.status == 'confirmado' %}
     <a href="{% url 'agendamentos:consulta-cancelar' consulta.pk %}"
-       class="w-full text-center text-red-500 text-sm font-semibold py-2 hover:underline mt-2">
+       class="w-full text-center text-red-700 text-sm font-semibold py-2 hover:underline mt-2">
       Cancelar consulta
     </a>
     {% endif %}

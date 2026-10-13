@@ -1,0 +1,9 @@
+{% with nome=request.resolver_match.url_name|default:'' %}
+<ul class="{% if vertical %}flex flex-col gap-2 pt-2{% else %}flex items-center gap-6{% endif %}">
+  <li><a href="{% url 'agendamentos:dashboard' %}" class="link-menu" {% if nome == 'dashboard' %}aria-current="page"{% endif %}>Dashboard</a></li>
+  <li><a href="{% url 'agendamentos:consulta-list' %}" class="link-menu" {% if nome|slice:':8' == 'consulta' %}aria-current="page"{% endif %}>Consultas</a></li>
+  <li><a href="{% url 'agendamentos:proprietario-list' %}" class="link-menu" {% if nome|slice:':12' == 'proprietario' %}aria-current="page"{% endif %}>Proprietários</a></li>
+  <li><a href="{% url 'agendamentos:animal-list' %}" class="link-menu" {% if nome|slice:':6' == 'animal' %}aria-current="page"{% endif %}>Animais</a></li>
+  <li><a href="{% url 'agendamentos:disponibilidade-list' %}" class="link-menu" {% if nome|slice:':15' == 'disponibilidade' %}aria-current="page"{% endif %}>Horários</a></li>
+</ul>
+{% endwith %}

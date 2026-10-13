@@ -1294,7 +1294,7 @@ git switch main && git pull # o Render publica sozinho a main
 
 ## Fase 5 — Acessibilidade (WCAG 2.1 AA)
 
-- [ ] **5.1 Crie `static/css/vetsystem.css`:**
+- [x] **5.1 Crie `static/css/vetsystem.css`:**
   ```css
   /* VETSystem — static/css/vetsystem.css
      Componentes e acessibilidade (WCAG 2.1 AA). Todas as cores com contraste ≥ 4,5:1. */
@@ -1347,7 +1347,7 @@ git switch main && git pull # o Render publica sozinho a main
                              transition-duration: .01ms !important; scroll-behavior: auto !important; }
   }
   ```
-- [ ] **5.2 Reescreva `templates/base.html`** com o conteúdo abaixo. **Copie sem alterar** o bloco de máscaras IMask atual (telefone, CPF, peso) para o ponto indicado.
+- [x] **5.2 Reescreva `templates/base.html`** com o conteúdo abaixo. **Copie sem alterar** o bloco de máscaras IMask atual (telefone, CPF, peso) para o ponto indicado.
   ```django
   {% load static %}<!DOCTYPE html>
   <html lang="pt-br">
@@ -1450,7 +1450,7 @@ git switch main && git pull # o Render publica sozinho a main
   </ul>
   {% endwith %}
   ```
-- [ ] **5.3 Conserte os atributos quebrados de `animal_list.html`.** Faça isto **antes** da paleta:
+- [x] **5.3 Conserte os atributos quebrados de `animal_list.html`.** Faça isto **antes** da paleta:
   ```bash
   F=agendamentos/templates/agendamentos/animal_list.html
   sed -i -E \
@@ -1462,7 +1462,7 @@ git switch main && git pull # o Render publica sozinho a main
     -e 's/class="style="color:#F26A2E" /class="text-ativo-laranja /g' "$F"
   grep -c 'class="style=' "$F"   # deve imprimir 0
   ```
-- [ ] **5.4 Paleta acessível em todos os templates e no `forms.py`:**
+- [x] **5.4 Paleta acessível em todos os templates e no `forms.py`:**
   ```bash
   ARQ=$(grep -rlE '#31A1A7|#F26A2E|text-gray-(400|500)|text-red-(400|500|600)|bg-red-500|text-green-600|text-white/(70|80|90)|hover:bg-orange-600' templates agendamentos/templates agendamentos/forms.py)
   sed -i -E -e 's/#31A1A7/#1E7579/gI' -e 's/#F26A2E/#B9471A/gI' -e 's/text-gray-(400|500)/text-gray-600/g' \
@@ -1473,13 +1473,13 @@ git switch main && git pull # o Render publica sozinho a main
   Ajustes manuais em `home.html`:
   - `#F9A96B` → `#FFD9C2`.
   - Selo "📍 Limeira" e botão "Conheça os serviços": `bg-white/20` → `bg-black/25` e `hover:bg-white/30` → `hover:bg-black/35`.
-- [ ] **5.5 Selo de status único.**
+- [x] **5.5 Selo de status único.**
   - Crie `agendamentos/templates/agendamentos/_badge_status.html`:
     ```django
     <span class="badge badge-{{ consulta.status }}" data-status-badge="{{ consulta.pk }}">{{ consulta.get_status_display }}</span>
     ```
   - Substitua os blocos `{% if consulta.status == 'agendado' %}…{% endif %}` de selo por `{% include 'agendamentos/_badge_status.html' %}` em `dashboard.html` (2×), `consulta_list.html`, `consulta_detail.html` e `animal_detail.html`.
-- [ ] **5.6 Padrões a aplicar em todos os templates:**
+- [x] **5.6 Padrões a aplicar em todos os templates:**
   - **Tabelas:**
     - todo `<th>` ganha `scope="col"`;
     - o `<th>` vazio de ações vira `<th scope="col"><span class="sr-only">Ações</span></th>`;
@@ -1512,7 +1512,7 @@ git switch main && git pull # o Render publica sozinho a main
     - o CTA "Agendar Consulta" passa a usar `href="https://wa.me/5519987286814?text={{ 'Olá! Gostaria de agendar um atendimento para meu pet.'|urlencode }}"` (o filtro `urlencode` codifica espaços e acentos), abrindo em nova aba (é a raia do tutor no fluxograma: solicitar por telefone/WhatsApp);
     - todo `target="_blank"` recebe `rel="noopener"` e `<span class="sr-only"> (abre em nova aba)</span>`;
     - o telefone exibido passa a ser **(19) 98728-6814**.
-- [ ] **5.7 Override do crispy (os erros passam a ter os ids que o Django referencia):**
+- [x] **5.7 Override do crispy (os erros passam a ter os ids que o Django referencia):**
   - Crie `templates/tailwind/layout/field_errors.html` e `templates/tailwind/layout/field_errors_block.html`, ambos com:
     ```django
     {% if form_show_errors and field.errors %}
@@ -1522,7 +1522,7 @@ git switch main && git pull # o Render publica sozinho a main
     {% endif %}
     ```
   - Copie `.venv/lib/python3.12/site-packages/crispy_tailwind/templates/tailwind/errors.html` para `templates/tailwind/errors.html` e acrescente `role="alert"` à `div` externa.
-- [ ] **5.8 Testes automatizados de acessibilidade** — crie `agendamentos/tests/test_acessibilidade.py`:
+- [x] **5.8 Testes automatizados de acessibilidade** — crie `agendamentos/tests/test_acessibilidade.py`:
   ```python
   """
   Testes automatizados de acessibilidade (WCAG 2.1) — verificações estruturais sem
@@ -1640,7 +1640,7 @@ git switch main && git pull # o Render publica sozinho a main
       assert problemas_de_acessibilidade(html) == []
   ```
   Se aparecer um problema, conserte o template, não o teste. Anote cada correção em `registro_testes.md`: isso vira evidência de "falhas encontradas e corrigidas".
-- [ ] **5.9 Verificação:**
+- [ ] **5.9 Verificação:** (pytest e CI feitos; checklist de teclado pendente)
   - pytest verde.
   - **[VOCÊ]** checklist de teclado: navegue pelas telas só com Tab, Shift+Tab, Enter e Esc; confira que o foco é sempre visível e que o menu funciona no celular (DevTools, 375 px).
   - Crie `docs/metricas/checklist_manual.md` com o resultado.
