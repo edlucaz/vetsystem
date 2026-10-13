@@ -11,6 +11,9 @@ Função  : Roteador principal do projeto. Conecta as URLs raiz do Django
             /                → App agendamentos (rotas públicas e autenticadas)
             /login/          → Página de login (Django Auth embutido)
             /logout/         → Logout (Django Auth embutido)
+            /api/            → API REST (Django REST Framework) — PI II
+            /api/schema/     → Esquema OpenAPI 3 (drf-spectacular)
+            /api/docs/       → Documentação interativa da API (Swagger UI)
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
 Data    : 2026-03-11
@@ -21,6 +24,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
 
@@ -41,6 +45,11 @@ urlpatterns = [
         auth_views.LogoutView.as_view(),
         name='logout'
     ),
+
+    # --- API REST (PI II) e sua documentação OpenAPI/Swagger ---
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/', include('agendamentos.api.urls')),
 
     # --- App de agendamentos ---
     # Inclui todas as URLs definidas em agendamentos/urls.py
