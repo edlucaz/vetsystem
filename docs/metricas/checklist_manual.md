@@ -20,3 +20,19 @@ Navegação só com Tab, Shift+Tab, Enter e Esc; menu no celular com DevTools a 
 | 10 | Logout ("Sair") acionável pelo teclado | ⏳ pendente |
 
 Problemas encontrados: _pendente_
+
+## Fase 6 — JavaScript do agendamento
+
+Data: _pendente_ · Responsável: Lucas Eduardo Rocha · Navegador: _pendente_
+
+| # | Verificação | Resultado |
+|---|---|---|
+| 1 | Agendar só com o teclado: autocomplete, setas, Enter, Tab até a agenda, setas nos horários e Enter | ⏳ pendente |
+| 2 | Conflito: duas abas agendando o mesmo horário — a segunda mostra o erro e recarrega a agenda | ⏳ pendente |
+| 3 | JavaScript desativado (DevTools → Disable JavaScript): agendar pelo formulário de reserva | ⏳ pendente |
+| 4 | Confirmar pelo WhatsApp: abre a conversa e o selo vira "Confirmado" | ⏳ pendente |
+| 5 | "Atendimento realizado" e "Registrar ausência" no dashboard | ⏳ pendente |
+| 6 | (Opcional) Leitor de tela Orca (Linux) ou NVDA (Windows) no agendamento | ⏳ pendente |
+
+Problemas encontrados: _pendente_
+

@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js"></script>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen flex flex-col bg-ativo-fundo text-[#1B1B1B]">
+<body class="min-h-screen flex flex-col bg-ativo-fundo text-[#1B1B1B]" data-url-api-consultas="{% url 'api:consulta-list' %}">
   <a href="#conteudo" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-white text-ativo-roxo font-bold px-4 py-2 rounded-lg shadow">Pular para o conteúdo</a>
 
   <header class="bg-ativo-turquesa shadow-md">
@@ -126,6 +126,8 @@
     }
   });
   </script>
+  <script src="{% static 'js/api.js' %}"></script>
+  {% if user.is_authenticated %}<script src="{% static 'js/status.js' %}"></script>{% endif %}
   {% block extra_js %}{% endblock %}
 </body>
 </html>

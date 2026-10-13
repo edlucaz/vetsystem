@@ -2,13 +2,16 @@
 VETSystem — ATIVO PET | Projeto Integrador UNIVESP 2026 — PI II
 Arquivo : agendamentos/tests/test_views.py
 Função  : Testes das telas Django seguindo o fluxograma (login, cancelar x excluir,
-          fluxo encadeado de cadastro, agendamento e lista de proprietários).
+          fluxo encadeado de cadastro, agendamento, lista de proprietários
+          e ganchos do JavaScript da Fase 6).
 Autor   : Lucas Eduardo Rocha (RA 24217901) | 2026-10-13
 """
 from django.urls import reverse
+from django.utils import timezone
 import pytest
 
 from agendamentos.models import Animal, Consulta, Proprietario
+from agendamentos.tests.utils import em
 
 URLS_INTERNAS = [
     ('agendamentos:dashboard', {}),
@@ -109,3 +112,15 @@ def test_lista_proprietarios_total_de_animais_e_busca_por_email(cliente_logado, 
 
     busca = cliente_logado.get(reverse('agendamentos:proprietario-list'), {'q': 'ana@exemplo'})
     assert [p.nome for p in busca.context['proprietarios']] == ['Ana Lima']
+
+
+def test_nova_consulta_tem_ganchos_do_js_e_reserva_sem_js(cliente_logado):
+    html = cliente_logado.get(reverse('agendamentos:consulta-create')).content.decode()
+    assert 'data-url-horarios="/api/horarios-livres/"' in html
+    assert '<select name="animal"' in html and 'id="id_animal"' in html
+
+
+def test_dashboard_mostra_acoes_rapidas_da_consulta_de_hoje(cliente_logado, animal):
+    consulta = Consulta.objects.create(animal=animal, data_hora=em(timezone.localdate(), 23), tipo='consulta')
+    html = cliente_logado.get(reverse('agendamentos:dashboard')).content.decode()
+    assert f'data-acoes-consulta="{consulta.pk}"' in html
