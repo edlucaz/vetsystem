@@ -263,22 +263,22 @@ git switch main && git pull # o Render publica sozinho a main
 
 ## Fase 1 — Nuvem: Neon + Render (passos [VOCÊ]; o Claude só verifica)
 
-- [ ] **1.1 [VOCÊ] Neon** (neon.tech, entre com o GitHub):
+- [x] **1.1 [VOCÊ] Neon** (neon.tech, entre com o GitHub):
   - Crie o projeto **vetsystem**, região **AWS US West 2 (Oregon)** — a mesma região do Render.
   - Em **Connect**, desligue "Connection pooling" e copie a string `postgresql://…neon.tech/neondb?sslmode=require…`.
   - Se aparecer o erro `channel_binding`, apague `&channel_binding=require` da string.
-- [ ] **1.2 [VOCÊ] Render → serviço `vetsystem` → Environment:**
+- [x] **1.2 [VOCÊ] Render → serviço `vetsystem` → Environment:**
   - `DATABASE_URL` = string do Neon.
   - `DJANGO_SUPERUSER_PASSWORD` = **senha nova e forte** (do gerenciador de senhas).
   - Confira `SECRET_KEY`, `ALLOWED_HOSTS` e `DEBUG=False`.
   - Em **Settings**, confirme *Auto-Deploy: On Commit* no branch `main`.
   - **Manual Deploy → Deploy latest commit.**
   - Se houver um Postgres antigo/expirado listado no Render, apague-o.
-- [ ] **1.3 Se o serviço web não existir mais:** crie um Web Service a partir do repositório (ou New → Blueprint usando o `render.yaml`). Se o domínio mudar, atualize `ALLOWED_HOSTS` (no `render.yaml` e no default do `settings.py`) e o README.
-- [ ] **1.4 Verificação (Claude):** `curl -s -o /dev/null -w "%{http_code}\n" --max-time 120 https://vetsystem-gky6.onrender.com/login/` deve responder 200. O primeiro acesso demora cerca de 1 min, porque o plano gratuito "dorme" após 15 min.
+- [x] **1.3 Se o serviço web não existir mais:** crie um Web Service a partir do repositório (ou New → Blueprint usando o `render.yaml`). Se o domínio mudar, atualize `ALLOWED_HOSTS` (no `render.yaml` e no default do `settings.py`) e o README.
+- [x] **1.4 Verificação (Claude):** `curl -s -o /dev/null -w "%{http_code}\n" --max-time 120 https://vetsystem-gky6.onrender.com/login/` deve responder 200. O primeiro acesso demora cerca de 1 min, porque o plano gratuito "dorme" após 15 min.
   - Nos logs do Render deve aparecer "Rodando migrações… Criando superusuário…".
   - **[VOCÊ]** entre como `fernanda` com a senha nova e passe-a à Sra. Fernanda por um canal privado.
-- [ ] **1.5** Para a apresentação: abra o site 2 minutos antes, por causa do "sono" do plano gratuito.
+- [x] **1.5** Para a apresentação: abra o site 2 minutos antes, por causa do "sono" do plano gratuito.
 
 ## Fase 2 — Testes, CI, regras de negócio e modelo fiel ao DER
 
