@@ -1,0 +1,12 @@
+---
+name: fase-8
+description: Executa a Fase 8 do docs/PLANO_PI2.md — métricas finais, documentação, diagramas e release.
+argument-hint: "[sua resposta, ao retomar depois de um passo [VOCÊ]]"
+effort: low
+disable-model-invocation: true
+---
+Leia `docs/PLANO_PI2.md` e o `CLAUDE.md`. Execute **somente a Fase 8**, na ordem dos passos, sem acrescentar nada fora do escopo. Quando o plano trouxer código, use-o como está. Passos marcados **[VOCÊ]** são meus: pare e me peça. Ao terminar, rode as verificações da fase, registre falhas de teste e correções em `docs/metricas/registro_testes.md`, marque os checkboxes da fase no plano, faça commit, push e abra o PR. Aguarde o CI ficar verde e faça o merge.
+
+Se houver texto depois desta linha, é a minha resposta a um passo [VOCÊ]: **não recomece a fase**. Confira o branch `fase-8-*` e o `git status` e continue de onde parou.
+
+$ARGUMENTS
