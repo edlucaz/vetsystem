@@ -45,6 +45,14 @@
         {% for erro in form.animal.errors %}
           <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
         {% endfor %}
+        <p class="text-sm text-gray-600 mt-2">
+          Tutor ou animal ainda não cadastrado?
+          <a href="{% url 'agendamentos:proprietario-create' %}?fluxo=agendamento"
+             class="font-semibold hover:underline" style="color:#1E7579;">Cadastrar tutor e animal</a>
+          ·
+          <a href="{% url 'agendamentos:animal-create' %}?fluxo=agendamento"
+             class="font-semibold hover:underline" style="color:#1E7579;">Cadastrar animal de tutor já cadastrado</a>
+        </p>
       </div>
 
       <!-- ── Data e Hora (separados) ───────────────────────────── -->

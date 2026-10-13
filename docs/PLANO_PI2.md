@@ -894,7 +894,7 @@ git switch main && git pull # o Render publica sozinho a main
 
 ## Fase 3 — Telas Django seguindo o fluxograma
 
-- [ ] **3.1 Cancelar vira mudança de status** (fluxograma: "Atualizar status — cancelado"); excluir passa a ser outra ação.
+- [x] **3.1 Cancelar vira mudança de status** (fluxograma: "Atualizar status — cancelado"); excluir passa a ser outra ação.
   - Em `views.py`, importe `redirect`, `reverse`, `ValidationError`, `Count`, `Q` e `atualizar_status`, e crie:
     ```python
     class ConsultaCancelarView(LoginRequiredMixin, DetailView):
@@ -925,7 +925,7 @@ git switch main && git pull # o Render publica sozinho a main
     - Crie `consulta_confirm_cancel.html`, copiando `consulta_confirm_delete.html`, com os textos "Cancelar consulta?", "O horário ficará livre de novo e o registro continuará no histórico." e o botão "Sim, cancelar consulta".
     - Em `consulta_confirm_delete.html`, use "Excluir consulta?" e "Apaga o registro definitivamente. Para manter o histórico, prefira Cancelar."
     - Em `consulta_detail.html`, mostre "Cancelar consulta" (→ `consulta-cancelar`) só se o status for agendado ou confirmado, e um link discreto "Excluir registro" (→ `consulta-delete`).
-- [ ] **3.2 Fluxo encadeado de cadastro** (fluxograma: "Cadastrado? Não → Cadastrar proprietário e animal → Consultar horários livres").
+- [x] **3.2 Fluxo encadeado de cadastro** (fluxograma: "Cadastrado? Não → Cadastrar proprietário e animal → Consultar horários livres").
   - Em `ProprietarioCreateView` e `AnimalCreateView`, acrescente:
     ```python
     def get_success_url(self):
@@ -943,11 +943,11 @@ git switch main && git pull # o Render publica sozinho a main
   - O crispy envia o formulário para a própria URL, com a *query string*, então o `?fluxo=` chega no POST.
   - Em `proprietario_form.html` e `animal_form.html`, mostre um aviso se `fluxo_agendamento`. Por exemplo: "Etapa 1 de 3 — cadastro do tutor. Depois: animal e horário." e "Etapa 2 de 3 — cadastro do animal. Depois: escolha do horário."
   - Em `consulta_form.html`, abaixo do campo Animal: "Tutor ou animal ainda não cadastrado?" com os links `proprietario-create?fluxo=agendamento` ("Cadastrar tutor e animal") e `animal-create?fluxo=agendamento` ("Cadastrar animal de tutor já cadastrado").
-- [ ] **3.3 Lista de proprietários:**
+- [x] **3.3 Lista de proprietários:**
   - `get_queryset` passa a usar `Proprietario.objects.annotate(total_animais=Count('animais')).order_by('nome')`.
   - A busca usa `Q(nome__icontains=q) | Q(telefone__icontains=q) | Q(email__icontains=q)` (o placeholder já promete e-mail).
   - No template, troque `proprietario.animais.count` por `proprietario.total_animais`.
-- [ ] **3.4 Expediente padrão.**
+- [x] **3.4 Expediente padrão.**
   - Crie `agendamentos/management/commands/criar_horarios_padrao.py`:
     ```python
     """
@@ -978,7 +978,7 @@ git switch main && git pull # o Render publica sozinho a main
     ```
   - No `start.sh`, depois de `criar_superusuario`, acrescente `echo "==> Expediente padrão..."` e `python manage.py criar_horarios_padrao`.
   - Rode o comando no banco local.
-- [ ] **3.5 Testes** (`test_views.py`, `test_comandos.py`):
+- [x] **3.5 Testes** (`test_views.py`, `test_comandos.py`):
   - todas as telas internas redirecionam para `/login/` sem login (parametrize as URLs);
   - a home é pública (200);
   - POST em cancelar → status `cancelado`, e o registro continua existindo;
@@ -989,7 +989,7 @@ git switch main && git pull # o Render publica sozinho a main
   - criar em conflito → 200 com a mensagem de erro;
   - a lista de proprietários mostra o total de animais e busca por e-mail;
   - `criar_horarios_padrao` rodado duas vezes → 5 registros.
-- [ ] **3.6 Verificação:** pytest verde, smoke test do fluxo completo no `runserver` e PR com CI verde. Depois do deploy, confira no site que os horários padrão existem.
+- [x] **3.6 Verificação:** pytest verde, smoke test do fluxo completo no `runserver` e PR com CI verde. Depois do deploy, confira no site que os horários padrão existem.
 
 ## Fase 4 — API REST (Django REST Framework)
 
