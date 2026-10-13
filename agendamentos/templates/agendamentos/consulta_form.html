@@ -105,6 +105,7 @@
         {% endfor %}
       </div>
 
+      {% if 'status' in form.fields %}
       <!-- ── Status ─────────────────────────────────────────────── -->
       <div class="mb-5">
         <label for="{{ form.status.id_for_label }}"
@@ -116,6 +117,7 @@
           <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
         {% endfor %}
       </div>
+      {% endif %}
 
       <!-- ── Observações ────────────────────────────────────────── -->
       <div class="mb-6">

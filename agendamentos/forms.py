@@ -11,10 +11,15 @@ Autor   : Lucas Eduardo Rocha (RA 24217901)
 Data    : 2026-03-11
 """
 
+import datetime
+from decimal import Decimal, InvalidOperation
+
 from django import forms
+from django.utils import timezone
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Submit, Div
 from .models import Proprietario, Animal, Consulta, Disponibilidade
+from .services import DURACAO_PADRAO_MINUTOS, validar_agendamento, validar_data_nascimento, validar_telefone
 
 
 class ProprietarioForm(forms.ModelForm):
@@ -88,17 +93,16 @@ class ProprietarioForm(forms.ModelForm):
         Lança:
             ValidationError: Se o telefone tiver menos de 8 dígitos numéricos.
         """
-        telefone = self.cleaned_data.get('telefone', '').strip()
+        return validar_telefone(self.cleaned_data.get('telefone'))
 
-        # Conta apenas os dígitos (ignora parênteses, traços e espaços)
-        digitos = ''.join(filter(str.isdigit, telefone))
 
-        if len(digitos) < 8:
-            raise forms.ValidationError(
-                'Telefone inválido. Informe pelo menos 8 dígitos.'
-            )
+class PesoField(forms.DecimalField):
+    """DecimalField que aceita vírgula como separador decimal (padrão BR): '12,50'."""
 
-        return telefone
+    def to_python(self, value):
+        if isinstance(value, str):
+            value = value.replace(',', '.').strip()
+        return super().to_python(value)
 
 
 class AnimalForm(forms.ModelForm):
@@ -112,12 +116,14 @@ class AnimalForm(forms.ModelForm):
 
     class Meta:
         model = Animal
-        fields = ['nome', 'especie', 'raca', 'idade', 'peso', 'queixa', 'proprietario']
+        fields = ['nome', 'especie', 'raca', 'data_nascimento', 'peso', 'queixa', 'proprietario']
+        # Sem isso o DecimalField recusa '12,50' antes de clean_peso rodar
+        field_classes = {'peso': PesoField}
 
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Nome do animal'}),
             'raca': forms.TextInput(attrs={'placeholder': 'Ex: Golden Retriever (deixe vazio para SRD)'}),
-            'idade': forms.NumberInput(attrs={'placeholder': 'Idade em anos', 'min': 0}),
+            'data_nascimento': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
             # TextInput + inputmode="decimal" → compatível com IMask (type=number conflita com máscaras)
             'peso': forms.TextInput(attrs={
                 'placeholder': 'Ex: 12,50',
@@ -141,6 +147,7 @@ class AnimalForm(forms.ModelForm):
         # Ordena o select de proprietários por nome alfabeticamente
         self.fields['proprietario'].queryset = Proprietario.objects.order_by('nome')
         self.fields['proprietario'].empty_label = '— Selecione o tutor —'
+        self.fields['data_nascimento'].widget.attrs['max'] = timezone.localdate().isoformat()
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -152,10 +159,10 @@ class AnimalForm(forms.ModelForm):
                 Div(Field('especie'), css_class='w-full md:w-1/2 pl-2'),
                 css_class='flex flex-wrap'
             ),
-            # Linha com raça, idade e peso
+            # Linha com raça, data de nascimento e peso
             Div(
                 Div(Field('raca'), css_class='w-full md:w-1/2 pr-2'),
-                Div(Field('idade'), css_class='w-full md:w-1/4 px-2'),
+                Div(Field('data_nascimento'), css_class='w-full md:w-1/4 px-2'),
                 Div(Field('peso'), css_class='w-full md:w-1/4 pl-2'),
                 css_class='flex flex-wrap'
             ),
@@ -170,6 +177,9 @@ class AnimalForm(forms.ModelForm):
             )
         )
 
+    def clean_data_nascimento(self):
+        return validar_data_nascimento(self.cleaned_data.get('data_nascimento'))
+
     def clean_peso(self):
         """
         Aceita vírgula como separador decimal (padrão BR) e converte para ponto.
@@ -177,7 +187,6 @@ class AnimalForm(forms.ModelForm):
 
         O campo usa TextInput para compatibilidade com IMask.
         """
-        from decimal import Decimal, InvalidOperation
         valor = self.cleaned_data.get('peso')
         if valor in (None, ''):
             return None
@@ -203,9 +212,11 @@ class ConsultaForm(forms.ModelForm):
     Essa separação melhora a UX e permite bloquear datas passadas
     diretamente no browser via atributo min= e validação JS em tempo real.
 
-    O clean() combina os dois em data_hora (datetime aware, fuso SP).
-    A validação de data futura é aplicada apenas na criação (não na edição),
-    para não impedir a edição de consultas já realizadas.
+    O clean() combina os dois em data_hora (datetime aware, fuso SP) e aplica
+    a decisão "Horário disponível?" do fluxograma (services.validar_agendamento:
+    data futura, expediente do dia e sem conflito) na criação ou quando a
+    data/hora muda — editar só as observações de uma consulta passada continua
+    permitido. Na criação o campo status não aparece: a consulta nasce 'agendado'.
     """
 
     # --- Campos extras (não existem no Model) ---
@@ -275,44 +286,39 @@ class ConsultaForm(forms.ModelForm):
         # animal_pk pode vir da URL (?animal=1) para pré-selecionar o animal
         animal_pk = kwargs.pop('animal_pk', None)
         super().__init__(*args, **kwargs)
-
         self.helper = FormHelper()
         self.helper.form_tag = False
+        # Evita uma consulta extra por opção (Animal.__str__ usa o nome do tutor)
+        self.fields['animal'].queryset = Animal.objects.select_related('proprietario').order_by('nome')
 
+        if self.instance.pk is None:
+            # Fluxograma: "Registrar consulta — status: agendado" — na criação o status não é escolhido
+            del self.fields['status']
+            self.fields['data_consulta'].widget.attrs['min'] = timezone.localdate().isoformat()
         if animal_pk:
             self.fields['animal'].initial = animal_pk
-
-        # Ao editar uma consulta existente, pré-preenche data e hora separados
-        if self.instance and self.instance.pk and self.instance.data_hora:
-            from django.utils import timezone as tz
-            dt_local = tz.localtime(self.instance.data_hora)
+        if self.instance.pk and self.instance.data_hora:
+            dt_local = timezone.localtime(self.instance.data_hora)
             self.fields['data_consulta'].initial = dt_local.date()
-            self.fields['hora_consulta'].initial = dt_local.strftime('%H:%M')
+            # time (não str): TimeField.has_changed compara com time e acusaria mudança sempre
+            self.fields['hora_consulta'].initial = dt_local.time().replace(second=0, microsecond=0)
 
     def clean(self):
         """
-        Combina data_consulta + hora_consulta em data_hora (datetime aware).
-        Valida que o agendamento é no futuro apenas para novas consultas.
+        Combina data + hora em data_hora e aplica a decisão "Horário disponível?"
+        (mesma regra da API) na criação ou quando a data/hora foi alterada.
         """
-        import datetime
-        from django.utils import timezone as tz
-
         cleaned = super().clean()
-        data  = cleaned.get('data_consulta')
-        hora  = cleaned.get('hora_consulta')
-
+        data = cleaned.get('data_consulta')
+        hora = cleaned.get('hora_consulta')
         if data and hora:
-            naive_dt = datetime.datetime.combine(data, hora)
-            aware_dt = tz.make_aware(naive_dt)
-
-            # Bloqueia data no passado apenas ao criar (não ao editar)
-            if not self.instance.pk and aware_dt < tz.now():
-                raise forms.ValidationError(
-                    'A data e hora do agendamento devem ser no futuro.'
-                )
-
-            cleaned['data_hora'] = aware_dt
-
+            data_hora = timezone.make_aware(datetime.datetime.combine(data, hora))
+            mudou_horario = (self.instance.pk is None
+                             or bool({'data_consulta', 'hora_consulta'} & set(self.changed_data)))
+            if mudou_horario:
+                validar_agendamento(data_hora, self.instance.duracao_minutos or DURACAO_PADRAO_MINUTOS,
+                                    ignorar_id=self.instance.pk)
+            cleaned['data_hora'] = data_hora
         return cleaned
 
     def save(self, commit=True):

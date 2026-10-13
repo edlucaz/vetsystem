@@ -21,14 +21,14 @@ class ProprietarioAdmin(admin.ModelAdmin):
 
 @admin.register(Animal)
 class AnimalAdmin(admin.ModelAdmin):
-    list_display  = ('nome', 'especie', 'raca', 'idade', 'peso', 'proprietario')
+    list_display  = ('nome', 'especie', 'raca', 'data_nascimento', 'peso', 'proprietario')
     search_fields = ('nome', 'proprietario__nome')
     list_filter   = ('especie',)
 
 
 @admin.register(Consulta)
 class ConsultaAdmin(admin.ModelAdmin):
-    list_display  = ('data_hora', 'animal', 'tipo', 'status', 'duracao_minutos')
+    list_display  = ('data_hora', 'animal', 'tipo', 'status', 'duracao_minutos', 'disponibilidade')
     search_fields = ('animal__nome', 'animal__proprietario__nome')
     list_filter   = ('status', 'tipo')
     ordering      = ('data_hora',)
