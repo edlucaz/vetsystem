@@ -1,0 +1,8 @@
+[run]
+source = agendamentos
+omit =
+    agendamentos/migrations/*
+    agendamentos/tests/*
+
+[report]
+show_missing = True

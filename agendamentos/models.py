@@ -14,9 +14,18 @@ Função  : Define as tabelas do banco de dados do sistema de agendamento.
             - Consulta      : agendamento de atendimento
             - Disponibilidade: horários de funcionamento da clínica
 
+          Relacionamentos (DER):
+            - Proprietario 1:N Animal 1:N Consulta
+            - Consulta N:1 Disponibilidade ("verifica"): FK Consulta.disponibilidade,
+              preenchida automaticamente em Consulta.save() pelo dia da semana.
+
+          Animal guarda data_nascimento (como no DER); a idade é calculada.
+
 Autor   : Lucas Eduardo Rocha (RA 24217901)
 Data    : 2026-03-11
 """
+
+from urllib.parse import quote
 
 from django.db import models
 from django.utils import timezone
@@ -95,7 +104,7 @@ class Animal(models.Model):
         nome        -- Nome do animal (obrigatório).
         especie     -- Espécie: cão, gato ou outro (obrigatório).
         raca        -- Raça do animal (opcional).
-        idade       -- Idade em anos (opcional).
+        data_nascimento -- Data de nascimento (opcional); a idade é calculada.
         peso        -- Peso em kg com duas casas decimais (opcional).
         queixa      -- Motivo principal do atendimento — sintomas relatados (opcional).
         proprietario-- Tutor responsável pelo animal (obrigatório, FK).
@@ -127,10 +136,11 @@ class Animal(models.Model):
         help_text='Deixe em branco para SRD (Sem Raça Definida).',
     )
 
-    idade = models.PositiveIntegerField(
-        null=True,   # Permite valor nulo no banco
-        blank=True,  # Permite campo vazio no formulário
-        verbose_name='Idade (anos)',
+    data_nascimento = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Data de nascimento',
+        help_text='Se não souber a data exata, informe uma aproximada.',
     )
 
     peso = models.DecimalField(
@@ -168,6 +178,28 @@ class Animal(models.Model):
         """Ex: 'Rex (Cão) — João Silva'"""
         return f'{self.nome} ({self.get_especie_display()}) — {self.proprietario.nome}'
 
+    @property
+    def idade(self):
+        """Idade em anos completos, calculada a partir de data_nascimento (None se não informada)."""
+        if not self.data_nascimento:
+            return None
+        hoje = timezone.localdate()
+        nasc = self.data_nascimento
+        return hoje.year - nasc.year - ((hoje.month, hoje.day) < (nasc.month, nasc.day))
+
+    @property
+    def idade_formatada(self):
+        """Texto para as telas: '3 anos', '1 ano', '7 meses' ou '—'."""
+        if not self.data_nascimento:
+            return '—'
+        anos = self.idade
+        if anos >= 1:
+            return '1 ano' if anos == 1 else f'{anos} anos'
+        hoje = timezone.localdate()
+        nasc = self.data_nascimento
+        meses = max((hoje.year - nasc.year) * 12 + hoje.month - nasc.month - (hoje.day < nasc.day), 0)
+        return '1 mês' if meses == 1 else f'{meses} meses'
+
 
 # =============================================================================
 # MODEL: Consulta
@@ -196,6 +228,7 @@ class Consulta(models.Model):
         status          -- Estado atual do agendamento (padrão: 'agendado').
         observacoes     -- Anotações adicionais da Sra. Fernanda (opcional).
         duracao_minutos -- Duração estimada da sessão em minutos (padrão: 60).
+        disponibilidade -- Disponibilidade do dia ("verifica"), preenchida em save().
     """
 
     # --- Choices de status ---
@@ -254,6 +287,18 @@ class Consulta(models.Model):
         help_text='Duração estimada do atendimento em minutos.',
     )
 
+    # Relacionamento "verifica" do DER (Consulta N:1 Disponibilidade).
+    # Preenchido automaticamente em save() com a Disponibilidade do dia da semana.
+    disponibilidade = models.ForeignKey(
+        'Disponibilidade',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        editable=False,
+        related_name='consultas',
+        verbose_name='Disponibilidade verificada',
+    )
+
     class Meta:
         verbose_name = 'Consulta'
         verbose_name_plural = 'Consultas'
@@ -279,6 +324,36 @@ class Consulta(models.Model):
             bool: True se a consulta ainda não aconteceu, False caso contrário.
         """
         return self.data_hora > timezone.now()
+
+    def save(self, *args, **kwargs):
+        """Liga a consulta à Disponibilidade do seu dia da semana (relacionamento "verifica")."""
+        if self.data_hora:
+            data_hora = self.data_hora
+            if timezone.is_naive(data_hora):
+                data_hora = timezone.make_aware(data_hora)
+            dia = timezone.localtime(data_hora).weekday()
+            self.disponibilidade = Disponibilidade.objects.filter(dia_da_semana=dia).first()
+        super().save(*args, **kwargs)
+
+    @property
+    def link_whatsapp(self):
+        """
+        Link wa.me com a mensagem de confirmação para o tutor (fluxograma:
+        "Confirmar agendamento — avisa o tutor"). Vazio se o telefone for inválido.
+        """
+        digitos = ''.join(c for c in self.animal.proprietario.telefone if c.isdigit())
+        if len(digitos) in (10, 11):  # DDD + número: acrescenta o código do Brasil
+            digitos = '55' + digitos
+        if len(digitos) not in (12, 13):
+            return ''
+        local = timezone.localtime(self.data_hora)
+        mensagem = (
+            f'Olá, {self.animal.proprietario.nome}! Confirmamos o atendimento de '
+            f'{self.animal.nome} ({self.get_tipo_display().lower()}) na ATIVO PET em '
+            f'{local:%d/%m/%Y} às {local:%H:%M}. Endereço: Av. Maria Thereza Silveira de '
+            f'Barros Camargo, 1525 — Limeira/SP. Qualquer dúvida, é só responder esta mensagem.'
+        )
+        return f'https://wa.me/{digitos}?text={quote(mensagem)}'
 
 
 # =============================================================================

@@ -282,7 +282,7 @@ git switch main && git pull # o Render publica sozinho a main
 
 ## Fase 2 — Testes, CI, regras de negócio e modelo fiel ao DER
 
-- [ ] **2.1 Dependências de teste.**
+- [x] **2.1 Dependências de teste.**
   - Crie `requirements-dev.txt`:
     ```
     -r requirements.txt
@@ -291,7 +291,7 @@ git switch main && git pull # o Render publica sozinho a main
     pytest-cov==7.1.0
     ```
   - Instale com `.venv/bin/pip install -r requirements-dev.txt`.
-- [ ] **2.2 Configuração dos testes.**
+- [x] **2.2 Configuração dos testes.**
   - `pytest.ini`:
     ```ini
     [pytest]
@@ -323,7 +323,7 @@ git switch main && git pull # o Render publica sozinho a main
     # Hash de senha rápido — só para acelerar os testes.
     PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
     ```
-- [ ] **2.3 Pacote de testes.** Crie `agendamentos/tests/__init__.py` (vazio) e os dois arquivos abaixo.
+- [x] **2.3 Pacote de testes.** Crie `agendamentos/tests/__init__.py` (vazio) e os dois arquivos abaixo.
   - `agendamentos/tests/utils.py`:
     ```python
     """Auxiliares de data dos testes — sempre datetimes com o fuso da clínica."""
@@ -392,7 +392,7 @@ git switch main && git pull # o Render publica sozinho a main
     def consulta_futura(horario_comercial, animal, segunda):
         return Consulta.objects.create(animal=animal, data_hora=em(segunda, 10), tipo='fisioterapia')
     ```
-- [ ] **2.4 `agendamentos/models.py`:**
+- [x] **2.4 `agendamentos/models.py`:**
   - Acrescente `from urllib.parse import quote` aos imports.
   - Atualize a docstring do módulo: relacionamento "verifica" e `data_nascimento`.
   - **Animal:** troque o campo `idade` (linha ~130) por:
@@ -474,7 +474,7 @@ git switch main && git pull # o Render publica sozinho a main
         )
         return f'https://wa.me/{digitos}?text={quote(mensagem)}'
     ```
-- [ ] **2.5 Migrações escritas à mão** (não use o `makemigrations` interativo).
+- [x] **2.5 Migrações escritas à mão** (não use o `makemigrations` interativo).
   - `agendamentos/migrations/0002_consulta_disponibilidade.py`:
     ```python
     """Relacionamento "verifica" do DER: FK Consulta → Disponibilidade, preenchida pelo dia da semana."""
@@ -553,7 +553,7 @@ git switch main && git pull # o Render publica sozinho a main
         ]
     ```
   - Rode `migrate` e depois `makemigrations --check --dry-run`, que deve responder "No changes detected".
-- [ ] **2.6 Crie `agendamentos/services.py`** (cabeçalho no padrão do projeto):
+- [x] **2.6 Crie `agendamentos/services.py`** (cabeçalho no padrão do projeto):
   ```python
   """
   VETSystem — Sistema de Agendamento Veterinário
@@ -708,7 +708,7 @@ git switch main && git pull # o Render publica sozinho a main
       consulta.save(update_fields=['status', 'observacoes'])
       return consulta
   ```
-- [ ] **2.7 `agendamentos/forms.py`.** Imports no topo:
+- [x] **2.7 `agendamentos/forms.py`.** Imports no topo:
   ```python
   import datetime
   from django.utils import timezone
@@ -767,12 +767,12 @@ git switch main && git pull # o Render publica sozinho a main
         return cleaned
     ```
     O `save()` continua igual. Atualize a docstring da classe.
-- [ ] **2.8 Ajustes que dependem dos campos:**
+- [x] **2.8 Ajustes que dependem dos campos:**
   - `admin.py`: em AnimalAdmin, `list_display` troca `'idade'` por `'data_nascimento'`; em ConsultaAdmin, acrescente `'disponibilidade'`.
   - `animal_detail.html:49`: `<p class="font-semibold">{{ animal.idade_formatada }}</p>`.
   - `proprietario_detail.html:93`: `{% if animal.data_nascimento %}<span>{{ animal.idade_formatada }}</span>{% endif %}`.
   - `consulta_form.html`: envolva o bloco "Status" em `{% if 'status' in form.fields %} … {% endif %}`.
-- [ ] **2.9 Testes.** Os exemplos abaixo vão completos; escreva os demais pela lista, um teste por linha.
+- [x] **2.9 Testes.** Os exemplos abaixo vão completos; escreva os demais pela lista, um teste por linha.
   - `agendamentos/tests/test_services.py`, exemplos completos:
     ```python
     from django.core.exceptions import ValidationError
@@ -838,7 +838,7 @@ git switch main && git pull # o Render publica sozinho a main
     - AnimalForm aceita peso "12,50";
     - AnimalForm recusa nascimento futuro;
     - ProprietarioForm recusa telefone curto.
-- [ ] **2.10 CI** — crie `.github/workflows/ci.yml`:
+- [x] **2.10 CI** — crie `.github/workflows/ci.yml`:
   ```yaml
   name: CI
 
@@ -886,7 +886,7 @@ git switch main && git pull # o Render publica sozinho a main
           run: pytest --cov --cov-report=term-missing
   ```
   Não defina `DEBUG` no CI: com `DEBUG=False`, o settings ligaria o redirecionamento para HTTPS.
-- [ ] **2.11 Verificação:**
+- [x] **2.11 Verificação:**
   - `.venv/bin/pytest --cov` passa (meta: ≥ 90% em `services.py`).
   - `check`, `makemigrations --check` e `migrate` local OK.
   - Smoke test no `runserver`: agendar duas consultas no mesmo horário mostra o erro de conflito, e a página do animal mostra a idade.

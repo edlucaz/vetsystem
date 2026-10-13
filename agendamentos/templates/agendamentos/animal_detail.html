@@ -46,7 +46,7 @@
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-4">
         <div>
           <span class="text-gray-400 font-medium block">Idade</span>
-          <p class="font-semibold">{{ animal.idade|default:"—" }}{% if animal.idade %} anos{% endif %}</p>
+          <p class="font-semibold">{{ animal.idade_formatada }}</p>
         </div>
         <div>
           <span class="text-gray-400 font-medium block">Peso</span>
