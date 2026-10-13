@@ -33,10 +33,31 @@ O relatório parcial do Grupo 8 descreve como **já prontos** itens que não exi
 
 ## Como executar cada fase
 
-**Antes de cada sessão:**
-- Abra o Claude Code em `/mnt/backup500gb/Projetos/Web/vetsystem`.
-- Ajuste o effort conforme a tabela (`/effort low` ou `/effort medium`).
-- Cole o prompt modelo trocando N pelo número da fase.
+Cada fase tem um comando próprio, **`/fase-N`** (em `.claude/skills/fase-N/SKILL.md`). Ele já traz o prompt da fase e **define o effort sozinho** (`effort:` no cabeçalho), então não é preciso rodar `/effort`.
+
+**Como usar:**
+1. Abra o Claude Code em `/mnt/backup500gb/Projetos/Web/vetsystem`.
+2. Digite `/clear` para começar sem o histórico da fase anterior.
+3. Digite `/fase-N`. O Claude executa a fase até o merge.
+4. Se ele parar num passo **[VOCÊ]**, faça o que foi pedido e responda com **`/fase-N <sua resposta>`** (ex.: `/fase-6 checklist feito, tudo ok`).
+   - Assim a resposta continua no effort da fase. Uma resposta comum, sem o comando, volta ao effort da sessão.
+5. Confira o resultado e passe para a próxima fase (volte ao passo 2).
+
+**Passo a passo por etapa:**
+
+| Etapa | Comando | Effort | O que você faz durante a fase |
+|---|---|---|---|
+| Fase 0 — Preparação | (concluída) | low | Mover o `.deb` para `~/Downloads/`; trocar a senha antiga onde mais tiver sido usada |
+| Fase 1 — Neon + Render | `/fase-1` | low | 1.1 criar o banco no Neon; 1.2 configurar o Render (`DATABASE_URL`, senha nova) e publicar; depois `/fase-1 terminei` para o Claude verificar; entrar como `fernanda` |
+| Fase 2 — Testes, CI, regras, DER | `/fase-2` | medium | Nada; só conferir o PR |
+| Fase 3 — Telas pelo fluxograma | `/fase-3` | medium | Nada; só conferir o PR |
+| Fase 4 — API REST + Swagger | `/fase-4` | medium | Nada; só conferir o PR |
+| Fase 5 — Acessibilidade | `/fase-5` | medium | Checklist de teclado (Tab/Shift+Tab/Enter/Esc; menu no celular a 375 px) |
+| Fase 6 — JavaScript | `/fase-6` | medium | 6.10 checklist manual em `docs/metricas/checklist_manual.md` |
+| Fase 7 — Extras | `/fase-7` | medium | Decidir se roda `popular_demo --forcar` em produção para a apresentação |
+| Fase 8 — Métricas e release | `/fase-8` | low | 8.4 validação com a Sra. Fernanda (tarefas cronometradas + SUS); atualizar DER e fluxograma conforme o Apêndice A |
+
+**Prompt usado pelos comandos** (para colar à mão, se preferir, trocando N):
 
 > Leia `docs/PLANO_PI2.md` e o `CLAUDE.md`. Execute **somente a Fase N**, na ordem dos passos, sem acrescentar nada fora do escopo. Quando o plano trouxer código, use-o como está. Passos marcados **[VOCÊ]** são meus: pare e me peça. Ao terminar, rode as verificações da fase, registre falhas de teste e correções em `docs/metricas/registro_testes.md`, marque os checkboxes da fase no plano, faça commit, push e abra o PR. Aguarde o CI ficar verde e faça o merge.
 
@@ -65,10 +86,10 @@ git switch main && git pull # o Render publica sozinho a main
 - Não commite `.env`, `db.sqlite3` nem os relatórios brutos do Lighthouse.
 - Se algo não previsto quebrar, pare e explique em vez de improvisar.
 
-| Fase | Entrega | Quem | /effort | Branch |
+| Fase | Entrega | Quem | Effort (automático) | Branch |
 |---|---|---|---|---|
 | 0 | Preparação: segurança, limpeza, linha de base ("antes") | Claude + [VOCÊ] | low | `fase-0-preparacao` |
-| 1 | Nuvem: Neon + Render no ar | [VOCÊ] (Claude verifica) | low | — |
+| 1 | Nuvem: Neon + Render no ar | [VOCÊ] (Claude verifica) | low | `fase-1-nuvem` (só checkboxes) |
 | 2 | Testes + CI + regras de negócio + modelo fiel ao DER | Claude | medium | `fase-2-regras-e-testes` |
 | 3 | Telas Django seguindo o fluxograma | Claude | medium | `fase-3-fluxo-telas` |
 | 4 | API REST (DRF) + Swagger | Claude | medium | `fase-4-api-rest` |

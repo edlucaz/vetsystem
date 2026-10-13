@@ -1,7 +1,7 @@
 # CLAUDE.md — VETSystem
 
 Agendamentos da Clínica ATIVO PET (Django). Projeto Integrador II — UNIVESP.
-Plano do PI II: `docs/PLANO_PI2.md` — execute uma fase por vez e marque os checkboxes.
+Plano do PI II: `docs/PLANO_PI2.md` — execute uma fase por vez (`/fase-N`, effort já definido) e marque os checkboxes.
 
 ## Comandos (nesta pasta, sempre com o venv)
 - Instalar: `.venv/bin/pip install -r requirements-dev.txt` (produção: `requirements.txt`)
