@@ -44,3 +44,11 @@ def segunda():
 @pytest.fixture
 def consulta_futura(horario_comercial, animal, segunda):
     return Consulta.objects.create(animal=animal, data_hora=em(segunda, 10), tipo='fisioterapia')
+
+
+@pytest.fixture
+def api(usuario):
+    from rest_framework.test import APIClient
+    cliente = APIClient()
+    cliente.force_login(usuario)  # sessão real, como no navegador
+    return cliente

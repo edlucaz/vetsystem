@@ -993,13 +993,13 @@ git switch main && git pull # o Render publica sozinho a main
 
 ## Fase 4 — API REST (Django REST Framework)
 
-- [ ] **4.1 Dependências.** Acrescente ao `requirements.txt` e reinstale:
+- [x] **4.1 Dependências.** Acrescente ao `requirements.txt` e reinstale:
   ```
   djangorestframework==3.18.1
   django-filter==26.1
   drf-spectacular==0.30.0
   ```
-- [ ] **4.2 `settings.py`.** Em `INSTALLED_APPS` (seção "Apps de terceiros"), acrescente `'rest_framework', 'django_filters', 'drf_spectacular',`. No fim do arquivo:
+- [x] **4.2 `settings.py`.** Em `INSTALLED_APPS` (seção "Apps de terceiros"), acrescente `'rest_framework', 'django_filters', 'drf_spectacular',`. No fim do arquivo:
   ```python
   # =============================================================================
   # API REST (Django REST Framework) — PI II
@@ -1026,7 +1026,7 @@ git switch main && git pull # o Render publica sozinho a main
       'SERVE_INCLUDE_SCHEMA': False,
   }
   ```
-- [ ] **4.3 Pacote `agendamentos/api/`.** Crie `__init__.py` (vazio) e os três arquivos abaixo, com cabeçalho no padrão do projeto.
+- [x] **4.3 Pacote `agendamentos/api/`.** Crie `__init__.py` (vazio) e os três arquivos abaixo, com cabeçalho no padrão do projeto.
   - `serializers.py`:
     ```python
     from django.core.exceptions import ValidationError as DjangoValidationError
@@ -1246,14 +1246,14 @@ git switch main && git pull # o Render publica sozinho a main
         path('', include(roteador.urls)),
     ]
     ```
-- [ ] **4.4 `vetsystem/urls.py`.** Importe `SpectacularAPIView` e `SpectacularSwaggerView` de `drf_spectacular.views` e acrescente, **antes** de `path('', include('agendamentos.urls'))`:
+- [x] **4.4 `vetsystem/urls.py`.** Importe `SpectacularAPIView` e `SpectacularSwaggerView` de `drf_spectacular.views` e acrescente, **antes** de `path('', include('agendamentos.urls'))`:
   ```python
   path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
   path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
   path('api/', include('agendamentos.api.urls')),
   ```
   Atualize a docstring com as novas rotas.
-- [ ] **4.5 Testes** (`test_api.py`).
+- [x] **4.5 Testes** (`test_api.py`).
   - Acrescente ao `conftest.py`:
     ```python
     @pytest.fixture
@@ -1282,7 +1282,7 @@ git switch main && git pull # o Render publica sozinho a main
     - `?data=` inválida → 400;
     - Disponibilidade duplicada → 400;
     - `/api/schema/` → 200.
-- [ ] **4.6 Verificação:**
+- [x] **4.6 Verificação:**
   - pytest verde e `collectstatic --noinput` OK (estáticos do DRF).
   - Logado no `runserver`, abra `/api/docs/` e `/api/consultas/` (API navegável).
   - Conte as rotas e operações:

@@ -57,6 +57,9 @@ INSTALLED_APPS = [
     # --- Apps de terceiros ---
     'crispy_forms',        # Renderiza formulários Django com estilo automático
     'crispy_tailwind',     # Integra o crispy_forms com Tailwind CSS
+    'rest_framework',      # Django REST Framework — API REST em /api/
+    'django_filters',      # Filtros por query string na API
+    'drf_spectacular',     # Esquema OpenAPI + Swagger em /api/docs/
 
     # --- App principal do VETSystem ---
     # Contém os models, views e formulários do sistema de agendamento da ATIVO PET
@@ -248,3 +251,29 @@ if not DEBUG:
     CSRF_TRUSTED_ORIGINS = [
         f'https://{host}' for host in ALLOWED_HOSTS if host not in ('localhost', '127.0.0.1')
     ]
+
+
+# =============================================================================
+# API REST (Django REST Framework) — PI II
+# =============================================================================
+REST_FRAMEWORK = {
+    # Mesma sessão do login do Django (cookies + proteção CSRF)
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication'],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 50,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_RATES': {'anon': '60/min'},   # só no endpoint público
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'VETSystem API',
+    'DESCRIPTION': 'API REST do VETSystem — agendamentos da Clínica ATIVO PET (Projeto Integrador II — UNIVESP).',
+    'VERSION': '2.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}

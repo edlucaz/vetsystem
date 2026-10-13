@@ -1,0 +1,1951 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "VETSystem API",
+        "version": "2.0.0",
+        "description": "API REST do VETSystem — agendamentos da Clínica ATIVO PET (Projeto Integrador II — UNIVESP)."
+    },
+    "paths": {
+        "/api/animais/": {
+            "get": {
+                "operationId": "animais_list",
+                "description": "CRUD de animais. Autocomplete (fluxograma, etapa 2): ?search=<nome do animal ou do tutor>.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "especie",
+                        "schema": {
+                            "type": "string",
+                            "title": "Espécie",
+                            "enum": [
+                                "cao",
+                                "gato",
+                                "outro"
+                            ]
+                        },
+                        "description": "* `cao` - Cão\n* `gato` - Gato\n* `outro` - Outro"
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "description": "Número de resultados a serem retornados por página.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "required": false,
+                        "in": "query",
+                        "description": "O índice inicial a partir do qual retornar os resultados.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Qual campo usar ao ordenar os resultados.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "proprietario",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "Um termo de busca.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "animais"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAnimalList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "animais_create",
+                "description": "CRUD de animais. Autocomplete (fluxograma, etapa 2): ?search=<nome do animal ou do tutor>.",
+                "tags": [
+                    "animais"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Animal"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Animal"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Animal"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Animal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/animais/{id}/": {
+            "get": {
+                "operationId": "animais_retrieve",
+                "description": "CRUD de animais. Autocomplete (fluxograma, etapa 2): ?search=<nome do animal ou do tutor>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Animal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "animais"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Animal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "animais_update",
+                "description": "CRUD de animais. Autocomplete (fluxograma, etapa 2): ?search=<nome do animal ou do tutor>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Animal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "animais"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Animal"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Animal"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Animal"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Animal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "animais_partial_update",
+                "description": "CRUD de animais. Autocomplete (fluxograma, etapa 2): ?search=<nome do animal ou do tutor>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Animal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "animais"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAnimal"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAnimal"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAnimal"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Animal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "animais_destroy",
+                "description": "CRUD de animais. Autocomplete (fluxograma, etapa 2): ?search=<nome do animal ou do tutor>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Animal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "animais"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/consultas/": {
+            "get": {
+                "operationId": "consultas_list",
+                "description": "Agenda. Filtros: ?status= ?tipo= ?animal= ?data=AAAA-MM-DD ?inicio=&fim=.\nCriar = fluxograma \"Registrar consulta (status: agendado)\".",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "animal",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "data",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fim",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "inicio",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "description": "Número de resultados a serem retornados por página.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "required": false,
+                        "in": "query",
+                        "description": "O índice inicial a partir do qual retornar os resultados.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Qual campo usar ao ordenar os resultados.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "Um termo de busca.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "agendado",
+                                "cancelado",
+                                "confirmado",
+                                "realizado"
+                            ]
+                        },
+                        "description": "* `agendado` - Agendado\n* `confirmado` - Confirmado\n* `realizado` - Realizado\n* `cancelado` - Cancelado"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tipo",
+                        "schema": {
+                            "type": "string",
+                            "title": "Tipo de atendimento",
+                            "enum": [
+                                "acupuntura",
+                                "consulta",
+                                "fisioterapia"
+                            ]
+                        },
+                        "description": "* `consulta` - Consulta\n* `fisioterapia` - Fisioterapia\n* `acupuntura` - Acupuntura"
+                    }
+                ],
+                "tags": [
+                    "consultas"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedConsultaList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "consultas_create",
+                "description": "Agenda. Filtros: ?status= ?tipo= ?animal= ?data=AAAA-MM-DD ?inicio=&fim=.\nCriar = fluxograma \"Registrar consulta (status: agendado)\".",
+                "tags": [
+                    "consultas"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Consulta"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Consulta"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Consulta"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Consulta"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/consultas/{id}/": {
+            "get": {
+                "operationId": "consultas_retrieve",
+                "description": "Agenda. Filtros: ?status= ?tipo= ?animal= ?data=AAAA-MM-DD ?inicio=&fim=.\nCriar = fluxograma \"Registrar consulta (status: agendado)\".",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Consulta.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "consultas"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Consulta"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "consultas_update",
+                "description": "Agenda. Filtros: ?status= ?tipo= ?animal= ?data=AAAA-MM-DD ?inicio=&fim=.\nCriar = fluxograma \"Registrar consulta (status: agendado)\".",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Consulta.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "consultas"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Consulta"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Consulta"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Consulta"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Consulta"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "consultas_partial_update",
+                "description": "Agenda. Filtros: ?status= ?tipo= ?animal= ?data=AAAA-MM-DD ?inicio=&fim=.\nCriar = fluxograma \"Registrar consulta (status: agendado)\".",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Consulta.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "consultas"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedConsulta"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedConsulta"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedConsulta"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Consulta"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "consultas_destroy",
+                "description": "Agenda. Filtros: ?status= ?tipo= ?animal= ?data=AAAA-MM-DD ?inicio=&fim=.\nCriar = fluxograma \"Registrar consulta (status: agendado)\".",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Consulta.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "consultas"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/consultas/{id}/status/": {
+            "post": {
+                "operationId": "consultas_status_create",
+                "description": "Fluxograma: \"Confirmar agendamento\" e \"Atualizar status (realizado/cancelado)\".",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Consulta.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "consultas"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AtualizarStatus"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AtualizarStatus"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AtualizarStatus"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Consulta"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/disponibilidades/": {
+            "get": {
+                "operationId": "disponibilidades_list",
+                "description": "Horários de funcionamento (um por dia da semana).",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Qual campo usar ao ordenar os resultados.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "Um termo de busca.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "disponibilidades"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Disponibilidade"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "disponibilidades_create",
+                "description": "Horários de funcionamento (um por dia da semana).",
+                "tags": [
+                    "disponibilidades"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Disponibilidade"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Disponibilidade"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Disponibilidade"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Disponibilidade"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/disponibilidades/{id}/": {
+            "get": {
+                "operationId": "disponibilidades_retrieve",
+                "description": "Horários de funcionamento (um por dia da semana).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Disponibilidade.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "disponibilidades"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Disponibilidade"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "disponibilidades_update",
+                "description": "Horários de funcionamento (um por dia da semana).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Disponibilidade.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "disponibilidades"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Disponibilidade"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Disponibilidade"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Disponibilidade"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Disponibilidade"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "disponibilidades_partial_update",
+                "description": "Horários de funcionamento (um por dia da semana).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Disponibilidade.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "disponibilidades"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedDisponibilidade"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedDisponibilidade"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedDisponibilidade"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Disponibilidade"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "disponibilidades_destroy",
+                "description": "Horários de funcionamento (um por dia da semana).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Disponibilidade.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "disponibilidades"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/horarios-livres/": {
+            "get": {
+                "operationId": "horarios_livres_retrieve",
+                "description": "Fluxograma, etapa 3 — GET /api/horarios-livres/?data=AAAA-MM-DD[&duracao=60][&ignorar=<id>].",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "data",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "duracao",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 240,
+                            "minimum": 15,
+                            "default": 60
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "ignorar",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "horarios-livres"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/proprietarios/": {
+            "get": {
+                "operationId": "proprietarios_list",
+                "description": "CRUD de tutores. Busca: ?search=<nome, telefone, CPF ou e-mail>.",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "description": "Número de resultados a serem retornados por página.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "required": false,
+                        "in": "query",
+                        "description": "O índice inicial a partir do qual retornar os resultados.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Qual campo usar ao ordenar os resultados.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "Um termo de busca.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "proprietarios"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedProprietarioList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "proprietarios_create",
+                "description": "CRUD de tutores. Busca: ?search=<nome, telefone, CPF ou e-mail>.",
+                "tags": [
+                    "proprietarios"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Proprietario"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Proprietario"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Proprietario"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proprietario"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/proprietarios/{id}/": {
+            "get": {
+                "operationId": "proprietarios_retrieve",
+                "description": "CRUD de tutores. Busca: ?search=<nome, telefone, CPF ou e-mail>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Proprietário.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proprietarios"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proprietario"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "proprietarios_update",
+                "description": "CRUD de tutores. Busca: ?search=<nome, telefone, CPF ou e-mail>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Proprietário.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proprietarios"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Proprietario"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Proprietario"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Proprietario"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proprietario"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "proprietarios_partial_update",
+                "description": "CRUD de tutores. Busca: ?search=<nome, telefone, CPF ou e-mail>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Proprietário.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proprietarios"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedProprietario"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedProprietario"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedProprietario"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proprietario"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "proprietarios_destroy",
+                "description": "CRUD de tutores. Busca: ?search=<nome, telefone, CPF ou e-mail>.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Proprietário.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proprietarios"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Animal": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "nome": {
+                        "type": "string",
+                        "title": "Nome do animal",
+                        "maxLength": 100
+                    },
+                    "especie": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EspecieEnum"
+                            }
+                        ],
+                        "title": "Espécie"
+                    },
+                    "especie_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "raca": {
+                        "type": "string",
+                        "title": "Raça",
+                        "description": "Deixe em branco para SRD (Sem Raça Definida).",
+                        "maxLength": 100
+                    },
+                    "data_nascimento": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true,
+                        "title": "Data de nascimento",
+                        "description": "Se não souber a data exata, informe uma aproximada."
+                    },
+                    "idade": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "peso": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "title": "Peso (kg)",
+                        "description": "Peso em quilogramas. Ex: 12.50"
+                    },
+                    "queixa": {
+                        "type": "string",
+                        "title": "Queixa principal",
+                        "description": "Descreva os sintomas ou motivo do atendimento."
+                    },
+                    "proprietario": {
+                        "type": "integer",
+                        "title": "Proprietário"
+                    },
+                    "proprietario_nome": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "proprietario_telefone": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "especie",
+                    "especie_display",
+                    "id",
+                    "idade",
+                    "nome",
+                    "proprietario",
+                    "proprietario_nome",
+                    "proprietario_telefone"
+                ]
+            },
+            "AtualizarStatus": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "$ref": "#/components/schemas/StatusEnum"
+                    },
+                    "observacao": {
+                        "type": "string",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
+            "Consulta": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "animal": {
+                        "type": "integer"
+                    },
+                    "animal_nome": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "proprietario_nome": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "proprietario_telefone": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "data_hora": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Data e horário",
+                        "description": "Data e horário do atendimento. Ex: 25/03/2026 14:00"
+                    },
+                    "duracao_minutos": {
+                        "type": "integer",
+                        "maximum": 240,
+                        "minimum": 15,
+                        "title": "Duração (minutos)",
+                        "description": "Duração estimada do atendimento em minutos."
+                    },
+                    "tipo": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TipoEnum"
+                            }
+                        ],
+                        "title": "Tipo de atendimento"
+                    },
+                    "tipo_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "status_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "observacoes": {
+                        "type": "string",
+                        "title": "Observações",
+                        "description": "Informações adicionais sobre o atendimento (opcional)."
+                    },
+                    "disponibilidade": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true,
+                        "title": "Disponibilidade verificada"
+                    },
+                    "disponibilidade_descricao": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "link_whatsapp": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "animal",
+                    "animal_nome",
+                    "data_hora",
+                    "disponibilidade",
+                    "disponibilidade_descricao",
+                    "id",
+                    "link_whatsapp",
+                    "proprietario_nome",
+                    "proprietario_telefone",
+                    "status",
+                    "status_display",
+                    "tipo",
+                    "tipo_display"
+                ]
+            },
+            "DiaDaSemanaEnum": {
+                "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "type": "integer",
+                "description": "* `0` - Segunda-feira\n* `1` - Terça-feira\n* `2` - Quarta-feira\n* `3` - Quinta-feira\n* `4` - Sexta-feira"
+            },
+            "Disponibilidade": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "dia_da_semana": {
+                        "$ref": "#/components/schemas/DiaDaSemanaEnum"
+                    },
+                    "dia_da_semana_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "hora_inicio": {
+                        "type": "string",
+                        "format": "time",
+                        "title": "Início do atendimento",
+                        "description": "Horário de abertura da clínica. Ex: 08:00"
+                    },
+                    "hora_fim": {
+                        "type": "string",
+                        "format": "time",
+                        "title": "Fim do atendimento",
+                        "description": "Horário de encerramento da clínica. Ex: 19:00"
+                    },
+                    "ativo": {
+                        "type": "boolean",
+                        "description": "Desmarque para indicar que a clínica não atende neste dia."
+                    }
+                },
+                "required": [
+                    "dia_da_semana",
+                    "dia_da_semana_display",
+                    "hora_fim",
+                    "hora_inicio",
+                    "id"
+                ]
+            },
+            "EspecieEnum": {
+                "enum": [
+                    "cao",
+                    "gato",
+                    "outro"
+                ],
+                "type": "string",
+                "description": "* `cao` - Cão\n* `gato` - Gato\n* `outro` - Outro"
+            },
+            "PaginatedAnimalList": {
+                "type": "object",
+                "required": [
+                    "count",
+                    "results"
+                ],
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=400&limit=100"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=200&limit=100"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Animal"
+                        }
+                    }
+                }
+            },
+            "PaginatedConsultaList": {
+                "type": "object",
+                "required": [
+                    "count",
+                    "results"
+                ],
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=400&limit=100"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=200&limit=100"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Consulta"
+                        }
+                    }
+                }
+            },
+            "PaginatedProprietarioList": {
+                "type": "object",
+                "required": [
+                    "count",
+                    "results"
+                ],
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=400&limit=100"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=200&limit=100"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Proprietario"
+                        }
+                    }
+                }
+            },
+            "PatchedAnimal": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "nome": {
+                        "type": "string",
+                        "title": "Nome do animal",
+                        "maxLength": 100
+                    },
+                    "especie": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EspecieEnum"
+                            }
+                        ],
+                        "title": "Espécie"
+                    },
+                    "especie_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "raca": {
+                        "type": "string",
+                        "title": "Raça",
+                        "description": "Deixe em branco para SRD (Sem Raça Definida).",
+                        "maxLength": 100
+                    },
+                    "data_nascimento": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true,
+                        "title": "Data de nascimento",
+                        "description": "Se não souber a data exata, informe uma aproximada."
+                    },
+                    "idade": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "peso": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "title": "Peso (kg)",
+                        "description": "Peso em quilogramas. Ex: 12.50"
+                    },
+                    "queixa": {
+                        "type": "string",
+                        "title": "Queixa principal",
+                        "description": "Descreva os sintomas ou motivo do atendimento."
+                    },
+                    "proprietario": {
+                        "type": "integer",
+                        "title": "Proprietário"
+                    },
+                    "proprietario_nome": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "proprietario_telefone": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                }
+            },
+            "PatchedConsulta": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "animal": {
+                        "type": "integer"
+                    },
+                    "animal_nome": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "proprietario_nome": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "proprietario_telefone": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "data_hora": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Data e horário",
+                        "description": "Data e horário do atendimento. Ex: 25/03/2026 14:00"
+                    },
+                    "duracao_minutos": {
+                        "type": "integer",
+                        "maximum": 240,
+                        "minimum": 15,
+                        "title": "Duração (minutos)",
+                        "description": "Duração estimada do atendimento em minutos."
+                    },
+                    "tipo": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TipoEnum"
+                            }
+                        ],
+                        "title": "Tipo de atendimento"
+                    },
+                    "tipo_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "status_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "observacoes": {
+                        "type": "string",
+                        "title": "Observações",
+                        "description": "Informações adicionais sobre o atendimento (opcional)."
+                    },
+                    "disponibilidade": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true,
+                        "title": "Disponibilidade verificada"
+                    },
+                    "disponibilidade_descricao": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "link_whatsapp": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                }
+            },
+            "PatchedDisponibilidade": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "dia_da_semana": {
+                        "$ref": "#/components/schemas/DiaDaSemanaEnum"
+                    },
+                    "dia_da_semana_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "hora_inicio": {
+                        "type": "string",
+                        "format": "time",
+                        "title": "Início do atendimento",
+                        "description": "Horário de abertura da clínica. Ex: 08:00"
+                    },
+                    "hora_fim": {
+                        "type": "string",
+                        "format": "time",
+                        "title": "Fim do atendimento",
+                        "description": "Horário de encerramento da clínica. Ex: 19:00"
+                    },
+                    "ativo": {
+                        "type": "boolean",
+                        "description": "Desmarque para indicar que a clínica não atende neste dia."
+                    }
+                }
+            },
+            "PatchedProprietario": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "nome": {
+                        "type": "string",
+                        "title": "Nome completo",
+                        "description": "Nome completo do tutor responsável pelo animal.",
+                        "maxLength": 200
+                    },
+                    "telefone": {
+                        "type": "string",
+                        "description": "Número de contato principal. Ex: (19) 99999-9999",
+                        "maxLength": 20
+                    },
+                    "email": {
+                        "title": "E-mail",
+                        "description": "E-mail para envio de confirmações (opcional).",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "cpf": {
+                        "type": "string",
+                        "description": "CPF no formato 000.000.000-00 (opcional).",
+                        "maxLength": 14
+                    },
+                    "total_animais": {
+                        "type": "integer",
+                        "readOnly": true
+                    }
+                }
+            },
+            "Proprietario": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "nome": {
+                        "type": "string",
+                        "title": "Nome completo",
+                        "description": "Nome completo do tutor responsável pelo animal.",
+                        "maxLength": 200
+                    },
+                    "telefone": {
+                        "type": "string",
+                        "description": "Número de contato principal. Ex: (19) 99999-9999",
+                        "maxLength": 20
+                    },
+                    "email": {
+                        "title": "E-mail",
+                        "description": "E-mail para envio de confirmações (opcional).",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "cpf": {
+                        "type": "string",
+                        "description": "CPF no formato 000.000.000-00 (opcional).",
+                        "maxLength": 14
+                    },
+                    "total_animais": {
+                        "type": "integer",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "nome",
+                    "telefone",
+                    "total_animais"
+                ]
+            },
+            "StatusEnum": {
+                "enum": [
+                    "agendado",
+                    "confirmado",
+                    "realizado",
+                    "cancelado"
+                ],
+                "type": "string",
+                "description": "* `agendado` - Agendado\n* `confirmado` - Confirmado\n* `realizado` - Realizado\n* `cancelado` - Cancelado"
+            },
+            "TipoEnum": {
+                "enum": [
+                    "consulta",
+                    "fisioterapia",
+                    "acupuntura"
+                ],
+                "type": "string",
+                "description": "* `consulta` - Consulta\n* `fisioterapia` - Fisioterapia\n* `acupuntura` - Acupuntura"
+            }
+        },
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "sessionid"
+            }
+        }
+    }
+}

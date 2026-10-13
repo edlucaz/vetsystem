@@ -1,8 +1,11 @@
 asgiref==3.11.1
 crispy-tailwind==1.0.3
 dj-database-url==3.1.2
-Django==6.0.9
 django-crispy-forms==2.6
+django-filter==26.1
+Django==6.0.9
+djangorestframework==3.18.1
+drf-spectacular==0.30.0
 gunicorn==25.3.0
 pillow==12.1.1
 psycopg2-binary==2.9.11
