@@ -1650,7 +1650,7 @@ git switch main && git pull # o Render publica sozinho a main
 
 Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo, função, etapa do fluxograma, autor).
 
-- [ ] **6.1 `static/js/api.js`:**
+- [x] **6.1 `static/js/api.js`:**
   ```js
   /* VETSystem — static/js/api.js — cliente mínimo da API REST (fetch + sessão do Django + CSRF). */
   (function () {
@@ -1735,7 +1735,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
     };
   }());
   ```
-- [ ] **6.2 `static/js/autocomplete.js`** — fluxograma, etapa 2 ("Sugerir proprietário e animal"). Segue o padrão WAI-ARIA 1.2 de combobox com listbox:
+- [x] **6.2 `static/js/autocomplete.js`** — fluxograma, etapa 2 ("Sugerir proprietário e animal"). Segue o padrão WAI-ARIA 1.2 de combobox com listbox:
   ```js
   /* VETSystem — static/js/autocomplete.js — combobox acessível que busca /api/animais/?search= */
   (function () {
@@ -1862,7 +1862,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
     window.VetAutocomplete = VetAutocomplete;
   }());
   ```
-- [ ] **6.3 `static/js/agenda.js`** — fluxograma, etapas 3 e 4 ("Consultar horários livres" e "Exibir agenda interativa"):
+- [x] **6.3 `static/js/agenda.js`** — fluxograma, etapas 3 e 4 ("Consultar horários livres" e "Exibir agenda interativa"):
   ```js
   /* VETSystem — static/js/agenda.js — 7 dias por vez + horários livres (rádios) via /api/horarios-livres/ */
   (function () {
@@ -2040,7 +2040,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
     window.VetAgenda = VetAgenda;
   }());
   ```
-- [ ] **6.4 `static/js/consulta_form.js`** — liga as peças. Na criação, envia para `POST /api/consultas/` (decisão "Horário disponível?" → "Registrar consulta"); a edição continua com o POST tradicional.
+- [x] **6.4 `static/js/consulta_form.js`** — liga as peças. Na criação, envia para `POST /api/consultas/` (decisão "Horário disponível?" → "Registrar consulta"); a edição continua com o POST tradicional.
   ```js
   /* VETSystem — static/js/consulta_form.js — agendamento sem recarregar (melhoria progressiva) */
   (function () {
@@ -2157,7 +2157,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
     });
   }());
   ```
-- [ ] **6.5 `static/js/status.js`** — fluxograma: "Confirmar agendamento (avisa o tutor)" e "Realizar atendimento ou registrar ausência → Atualizar status":
+- [x] **6.5 `static/js/status.js`** — fluxograma: "Confirmar agendamento (avisa o tutor)" e "Realizar atendimento ou registrar ausência → Atualizar status":
   ```js
   /* VETSystem — static/js/status.js — ações rápidas de status via POST /api/consultas/<id>/status/ */
   (function () {
@@ -2212,7 +2212,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
     });
   }());
   ```
-- [ ] **6.6 Reescreva `consulta_form.html`.** Mantenha cabeçalho, breadcrumb, título e a legenda de obrigatórios da Fase 5. **Apague o `<script>` antigo de validação.** Estrutura:
+- [x] **6.6 Reescreva `consulta_form.html`.** Mantenha cabeçalho, breadcrumb, título e a legenda de obrigatórios da Fase 5. **Apague o `<script>` antigo de validação.** Estrutura:
   - `{% load static %}`.
   - `<div id="mensagens-form" role="alert" tabindex="-1" class="bg-red-50 border border-red-300 text-red-700 text-sm rounded-lg px-4 py-3 mb-6" {% if not form.non_field_errors %}hidden{% endif %}>` com os `non_field_errors`.
   - `<form method="post" novalidate id="form-consulta" …>` com os atributos:
@@ -2247,7 +2247,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
     - `<p id="sucesso-resumo" class="text-gray-700 mb-6"></p>`;
     - os links `<a id="sucesso-whatsapp" class="btn-acao btn-acao-whatsapp" target="_blank" rel="noopener" hidden>Confirmar e avisar o tutor pelo WhatsApp<span class="sr-only"> (abre em nova aba)</span></a>`, `<a id="sucesso-detalhe" class="btn-acao">Ver consulta</a>` e `<a href="{% url 'agendamentos:consulta-create' %}" class="btn-acao">Agendar outra consulta</a>`.
   - `{% block extra_js %}` com `autocomplete.js`, `agenda.js` e `consulta_form.js`, nessa ordem (via `{% static %}`).
-- [ ] **6.7 Ações rápidas de status.** Crie `agendamentos/templates/agendamentos/_acoes_status.html`:
+- [x] **6.7 Ações rápidas de status.** Crie `agendamentos/templates/agendamentos/_acoes_status.html`:
   ```django
   {# Fluxograma: "Confirmar agendamento" e "Realizar atendimento ou registrar ausência → Atualizar status" #}
   {% if consulta.status == 'agendado' or consulta.status == 'confirmado' %}
@@ -2267,25 +2267,25 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
   Use o include em:
   - `consulta_detail.html`, na coluna de ações;
   - `dashboard.html`, numa nova coluna `<th scope="col">Ações</th>` da tabela "Consultas de hoje".
-- [ ] **6.8 `base.html`:**
+- [x] **6.8 `base.html`:**
   - No `<body>`, acrescente `data-url-api-consultas="{% url 'api:consulta-list' %}"`.
   - Antes de `{% block extra_js %}`, acrescente:
     ```django
     <script src="{% static 'js/api.js' %}"></script>
     {% if user.is_authenticated %}<script src="{% static 'js/status.js' %}"></script>{% endif %}
     ```
-- [ ] **6.9 Testes:**
+- [x] **6.9 Testes:**
   - os testes de acessibilidade continuam verdes (combobox rotulado e `aria-controls` válido);
   - `consulta-create` contém `data-url-horarios` e o `<select id="id_animal">` de reserva;
   - o dashboard mostra `data-acoes-consulta` para a consulta de hoje (crie uma consulta para hoje às 23:00 pelo ORM).
-- [ ] **6.10 [VOCÊ] Checklist manual.** Anote em `docs/metricas/checklist_manual.md`:
+- [ ] **6.10 [VOCÊ] Checklist manual.** (pendente — adiado para o fim do PI II, junto com o 5.9) Anote em `docs/metricas/checklist_manual.md`:
   1. Agendar só com o teclado: autocomplete, setas, Enter, Tab até a agenda, setas nos horários e Enter.
   2. Forçar um conflito: abra duas abas e agende o mesmo horário. A segunda mostra o erro e recarrega a agenda.
   3. Desativar o JavaScript (DevTools → Disable JavaScript) e agendar pelo formulário de reserva.
   4. Confirmar pelo WhatsApp: abre a conversa e o selo vira "Confirmado".
   5. "Atendimento realizado" e "Registrar ausência" no dashboard.
   6. (Opcional) Leitor de tela Orca (Linux) ou NVDA (Windows) no agendamento.
-- [ ] **6.11** PR com CI verde.
+- [x] **6.11** PR com CI verde.
 
 ## Fase 7 — Extras (análise de dados, agenda semanal, home pública, dados demo)
 

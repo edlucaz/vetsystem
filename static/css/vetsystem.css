@@ -5,6 +5,9 @@
 :focus-visible { outline: 3px solid #1B1B1B !important; outline-offset: 2px !important; box-shadow: 0 0 0 5px #FFFFFF !important; }
 main:focus-visible { outline: none !important; box-shadow: none !important; }
 
+/* O atributo hidden (usado pelo JavaScript da Fase 6) vence classes de display como .grid e .btn-acao */
+[hidden] { display: none !important; }
+
 /* Menu: página atual indicada também sem depender de cor */
 .link-menu { color: #FFFFFF; font-weight: 500; text-underline-offset: 4px; }
 .link-menu:hover, .link-menu[aria-current="page"] { text-decoration: underline; }

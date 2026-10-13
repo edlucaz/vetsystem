@@ -2,12 +2,15 @@
   VETSystem — agendamentos/templates/agendamentos/consulta_form.html
   Formulário de criação e edição de consulta.
 
-  Data e hora são exibidos em campos separados (date + time) para melhor UX.
-  A validação de data/hora passada ocorre em tempo real via JS, antes do submit.
+  Com JavaScript (Fase 6 do PI II): busca do tutor/animal (autocomplete, etapa 2 do fluxograma),
+  agenda de 7 dias com horários livres (etapas 3 e 4) e, na criação, envio para a API sem recarregar
+  (decisão "Horário disponível?" → "Registrar consulta").
+  Sem JavaScript: os blocos de reserva (select de animal + campos de data e hora) e o POST tradicional.
 
-  Autor: Lucas Eduardo Rocha (RA 24217901) | 2026-05-09
+  Autor: Lucas Eduardo Rocha (RA 24217901) | 2026-05-09 (reescrito em 2026-10-13)
 -->
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{% if object %}Editar Consulta{% else %}Nova Consulta{% endif %} — VETSystem{% endblock %}
 
 {% block content %}
@@ -24,91 +27,102 @@
     {% if object %}Editar Consulta #{{ object.pk }}{% else %}Agendar Nova Consulta{% endif %}
   </h1>
 
-  <!-- Erros gerais do formulário (ex: data no passado vinda do backend) -->
-  {% if form.non_field_errors %}
-    <div role="alert" class="bg-red-50 border border-red-300 text-red-700 text-sm rounded-lg px-4 py-3 mb-6">
-      {% for erro in form.non_field_errors %}{{ erro }}{% endfor %}
-    </div>
-  {% endif %}
+  <!-- Erros gerais (do Django ou da API) -->
+  <div id="mensagens-form" role="alert" tabindex="-1"
+       class="bg-red-50 border border-red-300 text-red-700 text-sm rounded-lg px-4 py-3 mb-6"
+       {% if not form.non_field_errors %}hidden{% endif %}>{% for erro in form.non_field_errors %}{{ erro }} {% endfor %}</div>
 
   <div class="bg-white rounded-2xl shadow-sm p-8">
-    <form method="post" novalidate id="form-consulta">
+    <form method="post" novalidate id="form-consulta"
+          data-modo="{% if object %}editar{% else %}criar{% endif %}"
+          data-consulta-id="{{ object.pk|default:'' }}"
+          data-url-consultas="{% url 'api:consulta-list' %}"
+          data-url-animais="{% url 'api:animal-list' %}"
+          data-url-horarios="{% url 'api:horarios-livres' %}"
+          data-url-disponibilidades="{% url 'api:disponibilidade-list' %}"
+          data-url-detalhe="{% url 'agendamentos:consulta-detail' 0 %}">
       {% csrf_token %}
       <p class="text-sm text-gray-600 mb-5">Campos marcados com <span aria-hidden="true">*</span> são obrigatórios.</p>
 
-      <!-- ── Animal ─────────────────────────────────────────────── -->
-      <div class="mb-5">
+      <!-- ── Bloco 1 (só com JS): busca do tutor ou animal ─────── -->
+      <div id="bloco-busca" class="mb-2 relative" hidden>
+        <label for="campo-busca" class="block text-sm font-semibold text-gray-700 mb-1">
+          Tutor ou animal <span class="text-red-700" aria-hidden="true">*</span>
+        </label>
+        <input id="campo-busca" type="text" role="combobox" autocomplete="off" aria-autocomplete="list"
+               aria-expanded="false" aria-controls="lista-sugestoes" aria-describedby="ajuda-busca erro-animal"
+               aria-required="true" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <p id="ajuda-busca" class="text-xs text-gray-600 mt-1">Digite ao menos 2 letras do nome do tutor ou do animal; use as setas e Enter para escolher.</p>
+        <ul id="lista-sugestoes" role="listbox" aria-label="Sugestões de animal e tutor" hidden
+            class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-auto"></ul>
+        <p id="status-busca" class="sr-only" role="status" aria-live="polite"></p>
+        <p id="erro-animal" data-erro-campo="animal" class="text-red-700 text-xs mt-1"></p>
+      </div>
+
+      <!-- ── Reserva sem JS: lista de animais ───────────────────── -->
+      <div id="bloco-select-animal">
         <label for="{{ form.animal.id_for_label }}"
                class="block text-sm font-semibold text-gray-700 mb-1">
           Animal <span class="text-red-700" aria-hidden="true">*</span>
         </label>
         {{ form.animal }}
-        {% if form.animal.errors %}
         <div id="{{ form.animal.auto_id }}_error">
           {% for erro in form.animal.errors %}
             <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
           {% endfor %}
         </div>
-        {% endif %}
-        <p class="text-sm text-gray-600 mt-2">
-          Tutor ou animal ainda não cadastrado?
-          <a href="{% url 'agendamentos:proprietario-create' %}?fluxo=agendamento"
-             class="font-semibold hover:underline" style="color:#1E7579;">Cadastrar tutor e animal</a>
-          ·
-          <a href="{% url 'agendamentos:animal-create' %}?fluxo=agendamento"
-             class="font-semibold hover:underline" style="color:#1E7579;">Cadastrar animal de tutor já cadastrado</a>
-        </p>
       </div>
 
-      <!-- ── Data e Hora (separados) ───────────────────────────── -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
+      <!-- Fluxo encadeado (Fase 3.2) -->
+      <p class="text-sm text-gray-600 mt-2 mb-5">
+        Tutor ou animal ainda não cadastrado?
+        <a href="{% url 'agendamentos:proprietario-create' %}?fluxo=agendamento"
+           class="font-semibold hover:underline" style="color:#1E7579;">Cadastrar tutor e animal</a>
+        ·
+        <a href="{% url 'agendamentos:animal-create' %}?fluxo=agendamento"
+           class="font-semibold hover:underline" style="color:#1E7579;">Cadastrar animal de tutor já cadastrado</a>
+      </p>
 
-        <!-- Data -->
+      <!-- ── Bloco 2 (só com JS): agenda interativa ─────────────── -->
+      <fieldset id="bloco-agenda" class="mb-6" hidden>
+        <legend class="text-sm font-semibold text-gray-700 mb-2">Data e horário <span class="text-red-700" aria-hidden="true">*</span></legend>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <button type="button" id="agenda-anterior" class="vs-nav"><span aria-hidden="true">←</span><span class="sr-only">Semana anterior</span></button>
+          <p id="agenda-titulo" class="text-sm font-semibold"></p>
+          <button type="button" id="agenda-proximo" class="vs-nav"><span aria-hidden="true">→</span><span class="sr-only">Próxima semana</span></button>
+        </div>
+        <div id="agenda-dias" role="group" aria-label="Escolha o dia" class="grid grid-cols-4 sm:grid-cols-7 gap-2 mb-4"></div>
+        <fieldset id="agenda-horarios" class="min-h-[3rem]"></fieldset>
+        <p id="agenda-status" class="text-sm text-gray-700 mt-2" role="status" aria-live="polite"></p>
+        <p id="erro-agenda" data-erro-campo="data_hora" class="text-red-700 text-xs mt-1"></p>
+      </fieldset>
+
+      <!-- ── Reserva sem JS: data e hora ────────────────────────── -->
+      <div id="bloco-data-hora" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div>
           <label for="{{ form.data_consulta.id_for_label }}"
                  class="block text-sm font-semibold text-gray-700 mb-1">
             Data <span class="text-red-700" aria-hidden="true">*</span>
           </label>
           {{ form.data_consulta }}
-          <p id="erro-data" class="text-red-700 text-xs mt-1 hidden">
-            <span aria-hidden="true">⚠</span> Selecione uma data de hoje em diante.
-          </p>
-          {% if form.data_consulta.errors %}
           <div id="{{ form.data_consulta.auto_id }}_error">
             {% for erro in form.data_consulta.errors %}
               <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
             {% endfor %}
           </div>
-          {% endif %}
         </div>
-
-        <!-- Horário -->
         <div>
           <label for="{{ form.hora_consulta.id_for_label }}"
                  class="block text-sm font-semibold text-gray-700 mb-1">
             Horário <span class="text-red-700" aria-hidden="true">*</span>
           </label>
           {{ form.hora_consulta }}
-          <p id="erro-hora" class="text-red-700 text-xs mt-1 hidden">
-            <span aria-hidden="true">⚠</span> Este horário já passou para hoje.
-          </p>
-          {% if form.hora_consulta.errors %}
           <div id="{{ form.hora_consulta.auto_id }}_error">
             {% for erro in form.hora_consulta.errors %}
               <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
             {% endfor %}
           </div>
-          {% endif %}
         </div>
-
-      </div>
-
-      <!-- Aviso visual de data/hora inválida (banner) — oculto por padrão -->
-      <div id="aviso-passado"
-           class="hidden mb-5 flex items-center gap-2 bg-amber-50 border border-amber-300
-                  text-amber-700 text-sm rounded-lg px-4 py-3">
-        <span class="text-lg" aria-hidden="true">⏰</span>
-        <span>Agendamentos devem ser marcados para datas e horários futuros.</span>
       </div>
 
       <!-- Separador -->
@@ -121,13 +135,12 @@
           Tipo de atendimento <span class="text-red-700" aria-hidden="true">*</span>
         </label>
         {{ form.tipo }}
-        {% if form.tipo.errors %}
+        <p data-erro-campo="tipo" class="text-red-700 text-xs mt-1"></p>
         <div id="{{ form.tipo.auto_id }}_error">
           {% for erro in form.tipo.errors %}
             <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
           {% endfor %}
         </div>
-        {% endif %}
       </div>
 
       {% if 'status' in form.fields %}
@@ -138,13 +151,11 @@
           Status
         </label>
         {{ form.status }}
-        {% if form.status.errors %}
         <div id="{{ form.status.auto_id }}_error">
           {% for erro in form.status.errors %}
             <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
           {% endfor %}
         </div>
-        {% endif %}
       </div>
       {% endif %}
 
@@ -156,23 +167,18 @@
         </label>
         {{ form.observacoes }}
         <p id="{{ form.observacoes.auto_id }}_helptext" class="text-xs text-gray-600 mt-1">{{ form.observacoes.help_text }}</p>
-        {% if form.observacoes.errors %}
+        <p data-erro-campo="observacoes" class="text-red-700 text-xs mt-1"></p>
         <div id="{{ form.observacoes.auto_id }}_error">
           {% for erro in form.observacoes.errors %}
             <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
           {% endfor %}
         </div>
-        {% endif %}
       </div>
 
       <!-- ── Ações ──────────────────────────────────────────────── -->
       <div class="flex items-center gap-4 pt-4 border-t border-gray-100">
-        <button type="submit"
-                id="btn-agendar"
-                class="text-white font-bold py-3 px-8 rounded-xl hover:opacity-90 transition"
-                style="background:#1E7579;">
-          {% if object %}Salvar alterações{% else %}Agendar consulta{% endif %}
-        </button>
+        <button type="submit" id="btn-agendar"
+                class="bg-ativo-turquesa text-white font-bold py-3 px-8 rounded-xl hover:opacity-90">{% if object %}Salvar alterações{% else %}Agendar consulta{% endif %}</button>
         <a href="{% url 'agendamentos:consulta-list' %}"
            class="text-gray-600 font-semibold hover:text-gray-700 transition">
           Cancelar
@@ -181,106 +187,24 @@
 
     </form>
   </div>
+
+  <!-- ===== CONFIRMAÇÃO (agendamento pela API) ===== -->
+  <section id="painel-sucesso" hidden tabindex="-1" aria-labelledby="titulo-sucesso" class="bg-white rounded-2xl shadow-sm p-8">
+    <h2 id="titulo-sucesso" class="text-xl font-bold text-ativo-roxo mb-2">Consulta agendada!</h2>
+    <p id="sucesso-resumo" class="text-gray-700 mb-6"></p>
+    <div class="flex flex-wrap gap-2">
+      <a id="sucesso-whatsapp" class="btn-acao btn-acao-whatsapp" target="_blank" rel="noopener" hidden>Confirmar e avisar o tutor pelo WhatsApp<span class="sr-only"> (abre em nova aba)</span></a>
+      <a id="sucesso-detalhe" class="btn-acao">Ver consulta</a>
+      <a href="{% url 'agendamentos:consulta-create' %}" class="btn-acao">Agendar outra consulta</a>
+    </div>
+  </section>
 </div>
 
 {% endblock %}
 
 
 {% block extra_js %}
-<script>
-(function () {
-  'use strict';
-
-  var dataEl   = document.getElementById('id_data_consulta');
-  var horaEl   = document.getElementById('id_hora_consulta');
-  var erroData = document.getElementById('erro-data');
-  var erroHora = document.getElementById('erro-hora');
-  var aviso    = document.getElementById('aviso-passado');
-  var btnSubmit = document.getElementById('btn-agendar');
-
-  // Só aplica restrição de data futura em novas consultas (não na edição).
-  var isCreate = {% if not object %}true{% else %}false{% endif %};
-
-  if (!isCreate || !dataEl || !horaEl) return;
-
-  // ── Define o mínimo do date picker como hoje ─────────────────────
-  function isoHoje() {
-    var d = new Date();
-    var mm = String(d.getMonth() + 1).padStart(2, '0');
-    var dd = String(d.getDate()).padStart(2, '0');
-    return d.getFullYear() + '-' + mm + '-' + dd;
-  }
-  var hoje = isoHoje();
-  dataEl.min = hoje;
-
-  // ── Lógica de validação ──────────────────────────────────────────
-  function horaAtualHHMM() {
-    var d = new Date();
-    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-  }
-
-  function validar() {
-    var dataSel = dataEl.value;
-    var horaSel = horaEl.value;
-    var dataInvalida = false;
-    var horaInvalida = false;
-
-    // Valida data
-    if (dataSel && dataSel < hoje) {
-      dataInvalida = true;
-    }
-
-    // Valida hora apenas se a data for hoje
-    if (dataSel === hoje && horaSel && horaSel <= horaAtualHHMM()) {
-      horaInvalida = true;
-    }
-
-    // Atualiza estilos do campo de data
-    if (dataInvalida) {
-      erroData.classList.remove('hidden');
-      dataEl.classList.add('border-red-400', 'ring-1', 'ring-red-300');
-      dataEl.classList.remove('border-gray-300');
-    } else {
-      erroData.classList.add('hidden');
-      dataEl.classList.remove('border-red-400', 'ring-1', 'ring-red-300');
-      dataEl.classList.add('border-gray-300');
-    }
-
-    // Atualiza estilos do campo de hora
-    if (horaInvalida) {
-      erroHora.classList.remove('hidden');
-      horaEl.classList.add('border-red-400', 'ring-1', 'ring-red-300');
-      horaEl.classList.remove('border-gray-300');
-    } else {
-      erroHora.classList.add('hidden');
-      horaEl.classList.remove('border-red-400', 'ring-1', 'ring-red-300');
-      horaEl.classList.add('border-gray-300');
-    }
-
-    // Banner de aviso geral
-    var invalido = dataInvalida || horaInvalida;
-    aviso.classList.toggle('hidden', !invalido);
-
-    // Desabilita o botão de submit enquanto inválido
-    btnSubmit.disabled = invalido;
-    btnSubmit.style.opacity  = invalido ? '0.45' : '1';
-    btnSubmit.style.cursor   = invalido ? 'not-allowed' : 'pointer';
-
-    return !invalido;
-  }
-
-  // ── Listeners ────────────────────────────────────────────────────
-  dataEl.addEventListener('change', validar);
-  horaEl.addEventListener('change', validar);
-
-  // Segurança extra: bloqueia submit mesmo se JS foi contornado
-  document.getElementById('form-consulta').addEventListener('submit', function (e) {
-    if (!validar()) e.preventDefault();
-  });
-
-  // Valida imediatamente se já houver valores (ex: volta de erro de servidor)
-  if (dataEl.value || horaEl.value) validar();
-
-}());
-</script>
+<script src="{% static 'js/autocomplete.js' %}"></script>
+<script src="{% static 'js/agenda.js' %}"></script>
+<script src="{% static 'js/consulta_form.js' %}"></script>
 {% endblock %}

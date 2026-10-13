@@ -1,0 +1,14 @@
+{# Fluxograma: "Confirmar agendamento" e "Realizar atendimento ou registrar ausência → Atualizar status" #}
+{% if consulta.status == 'agendado' or consulta.status == 'confirmado' %}
+<div class="flex flex-wrap items-center gap-2" data-acoes-consulta="{{ consulta.pk }}">
+  {% if consulta.link_whatsapp %}
+    <a href="{{ consulta.link_whatsapp }}" target="_blank" rel="noopener" class="btn-acao btn-acao-whatsapp"
+       data-confirmar-consulta="{{ consulta.pk }}" data-status-atual="{{ consulta.status }}">{% if consulta.status == 'agendado' %}Confirmar e avisar tutor{% else %}Avisar tutor{% endif %}<span class="sr-only"> de {{ consulta.animal.nome }} pelo WhatsApp (abre em nova aba)</span></a>
+  {% elif consulta.status == 'agendado' %}
+    <button type="button" class="btn-acao" data-acao-status="confirmado" data-consulta-id="{{ consulta.pk }}">Confirmar<span class="sr-only"> consulta de {{ consulta.animal.nome }}</span></button>
+  {% endif %}
+  <button type="button" class="btn-acao" data-acao-status="realizado" data-consulta-id="{{ consulta.pk }}">Atendimento realizado<span class="sr-only"> — {{ consulta.animal.nome }}</span></button>
+  <button type="button" class="btn-acao btn-acao-alerta" data-acao-status="cancelado" data-observacao="Ausência do tutor registrada." data-consulta-id="{{ consulta.pk }}">Registrar ausência<span class="sr-only"> — {{ consulta.animal.nome }}</span></button>
+  <p class="w-full text-red-700 text-xs" data-erro-acoes="{{ consulta.pk }}"></p>
+</div>
+{% endif %}
