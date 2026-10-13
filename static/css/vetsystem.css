@@ -1,0 +1,50 @@
+/* VETSystem — static/css/vetsystem.css
+   Componentes e acessibilidade (WCAG 2.1 AA). Todas as cores com contraste ≥ 4,5:1. */
+
+/* 2.4.7 Foco visível: anel escuro com halo branco (aparece no fundo claro e no menu turquesa) */
+:focus-visible { outline: 3px solid #1B1B1B !important; outline-offset: 2px !important; box-shadow: 0 0 0 5px #FFFFFF !important; }
+main:focus-visible { outline: none !important; box-shadow: none !important; }
+
+/* Menu: página atual indicada também sem depender de cor */
+.link-menu { color: #FFFFFF; font-weight: 500; text-underline-offset: 4px; }
+.link-menu:hover, .link-menu[aria-current="page"] { text-decoration: underline; }
+.link-menu[aria-current="page"] { font-weight: 700; }
+
+/* Selos de status (um só lugar; o JS troca a classe badge-<status>) */
+.badge { display: inline-block; font-size: .75rem; font-weight: 600; padding: .25rem .75rem; border-radius: 9999px; }
+.badge-agendado { background: #DBEAFE; color: #1D4ED8; }
+.badge-confirmado { background: #EAF7F7; color: #1E7579; }
+.badge-realizado { background: #DCFCE7; color: #166534; }
+.badge-cancelado { background: #FEE2E2; color: #B91C1C; }
+
+/* Botões de ação rápida de status */
+.btn-acao { display: inline-flex; align-items: center; font-size: .75rem; font-weight: 700; padding: .375rem .75rem;
+            border-radius: .5rem; border: 1px solid #1E7579; color: #1E7579; background: #FFFFFF; }
+.btn-acao:hover { background: #EAF7F7; }
+.btn-acao-whatsapp { background: #1E7579; color: #FFFFFF; }
+.btn-acao-whatsapp:hover { background: #185F62; }
+.btn-acao-alerta { border-color: #B91C1C; color: #B91C1C; }
+
+/* Autocomplete (combobox WAI-ARIA) */
+.vs-opcao { padding: .5rem .75rem; cursor: pointer; }
+.vs-opcao:hover, .vs-opcao[aria-selected="true"] { background: #EAF7F7; }
+.vs-opcao[aria-selected="true"] { outline: 2px solid #1E7579; outline-offset: -2px; }
+
+/* Agenda interativa: dias e horários */
+.vs-nav { padding: .25rem .75rem; border: 1px solid #D1D5DB; border-radius: .5rem; background: #FFFFFF; }
+.vs-nav:disabled { color: #4B5563; background: #F3F4F6; cursor: not-allowed; }
+.vs-dia { padding: .5rem; border: 1px solid #D1D5DB; border-radius: .75rem; background: #FFFFFF; color: #1B1B1B; text-align: center; }
+.vs-dia[aria-pressed="true"] { background: #1E7579; border-color: #1E7579; color: #FFFFFF; }
+.vs-dia:disabled { background: #F3F4F6; color: #4B5563; cursor: not-allowed; }
+.vs-slot { position: relative; display: inline-flex; }
+.vs-slot input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.vs-slot span { display: inline-block; min-width: 4.5rem; text-align: center; padding: .5rem .75rem; border: 1px solid #1E7579;
+                border-radius: .5rem; color: #1E7579; font-weight: 600; background: #FFFFFF; cursor: pointer; }
+.vs-slot input:checked + span { background: #1E7579; color: #FFFFFF; }
+.vs-slot input:focus-visible + span { outline: 3px solid #1B1B1B; outline-offset: 2px; }
+
+/* 2.3.3 / conforto: respeita quem pede menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+                           transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

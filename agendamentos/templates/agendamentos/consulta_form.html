@@ -13,10 +13,10 @@
 {% block content %}
 
 <!-- ===== BREADCRUMB ===== -->
-<nav class="text-sm text-gray-400 mb-6">
-  <a href="{% url 'agendamentos:consulta-list' %}" class="hover:underline" style="color:#31A1A7;">Consultas</a>
-  <span class="mx-2">/</span>
-  <span class="text-gray-600">{% if object %}Editar #{{ object.pk }}{% else %}Nova consulta{% endif %}</span>
+<nav aria-label="Trilha de navegação" class="text-sm text-gray-600 mb-6">
+  <a href="{% url 'agendamentos:consulta-list' %}" class="hover:underline" style="color:#1E7579;">Consultas</a>
+  <span class="mx-2" aria-hidden="true">/</span>
+  <span class="text-gray-600" aria-current="page">{% if object %}Editar #{{ object.pk }}{% else %}Nova consulta{% endif %}</span>
 </nav>
 
 <div class="max-w-2xl">
@@ -26,7 +26,7 @@
 
   <!-- Erros gerais do formulário (ex: data no passado vinda do backend) -->
   {% if form.non_field_errors %}
-    <div class="bg-red-50 border border-red-300 text-red-700 text-sm rounded-lg px-4 py-3 mb-6">
+    <div role="alert" class="bg-red-50 border border-red-300 text-red-700 text-sm rounded-lg px-4 py-3 mb-6">
       {% for erro in form.non_field_errors %}{{ erro }}{% endfor %}
     </div>
   {% endif %}
@@ -34,17 +34,22 @@
   <div class="bg-white rounded-2xl shadow-sm p-8">
     <form method="post" novalidate id="form-consulta">
       {% csrf_token %}
+      <p class="text-sm text-gray-600 mb-5">Campos marcados com <span aria-hidden="true">*</span> são obrigatórios.</p>
 
       <!-- ── Animal ─────────────────────────────────────────────── -->
       <div class="mb-5">
         <label for="{{ form.animal.id_for_label }}"
                class="block text-sm font-semibold text-gray-700 mb-1">
-          Animal <span class="text-red-500">*</span>
+          Animal <span class="text-red-700" aria-hidden="true">*</span>
         </label>
         {{ form.animal }}
-        {% for erro in form.animal.errors %}
-          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
-        {% endfor %}
+        {% if form.animal.errors %}
+        <div id="{{ form.animal.auto_id }}_error">
+          {% for erro in form.animal.errors %}
+            <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
         <p class="text-sm text-gray-600 mt-2">
           Tutor ou animal ainda não cadastrado?
           <a href="{% url 'agendamentos:proprietario-create' %}?fluxo=agendamento"
@@ -62,30 +67,38 @@
         <div>
           <label for="{{ form.data_consulta.id_for_label }}"
                  class="block text-sm font-semibold text-gray-700 mb-1">
-            Data <span class="text-red-500">*</span>
+            Data <span class="text-red-700" aria-hidden="true">*</span>
           </label>
           {{ form.data_consulta }}
-          <p id="erro-data" class="text-red-500 text-xs mt-1 hidden">
-            ⚠ Selecione uma data de hoje em diante.
+          <p id="erro-data" class="text-red-700 text-xs mt-1 hidden">
+            <span aria-hidden="true">⚠</span> Selecione uma data de hoje em diante.
           </p>
-          {% for erro in form.data_consulta.errors %}
-            <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
-          {% endfor %}
+          {% if form.data_consulta.errors %}
+          <div id="{{ form.data_consulta.auto_id }}_error">
+            {% for erro in form.data_consulta.errors %}
+              <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
 
         <!-- Horário -->
         <div>
           <label for="{{ form.hora_consulta.id_for_label }}"
                  class="block text-sm font-semibold text-gray-700 mb-1">
-            Horário <span class="text-red-500">*</span>
+            Horário <span class="text-red-700" aria-hidden="true">*</span>
           </label>
           {{ form.hora_consulta }}
-          <p id="erro-hora" class="text-red-500 text-xs mt-1 hidden">
-            ⚠ Este horário já passou para hoje.
+          <p id="erro-hora" class="text-red-700 text-xs mt-1 hidden">
+            <span aria-hidden="true">⚠</span> Este horário já passou para hoje.
           </p>
-          {% for erro in form.hora_consulta.errors %}
-            <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
-          {% endfor %}
+          {% if form.hora_consulta.errors %}
+          <div id="{{ form.hora_consulta.auto_id }}_error">
+            {% for erro in form.hora_consulta.errors %}
+              <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
 
       </div>
@@ -94,7 +107,7 @@
       <div id="aviso-passado"
            class="hidden mb-5 flex items-center gap-2 bg-amber-50 border border-amber-300
                   text-amber-700 text-sm rounded-lg px-4 py-3">
-        <span class="text-lg">⏰</span>
+        <span class="text-lg" aria-hidden="true">⏰</span>
         <span>Agendamentos devem ser marcados para datas e horários futuros.</span>
       </div>
 
@@ -105,12 +118,16 @@
       <div class="mb-5">
         <label for="{{ form.tipo.id_for_label }}"
                class="block text-sm font-semibold text-gray-700 mb-1">
-          Tipo de atendimento <span class="text-red-500">*</span>
+          Tipo de atendimento <span class="text-red-700" aria-hidden="true">*</span>
         </label>
         {{ form.tipo }}
-        {% for erro in form.tipo.errors %}
-          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
-        {% endfor %}
+        {% if form.tipo.errors %}
+        <div id="{{ form.tipo.auto_id }}_error">
+          {% for erro in form.tipo.errors %}
+            <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
 
       {% if 'status' in form.fields %}
@@ -121,9 +138,13 @@
           Status
         </label>
         {{ form.status }}
-        {% for erro in form.status.errors %}
-          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
-        {% endfor %}
+        {% if form.status.errors %}
+        <div id="{{ form.status.auto_id }}_error">
+          {% for erro in form.status.errors %}
+            <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
       {% endif %}
 
@@ -134,9 +155,14 @@
           Observações
         </label>
         {{ form.observacoes }}
-        {% for erro in form.observacoes.errors %}
-          <p class="text-red-500 text-xs mt-1">{{ erro }}</p>
-        {% endfor %}
+        <p id="{{ form.observacoes.auto_id }}_helptext" class="text-xs text-gray-600 mt-1">{{ form.observacoes.help_text }}</p>
+        {% if form.observacoes.errors %}
+        <div id="{{ form.observacoes.auto_id }}_error">
+          {% for erro in form.observacoes.errors %}
+            <p class="text-red-700 text-xs mt-1">{{ erro }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
 
       <!-- ── Ações ──────────────────────────────────────────────── -->
@@ -144,11 +170,11 @@
         <button type="submit"
                 id="btn-agendar"
                 class="text-white font-bold py-3 px-8 rounded-xl hover:opacity-90 transition"
-                style="background:#31A1A7;">
+                style="background:#1E7579;">
           {% if object %}Salvar alterações{% else %}Agendar consulta{% endif %}
         </button>
         <a href="{% url 'agendamentos:consulta-list' %}"
-           class="text-gray-500 font-semibold hover:text-gray-700 transition">
+           class="text-gray-600 font-semibold hover:text-gray-700 transition">
           Cancelar
         </a>
       </div>

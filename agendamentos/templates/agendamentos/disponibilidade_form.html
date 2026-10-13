@@ -2,10 +2,10 @@
 {% load crispy_forms_tags %}
 {% block title %}{% if object %}Editar Horário{% else %}Novo Horário{% endif %} — VETSystem{% endblock %}
 {% block content %}
-<nav class="text-sm text-gray-400 mb-6">
-  <a href="{% url 'agendamentos:disponibilidade-list' %}" class="hover:underline" style="color:#31A1A7;">Horários</a>
-  <span class="mx-2">/</span>
-  <span class="text-gray-600">{% if object %}Editar{% else %}Novo horário{% endif %}</span>
+<nav aria-label="Trilha de navegação" class="text-sm text-gray-600 mb-6">
+  <a href="{% url 'agendamentos:disponibilidade-list' %}" class="hover:underline" style="color:#1E7579;">Horários</a>
+  <span class="mx-2" aria-hidden="true">/</span>
+  <span class="text-gray-600" aria-current="page">{% if object %}Editar{% else %}Novo horário{% endif %}</span>
 </nav>
 <div class="max-w-lg">
   <h1 class="text-2xl font-bold mb-8" style="color:#4A2C7A;">
@@ -18,11 +18,11 @@
       <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-100">
         <button type="submit"
                 class="text-white font-bold py-3 px-8 rounded-xl hover:opacity-90 transition"
-                style="background:#31A1A7;">
+                style="background:#1E7579;">
           Salvar horário
         </button>
         <a href="{% url 'agendamentos:disponibilidade-list' %}"
-           class="text-gray-500 font-semibold hover:text-gray-700">Cancelar</a>
+           class="text-gray-600 font-semibold hover:text-gray-700">Cancelar</a>
       </div>
     </form>
   </div>

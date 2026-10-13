@@ -74,7 +74,7 @@ class ProprietarioForm(forms.ModelForm):
             Div(
                 Submit(
                     'submit', 'Salvar',
-                    css_class='bg-[#F26A2E] hover:bg-orange-600 text-white font-bold py-2 px-6 rounded'
+                    css_class='bg-[#B9471A] hover:bg-orange-800 text-white font-bold py-2 px-6 rounded'
                 ),
                 css_class='mt-4'
             )
@@ -171,7 +171,7 @@ class AnimalForm(forms.ModelForm):
             Div(
                 Submit(
                     'submit', 'Salvar',
-                    css_class='bg-[#F26A2E] hover:bg-orange-600 text-white font-bold py-2 px-6 rounded'
+                    css_class='bg-[#B9471A] hover:bg-orange-800 text-white font-bold py-2 px-6 rounded'
                 ),
                 css_class='mt-4'
             )
@@ -229,7 +229,7 @@ class ConsultaForm(forms.ModelForm):
                 'type': 'date',
                 'class': (
                     'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
-                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7]'
+                    'focus:outline-none focus:ring-2 focus:ring-[#1E7579]'
                 ),
             },
         ),
@@ -243,7 +243,7 @@ class ConsultaForm(forms.ModelForm):
                 'type': 'time',
                 'class': (
                     'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
-                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7]'
+                    'focus:outline-none focus:ring-2 focus:ring-[#1E7579]'
                 ),
             },
         ),
@@ -258,26 +258,26 @@ class ConsultaForm(forms.ModelForm):
                 'rows': 3,
                 'class': (
                     'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
-                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7]'
+                    'focus:outline-none focus:ring-2 focus:ring-[#1E7579]'
                 ),
                 'placeholder': 'Observações adicionais (opcional)...',
             }),
             'animal': forms.Select(attrs={
                 'class': (
                     'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
-                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7] bg-white'
+                    'focus:outline-none focus:ring-2 focus:ring-[#1E7579] bg-white'
                 ),
             }),
             'tipo': forms.Select(attrs={
                 'class': (
                     'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
-                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7] bg-white'
+                    'focus:outline-none focus:ring-2 focus:ring-[#1E7579] bg-white'
                 ),
             }),
             'status': forms.Select(attrs={
                 'class': (
                     'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
-                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7] bg-white'
+                    'focus:outline-none focus:ring-2 focus:ring-[#1E7579] bg-white'
                 ),
             }),
         }

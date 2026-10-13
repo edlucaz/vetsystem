@@ -12,21 +12,22 @@
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
   <div>
     <h1 class="text-3xl font-bold" style="color: #4A2C7A;">Proprietários</h1>
-    <p class="text-gray-500 text-sm mt-1">Cadastro de tutores dos animais</p>
+    <p class="text-gray-600 text-sm mt-1">Cadastro de tutores dos animais</p>
   </div>
   <a href="{% url 'agendamentos:proprietario-create' %}"
      class="inline-flex items-center gap-2 text-white font-bold px-5 py-2.5 rounded-xl shadow hover:opacity-90 transition"
-     style="background: #31A1A7;">
+     style="background: #1E7579;">
     + Novo Proprietário
   </a>
 </div>
 
 <!-- ===== BUSCA ===== -->
 <form method="get" class="bg-white rounded-2xl shadow-sm p-5 mb-8 flex gap-3">
-  <input type="text" name="q" value="{{ request.GET.q }}"
+  <label for="busca-proprietario" class="sr-only">Buscar por nome, telefone ou e-mail</label>
+  <input type="text" name="q" id="busca-proprietario" value="{{ request.GET.q }}"
          placeholder="Buscar por nome, telefone ou e-mail..."
          class="flex-1 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2"
-         style="--tw-ring-color: #31A1A7;">
+         style="--tw-ring-color: #1E7579;">
   <button type="submit"
           class="text-white font-semibold px-5 py-2 rounded-lg text-sm hover:opacity-90 transition"
           style="background: #4A2C7A;">
@@ -34,8 +35,8 @@
   </button>
   {% if request.GET.q %}
   <a href="{% url 'agendamentos:proprietario-list' %}"
-     class="text-gray-400 text-sm self-center hover:text-gray-600">
-    Limpar ×
+     class="text-gray-600 text-sm self-center hover:text-gray-600">
+    Limpar <span aria-hidden="true">×</span>
   </a>
   {% endif %}
 </form>
@@ -48,23 +49,23 @@
     <div class="flex items-start justify-between mb-3">
       <div>
         <h2 class="font-bold text-lg" style="color: #4A2C7A;">{{ proprietario.nome }}</h2>
-        <p class="text-gray-400 text-xs mt-0.5">{{ proprietario.total_animais }} animal(is)</p>
+        <p class="text-gray-600 text-xs mt-0.5">{{ proprietario.total_animais }} animal(is)</p>
       </div>
-      <span class="text-2xl">👤</span>
+      <span class="text-2xl" aria-hidden="true">👤</span>
     </div>
     <div class="space-y-1 text-sm text-gray-600 mb-5">
-      <p>📱 {{ proprietario.telefone }}</p>
-      {% if proprietario.email %}<p>✉️ {{ proprietario.email }}</p>{% endif %}
+      <p><span aria-hidden="true">📱 </span><span class="sr-only">Telefone: </span>{{ proprietario.telefone }}</p>
+      {% if proprietario.email %}<p><span aria-hidden="true">✉️ </span><span class="sr-only">E-mail: </span>{{ proprietario.email }}</p>{% endif %}
     </div>
     <div class="flex gap-2 pt-4 border-t border-gray-100">
       <a href="{% url 'agendamentos:proprietario-detail' proprietario.pk %}"
          class="flex-1 text-center text-sm font-semibold py-2 rounded-lg hover:opacity-90 transition text-white"
-         style="background: #31A1A7;">
-        Ver detalhes
+         style="background: #1E7579;">
+        Ver detalhes<span class="sr-only"> de {{ proprietario.nome }}</span>
       </a>
       <a href="{% url 'agendamentos:proprietario-update' proprietario.pk %}"
-         class="px-4 text-sm font-semibold py-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition">
-        Editar
+         class="px-4 text-sm font-semibold py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+        Editar<span class="sr-only"> {{ proprietario.nome }}</span>
       </a>
     </div>
   </div>
@@ -73,14 +74,14 @@
 
 {% else %}
 <!-- Estado vazio -->
-<div class="text-center py-20 text-gray-400">
-  <p class="text-5xl mb-4">👤</p>
-  <p class="text-lg font-semibold text-gray-500 mb-2">
+<div class="text-center py-20 text-gray-600">
+  <p class="text-5xl mb-4" aria-hidden="true">👤</p>
+  <p class="text-lg font-semibold text-gray-600 mb-2">
     {% if request.GET.q %}Nenhum proprietário encontrado para "{{ request.GET.q }}"{% else %}Nenhum proprietário cadastrado{% endif %}
   </p>
   <a href="{% url 'agendamentos:proprietario-create' %}"
      class="inline-block text-white font-bold px-6 py-3 rounded-xl hover:opacity-90 mt-4"
-     style="background: #31A1A7;">
+     style="background: #1E7579;">
     + Cadastrar primeiro proprietário
   </a>
 </div>
