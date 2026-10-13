@@ -118,7 +118,11 @@ class AnimalForm(forms.ModelForm):
             'nome': forms.TextInput(attrs={'placeholder': 'Nome do animal'}),
             'raca': forms.TextInput(attrs={'placeholder': 'Ex: Golden Retriever (deixe vazio para SRD)'}),
             'idade': forms.NumberInput(attrs={'placeholder': 'Idade em anos', 'min': 0}),
-            'peso': forms.NumberInput(attrs={'placeholder': 'Ex: 12.50', 'step': '0.01', 'min': 0}),
+            # TextInput + inputmode="decimal" → compatível com IMask (type=number conflita com máscaras)
+            'peso': forms.TextInput(attrs={
+                'placeholder': 'Ex: 12,50',
+                'inputmode': 'decimal',
+            }),
             'queixa': forms.Textarea(attrs={
                 'placeholder': 'Descreva os sintomas ou motivo do atendimento...',
                 'rows': 3,
@@ -165,49 +169,159 @@ class AnimalForm(forms.ModelForm):
                 css_class='mt-4'
             )
         )
-# =============================================================================
-# Adicionar ao final de agendamentos/forms.py
-# Adicione também ao import do topo:
-#   from .models import Proprietario, Animal, Consulta, Consulta
-# E aos imports do crispy-forms, adicione Layout, Row, Column se ainda não tem:
-#   from crispy_forms.layout import Layout, Row, Column
-# =============================================================================
+
+    def clean_peso(self):
+        """
+        Aceita vírgula como separador decimal (padrão BR) e converte para ponto.
+        Exemplo: '12,50' → Decimal('12.50')
+
+        O campo usa TextInput para compatibilidade com IMask.
+        """
+        from decimal import Decimal, InvalidOperation
+        valor = self.cleaned_data.get('peso')
+        if valor in (None, ''):
+            return None
+        # Converte vírgula para ponto antes de passar ao Decimal
+        valor_str = str(valor).replace(',', '.').strip()
+        try:
+            resultado = Decimal(valor_str)
+            if resultado < 0:
+                raise forms.ValidationError('O peso não pode ser negativo.')
+            return resultado
+        except InvalidOperation:
+            raise forms.ValidationError('Informe um peso válido. Ex: 12,50')
+
 
 class ConsultaForm(forms.ModelForm):
     """
     Formulário de agendamento/edição de Consulta.
 
-    Campos: animal, data_hora, tipo, status, observacoes.
-    Validação: data_hora deve ser no futuro.
+    O campo data_hora do model é composto por dois campos separados:
+      data_consulta  → DateField  (type="date")
+      hora_consulta  → TimeField  (type="time")
+
+    Essa separação melhora a UX e permite bloquear datas passadas
+    diretamente no browser via atributo min= e validação JS em tempo real.
+
+    O clean() combina os dois em data_hora (datetime aware, fuso SP).
+    A validação de data futura é aplicada apenas na criação (não na edição),
+    para não impedir a edição de consultas já realizadas.
     """
+
+    # --- Campos extras (não existem no Model) ---
+    data_consulta = forms.DateField(
+        label='Data',
+        required=True,
+        widget=forms.DateInput(
+            format='%Y-%m-%d',   # type="date" exige YYYY-MM-DD; pt-br usaria dd/mm/YYYY sem isso
+            attrs={
+                'type': 'date',
+                'class': (
+                    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
+                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7]'
+                ),
+            },
+        ),
+    )
+    hora_consulta = forms.TimeField(
+        label='Horário',
+        required=True,
+        widget=forms.TimeInput(
+            format='%H:%M',      # garante HH:MM mesmo com localização ativa
+            attrs={
+                'type': 'time',
+                'class': (
+                    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
+                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7]'
+                ),
+            },
+        ),
+    )
 
     class Meta:
         model = Consulta
-        fields = ['animal', 'data_hora', 'tipo', 'status', 'observacoes']
+        # data_hora é omitido aqui — será preenchido pelo clean()
+        fields = ['animal', 'tipo', 'status', 'observacoes']
         widgets = {
-            'data_hora': forms.DateTimeInput(
-                attrs={'type': 'datetime-local'},
-                format='%Y-%m-%dT%H:%M'
-            ),
-            'observacoes': forms.Textarea(attrs={'rows': 3}),
+            'observacoes': forms.Textarea(attrs={
+                'rows': 3,
+                'class': (
+                    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
+                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7]'
+                ),
+                'placeholder': 'Observações adicionais (opcional)...',
+            }),
+            'animal': forms.Select(attrs={
+                'class': (
+                    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
+                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7] bg-white'
+                ),
+            }),
+            'tipo': forms.Select(attrs={
+                'class': (
+                    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
+                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7] bg-white'
+                ),
+            }),
+            'status': forms.Select(attrs={
+                'class': (
+                    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm '
+                    'focus:outline-none focus:ring-2 focus:ring-[#31A1A7] bg-white'
+                ),
+            }),
         }
 
     def __init__(self, *args, **kwargs):
         # animal_pk pode vir da URL (?animal=1) para pré-selecionar o animal
         animal_pk = kwargs.pop('animal_pk', None)
         super().__init__(*args, **kwargs)
+
         self.helper = FormHelper()
         self.helper.form_tag = False
+
         if animal_pk:
             self.fields['animal'].initial = animal_pk
 
-    def clean_data_hora(self):
-        """Impede agendamento em datas passadas."""
-        from django.utils import timezone
-        data_hora = self.cleaned_data.get('data_hora')
-        if data_hora and data_hora < timezone.now():
-            raise forms.ValidationError('A data e hora devem ser no futuro.')
-        return data_hora
+        # Ao editar uma consulta existente, pré-preenche data e hora separados
+        if self.instance and self.instance.pk and self.instance.data_hora:
+            from django.utils import timezone as tz
+            dt_local = tz.localtime(self.instance.data_hora)
+            self.fields['data_consulta'].initial = dt_local.date()
+            self.fields['hora_consulta'].initial = dt_local.strftime('%H:%M')
+
+    def clean(self):
+        """
+        Combina data_consulta + hora_consulta em data_hora (datetime aware).
+        Valida que o agendamento é no futuro apenas para novas consultas.
+        """
+        import datetime
+        from django.utils import timezone as tz
+
+        cleaned = super().clean()
+        data  = cleaned.get('data_consulta')
+        hora  = cleaned.get('hora_consulta')
+
+        if data and hora:
+            naive_dt = datetime.datetime.combine(data, hora)
+            aware_dt = tz.make_aware(naive_dt)
+
+            # Bloqueia data no passado apenas ao criar (não ao editar)
+            if not self.instance.pk and aware_dt < tz.now():
+                raise forms.ValidationError(
+                    'A data e hora do agendamento devem ser no futuro.'
+                )
+
+            cleaned['data_hora'] = aware_dt
+
+        return cleaned
+
+    def save(self, commit=True):
+        """Grava data_hora composto a partir dos campos separados."""
+        instance = super().save(commit=False)
+        instance.data_hora = self.cleaned_data.get('data_hora')
+        if commit:
+            instance.save()
+        return instance
 
 
 # =============================================================================

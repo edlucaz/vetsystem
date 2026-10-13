@@ -74,9 +74,11 @@
       {% endif %}
 
       <!-- Botão de submit com cor laranja da identidade visual -->
+      <!-- bg-ativo-laranja é cor customizada não reconhecida pelo CDN; usando style inline -->
       <button
         type="submit"
-        class="w-full bg-ativo-laranja hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg transition-colors">
+        style="background:#F26A2E;"
+        class="w-full hover:opacity-90 text-white font-bold py-2.5 rounded-lg transition-opacity">
         Entrar
       </button>
 
