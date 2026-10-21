@@ -10,3 +10,10 @@ Leia `docs/PLANO_PI2.md` e o `CLAUDE.md`. Execute **somente a Fase 2**, na ordem
 Se houver texto depois desta linha, é a minha resposta a um passo [VOCÊ]: **não recomece a fase**. Confira o branch `fase-2-*` e o `git status` e continue de onde parou.
 
 $ARGUMENTS
+
+## Contexto (economia de tokens)
+
+- Ao fechar cada etapa, grave o progresso no documento do plano (ou no registro da tarefa) e peça ao
+  Lucas numa linha: `/compact foco: <próxima etapa>`. Sessão acima de ~150k tokens custa caro mesmo com cache.
+- Não releia arquivo, imagem ou diff já vistos; para retomar, leia o progresso gravado e o registro
+  "Onde parei" que aparece no início da sessão.
