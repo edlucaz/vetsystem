@@ -148,6 +148,10 @@ class AnimalForm(forms.ModelForm):
         self.fields['proprietario'].queryset = Proprietario.objects.order_by('nome')
         self.fields['proprietario'].empty_label = '— Selecione o tutor —'
         self.fields['data_nascimento'].widget.attrs['max'] = timezone.localdate().isoformat()
+        if self.instance.pk:
+            self.fields['peso'].help_text = (
+                'Peso de hoje, em kg. Ao alterar, o valor anterior continua no histórico do animal.'
+            )
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'

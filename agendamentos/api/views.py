@@ -23,7 +23,7 @@ from .. import services
 from ..models import Animal, Consulta, Disponibilidade, Proprietario
 from .serializers import (AnimalSerializer, AtualizarStatusSerializer, ConsultaSerializer,
                           DisponibilidadeSerializer, HorariosLivresEntradaSerializer,
-                          ProprietarioSerializer)
+                          ProprietarioSerializer, RegistroPesoSerializer)
 
 
 class ProprietarioViewSet(viewsets.ModelViewSet):
@@ -43,6 +43,12 @@ class AnimalViewSet(viewsets.ModelViewSet):
     search_fields = ['nome', 'proprietario__nome', 'proprietario__telefone']
     filterset_fields = ['especie', 'proprietario']
     ordering_fields = ['nome']
+
+    @extend_schema(responses=RegistroPesoSerializer(many=True))
+    @action(detail=True, methods=['get'], url_path='pesos', url_name='pesos')
+    def pesos(self, request, pk=None):
+        """Histórico de peso do animal, da pesagem mais recente à mais antiga."""
+        return Response(RegistroPesoSerializer(self.get_object().pesos.all(), many=True).data)
 
 
 class ConsultaFiltro(filtros.FilterSet):

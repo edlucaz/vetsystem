@@ -21,11 +21,19 @@
   blocos.busca.hidden = false; blocos.select.hidden = true;
   blocos.agenda.hidden = false; blocos.dataHora.hidden = true;
 
-  new VetAutocomplete({
+  var busca = new VetAutocomplete({
     campoId: 'campo-busca', listaId: 'lista-sugestoes', statusId: 'status-busca', selectId: 'id_animal',
     url: form.dataset.urlAnimais,
     aoFalhar: function () { blocos.busca.hidden = true; blocos.select.hidden = false; }
   });
+  if (window.VetSeletor) {
+    new VetSeletor({
+      dialogoId: 'seletor-cadastro', abridorId: 'abrir-seletor',
+      urlTutores: form.dataset.urlProprietarios, urlAnimais: form.dataset.urlAnimais,
+      urlNovoAnimal: form.dataset.urlNovoAnimal,
+      aoEscolher: function (animal) { busca.selecionar(animal); }
+    });
+  }
   if (select.selectedIndex > 0) document.getElementById('campo-busca').value = select.options[select.selectedIndex].text;
 
   var agenda = new VetAgenda({

@@ -115,9 +115,14 @@
 
   VetAutocomplete.prototype.escolher = function (indice) {
     var animal = this.itens[indice];
-    if (!animal) return;
+    if (animal) this.selecionar(animal);
+  };
+
+  /* Também usado pelo seletor em modal (seletor_cadastro.js). */
+  VetAutocomplete.prototype.selecionar = function (animal) {
     this.select.value = String(animal.id);
     this.campo.value = animal.nome + ' (' + animal.especie_display + ') — ' + animal.proprietario_nome;
+    this.campo.removeAttribute('aria-invalid');
     this.fechar();
     this._anunciar('Selecionado: ' + this.campo.value + '.');
   };

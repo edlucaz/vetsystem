@@ -6,6 +6,8 @@ Função  : Testes das telas Django seguindo o fluxograma (login, cancelar x exc
           e ganchos do JavaScript da Fase 6).
 Autor   : Lucas Eduardo Rocha (RA 24217901) | 2026-10-13
 """
+from decimal import Decimal
+
 from django.urls import reverse
 from django.utils import timezone
 import pytest
@@ -124,3 +126,41 @@ def test_dashboard_mostra_acoes_rapidas_da_consulta_de_hoje(cliente_logado, anim
     consulta = Consulta.objects.create(animal=animal, data_hora=em(timezone.localdate(), 23), tipo='consulta')
     html = cliente_logado.get(reverse('agendamentos:dashboard')).content.decode()
     assert f'data-acoes-consulta="{consulta.pk}"' in html
+
+
+def test_post_animal_update_com_peso_novo_cria_historico(cliente_logado, animal):
+    url = reverse('agendamentos:animal-update', args=[animal.pk])
+    resposta = cliente_logado.post(url, {
+        'nome': animal.nome,
+        'especie': animal.especie,
+        'raca': animal.raca,
+        'peso': '14,50',
+        'proprietario': animal.proprietario.pk,
+    })
+    assert resposta.status_code == 302
+    animal.refresh_from_db()
+    assert animal.pesos.count() == 1
+    assert animal.pesos.first().peso == Decimal('14.50')
+
+
+def test_animal_detail_mostra_historico_de_peso(cliente_logado, animal):
+    animal.peso = Decimal('12.50')
+    animal.save()
+    url = reverse('agendamentos:animal-detail', args=[animal.pk])
+    resposta = cliente_logado.get(url)
+    assert resposta.status_code == 200
+    html = resposta.content.decode()
+    assert 'Histórico de peso' in html
+    assert 'primeira pesagem' in html
+
+
+def test_consulta_create_contem_seletor_em_modal(cliente_logado):
+    url = reverse('agendamentos:consulta-create')
+    resposta = cliente_logado.get(url)
+    assert resposta.status_code == 200
+    html = resposta.content.decode()
+    assert 'id="seletor-cadastro"' in html
+    assert 'role="tablist"' in html
+    assert 'data-url-proprietarios' in html
+    assert '<option value="gato">' in html
+

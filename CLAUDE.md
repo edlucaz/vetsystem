@@ -12,7 +12,8 @@ Plano do PI II: `docs/PLANO_PI2.md` — execute uma fase por vez (`/fase-N`, eff
 
 ## Arquitetura
 - App `agendamentos/`: models, forms, views (CBVs), templates. DER: Proprietario 1:N Animal 1:N Consulta N:1 Disponibilidade
-  ("verifica" = FK `Consulta.disponibilidade`, preenchida em `Consulta.save()` pelo dia da semana).
+  ("verifica" = FK `Consulta.disponibilidade`, preenchida em `Consulta.save()` pelo dia da semana);
+  Animal 1:N RegistroPeso (histórico, gravado por `Animal.save()` via `services.registrar_peso`).
 - `agendamentos/services.py` é a ÚNICA fonte das regras (horários livres, "Horário disponível?", status, estatísticas);
   formulários e API chamam essas funções — não duplique regras.
 - `agendamentos/api/`: Django REST Framework, autenticação por sessão + CSRF, documentação em `/api/docs/`.

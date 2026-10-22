@@ -54,6 +54,7 @@ Cada fase tem um comando próprio, **`/fase-N`** (em `.claude/skills/fase-N/SKIL
 | Fase 4 — API REST + Swagger | `/fase-4` | medium | Nada; só conferir o PR |
 | Fase 5 — Acessibilidade | `/fase-5` | medium | Checklist de teclado (Tab/Shift+Tab/Enter/Esc; menu no celular a 375 px) |
 | Fase 6 — JavaScript | `/fase-6` | medium | 6.10 checklist manual em `docs/metricas/checklist_manual.md` |
+| Fase 6B — Modal tutor/animal + histórico de peso | `/fase-6b` | medium | Nada; só conferir o PR (o teclado do modal entra no checklist do 6.10) |
 | Fase 7 — Extras | `/fase-7` | medium | Decidir se roda `popular_demo --forcar` em produção para a apresentação |
 | Fase 8 — Métricas e release | `/fase-8` | low | 8.4 validação com a Sra. Fernanda (tarefas cronometradas + SUS); atualizar DER e fluxograma conforme o Apêndice A |
 
@@ -95,6 +96,7 @@ git switch main && git pull # o Render publica sozinho a main
 | 4 | API REST (DRF) + Swagger | Claude | medium | `fase-4-api-rest` |
 | 5 | Acessibilidade WCAG 2.1 AA | Claude | medium | `fase-5-acessibilidade` |
 | 6 | JavaScript do fluxo de agendamento | Claude | medium | `fase-6-javascript` |
+| 6B | Seleção de tutor/animal em modal com abas + histórico de peso | Claude | medium | `fase-6b-selecao-e-peso` |
 | 7 | Extras: análise de dados, agenda semanal, home pública, dados demo | Claude | medium | `fase-7-extras` |
 | 8 | Métricas finais, documentação, diagramas, release | Claude + [VOCÊ] | low | `fase-8-entrega` |
 
@@ -2285,7 +2287,489 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
   4. Confirmar pelo WhatsApp: abre a conversa e o selo vira "Confirmado".
   5. "Atendimento realizado" e "Registrar ausência" no dashboard.
   6. (Opcional) Leitor de tela Orca (Linux) ou NVDA (Windows) no agendamento.
+  7. (Fase 6B) Abrir "Procurar na lista de tutores e animais", trocar de aba com as setas, filtrar, escolher com Enter; Esc fecha e o foco volta ao botão.
 - [x] **6.11** PR com CI verde.
+
+## Fase 6B — Seleção de tutor/animal em modal e histórico de peso
+
+Pedido do grupo em 13/10/2026, para rodar **antes da Fase 7**: os dados demo (7.5), as métricas (8.1) e a validação (8.4) já contam com estas funções.
+
+**O que entra:**
+- **Filtro de tutores e animais já cadastrados.** No agendamento, o botão "Procurar na lista de tutores e animais" abre um modal (`<dialog>`) com duas abas:
+  - **Tutor:** filtra os tutores (nome, telefone, CPF ou e-mail) e, ao escolher um, lista os animais dele.
+  - **Animal:** filtra os animais (nome do animal ou do tutor, mais a espécie).
+  - Escolher um animal preenche o campo do agendamento e fecha o modal.
+  - A busca rápida (combobox da Fase 6) continua igual. O modal é a alternativa para quem prefere navegar pela lista.
+- **Histórico de peso.** Toda vez que o peso muda no cadastro do animal (tela, API ou admin), a pesagem é guardada em `RegistroPeso`. O peso de `Animal.peso` continua sendo o **peso atual**. A tela do animal mostra a tabela de pesagens com a variação.
+  - **Regra:** um registro por dia. Corrigir o peso duas vezes no mesmo dia atualiza o registro do dia em vez de criar outro.
+
+Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/serializers.py`, `api/views.py`, migração `0004`, `animal_detail.html`, `consulta_form.html`, `static/js/seletor_cadastro.js`, `static/js/autocomplete.js`, `static/js/consulta_form.js`, `static/css/vetsystem.css` e testes.
+
+- [x] **6B.1 Modelo `RegistroPeso`** (DER: nova entidade HISTÓRICO_PESO, Animal 1:N).
+  - Em `models.py`, depois de `Animal`:
+    ```python
+    # =============================================================================
+    # MODEL: RegistroPeso
+    # =============================================================================
+
+    class RegistroPeso(models.Model):
+        """
+        Histórico de peso do Animal (relação 1:N). Gravado por Animal.save() sempre que
+        o peso muda — vale para a tela, a API e o admin (regra em services.registrar_peso).
+        Um registro por dia: corrigir o peso no mesmo dia atualiza o registro do dia.
+        """
+        animal = models.ForeignKey(
+            Animal,
+            on_delete=models.CASCADE,
+            related_name='pesos',
+            verbose_name='Animal',
+        )
+        peso = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Peso (kg)')
+        data = models.DateField(default=timezone.localdate, verbose_name='Data da pesagem')
+
+        class Meta:
+            verbose_name = 'Registro de peso'
+            verbose_name_plural = 'Histórico de peso'
+            ordering = ['-data']
+            constraints = [models.UniqueConstraint(fields=['animal', 'data'], name='peso_unico_por_dia')]
+
+        def __str__(self):
+            return f'{self.animal.nome}: {self.peso} kg em {self.data:%d/%m/%Y}'
+    ```
+  - Em `Animal`, acrescente o `save()`:
+    ```python
+    def save(self, *args, **kwargs):
+        """Salva o animal; se o peso mudou, guarda a pesagem no histórico (RegistroPeso)."""
+        from . import services  # import local: services importa models
+        peso_anterior = (Animal.objects.filter(pk=self.pk).values_list('peso', flat=True).first()
+                         if self.pk else None)
+        super().save(*args, **kwargs)
+        if self.peso is not None and self.peso != peso_anterior:
+            services.registrar_peso(self)
+    ```
+  - Atualize a docstring de cabeçalho de `models.py` (entidades e relacionamentos: `Animal 1:N RegistroPeso`) e a docstring de `Animal` (`peso` = peso atual; o histórico fica em `animal.pesos`).
+  - Crie `agendamentos/migrations/0004_registropeso.py`. Ela já leva para o histórico o peso atual de quem tem peso:
+    ```python
+    """Histórico de peso do animal (RegistroPeso, Animal 1:N) + carga inicial com o peso atual."""
+    import django.db.models.deletion
+    import django.utils.timezone
+    from django.db import migrations, models
+
+
+    def peso_atual_para_historico(apps, schema_editor):
+        Animal = apps.get_model('agendamentos', 'Animal')
+        RegistroPeso = apps.get_model('agendamentos', 'RegistroPeso')
+        hoje = django.utils.timezone.localdate()
+        RegistroPeso.objects.bulk_create(
+            RegistroPeso(animal_id=animal.pk, peso=animal.peso, data=hoje)
+            for animal in Animal.objects.exclude(peso__isnull=True))
+
+
+    class Migration(migrations.Migration):
+        dependencies = [('agendamentos', '0003_animal_data_nascimento')]
+
+        operations = [
+            migrations.CreateModel(
+                name='RegistroPeso',
+                fields=[
+                    ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                    ('peso', models.DecimalField(decimal_places=2, max_digits=5, verbose_name='Peso (kg)')),
+                    ('data', models.DateField(default=django.utils.timezone.localdate, verbose_name='Data da pesagem')),
+                    ('animal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pesos',
+                                                 to='agendamentos.animal', verbose_name='Animal')),
+                ],
+                options={
+                    'verbose_name': 'Registro de peso',
+                    'verbose_name_plural': 'Histórico de peso',
+                    'ordering': ['-data'],
+                    'constraints': [models.UniqueConstraint(fields=('animal', 'data'), name='peso_unico_por_dia')],
+                },
+            ),
+            migrations.RunPython(peso_atual_para_historico, migrations.RunPython.noop),
+        ]
+    ```
+    Confira com `makemigrations --check --dry-run`, que deve dizer "No changes detected". Se acusar diferença, ajuste a migração ao model; não gere outra.
+- [x] **6B.2 Regras em `services.py`.** Importe `RegistroPeso` junto de `Consulta` e `Disponibilidade` e acrescente:
+  ```python
+  def registrar_peso(animal, data=None):
+      """
+      Guarda o peso atual do animal no histórico. Um registro por dia: se o peso for
+      corrigido no mesmo dia, o registro do dia é atualizado (não duplica).
+      Chamado por Animal.save() quando o peso muda.
+      """
+      if animal.peso is None:
+          return None
+      registro, _criado = RegistroPeso.objects.update_or_create(
+          animal=animal, data=data or timezone.localdate(), defaults={'peso': animal.peso})
+      return registro
+
+
+  def historico_peso(animal):
+      """Pesagens do animal, da mais recente à mais antiga, com a variação (kg) em relação à anterior."""
+      registros = list(animal.pesos.order_by('data'))
+      anterior = None
+      for registro in registros:
+          registro.variacao = None if anterior is None else registro.peso - anterior
+          anterior = registro.peso
+      return list(reversed(registros))
+  ```
+  Apagar o peso (deixar o campo vazio) não cria registro e não apaga o histórico.
+- [x] **6B.3 Telas do histórico de peso.**
+  - `AnimalDetailView.get_context_data`: `ctx['historico_peso'] = historico_peso(self.object)` (importe de `.services`). Atualize a docstring (Contexto).
+  - `animal_detail.html`:
+    - no card, abaixo do peso: `{% if historico_peso %}<span class="block text-xs text-gray-600">pesado em {{ historico_peso.0.data|date:"d/m/Y" }}</span>{% endif %}`;
+    - entre o card e o histórico de consultas:
+    ```html
+    <!-- ===== HISTÓRICO DE PESO (Fase 6B) ===== -->
+    <section aria-labelledby="titulo-peso" class="mb-8">
+      <h2 id="titulo-peso" class="text-lg font-bold text-ativo-roxo mb-4">Histórico de peso ({{ historico_peso|length }})</h2>
+      {% if historico_peso %}
+      <div class="bg-white rounded-xl shadow overflow-x-auto">
+        <table class="w-full text-sm">
+          <caption class="sr-only">Pesagens de {{ animal.nome }}, da mais recente à mais antiga</caption>
+          <thead class="bg-ativo-fundo text-left">
+            <tr>
+              <th scope="col" class="px-4 py-2">Data</th>
+              <th scope="col" class="px-4 py-2">Peso</th>
+              <th scope="col" class="px-4 py-2">Variação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registro in historico_peso %}
+            <tr class="border-t border-gray-100">
+              <th scope="row" class="px-4 py-2 font-medium text-left">{{ registro.data|date:"d/m/Y" }}</th>
+              <td class="px-4 py-2">{{ registro.peso }} kg</td>
+              <td class="px-4 py-2">{% if registro.variacao is None %}primeira pesagem{% elif registro.variacao > 0 %}+{{ registro.variacao }} kg{% elif registro.variacao < 0 %}{{ registro.variacao }} kg{% else %}sem alteração{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-600 bg-white rounded-xl shadow p-4">Nenhuma pesagem registrada. Informe o peso em "Editar".</p>
+      {% endif %}
+    </section>
+    ```
+  - `AnimalForm.__init__`: na edição (`self.instance.pk`), troque o `help_text` do peso por "Peso de hoje, em kg. Ao alterar, o valor anterior continua no histórico do animal."
+  - `admin.py`: `RegistroPesoInline(admin.TabularInline)` com `model = RegistroPeso`, `extra = 0` e `fields = ('data', 'peso')`; em `AnimalAdmin`, `inlines = [RegistroPesoInline]`.
+- [x] **6B.4 API do histórico de peso.**
+  - Em `serializers.py`:
+    ```python
+    class RegistroPesoSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = RegistroPeso
+            fields = ['id', 'data', 'peso']
+    ```
+  - Em `AnimalViewSet` (importe `RegistroPesoSerializer`):
+    ```python
+    @extend_schema(responses=RegistroPesoSerializer(many=True))
+    @action(detail=True, methods=['get'], url_path='pesos', url_name='pesos')
+    def pesos(self, request, pk=None):
+        """Histórico de peso do animal, da pesagem mais recente à mais antiga."""
+        return Response(RegistroPesoSerializer(self.get_object().pesos.all(), many=True).data)
+    ```
+  - `PATCH /api/animais/<id>/` com `peso` novo grava o histórico sozinho, pelo `Animal.save()`. Não duplique a regra na API.
+  - Atualize a docstring de `api/urls.py` (rota `/api/animais/<id>/pesos/`).
+- [x] **6B.5 Modal de seleção — HTML** (`consulta_form.html`).
+  - Em `ConsultaCreateView` e `ConsultaUpdateView`, `get_context_data` acrescenta `ctx['especies'] = Animal.ESPECIE_CHOICES`.
+  - No `<form id="form-consulta">`, acrescente `data-url-proprietarios="{% url 'api:proprietario-list' %}"` e `data-url-novo-animal="{% url 'agendamentos:animal-create' %}?fluxo=agendamento"`.
+  - No `bloco-busca`, logo depois de `ajuda-busca`:
+    ```html
+    <button type="button" id="abrir-seletor" class="btn-acao mt-2" aria-haspopup="dialog" hidden>Procurar na lista de tutores e animais</button>
+    ```
+  - Depois do `</form>` e do `painel-sucesso`, ainda dentro de `<div class="max-w-2xl">`:
+    ```html
+    <!-- ===== SELETOR EM MODAL (Fase 6B): abas Tutor / Animal ===== -->
+    <dialog id="seletor-cadastro" aria-labelledby="seletor-titulo" class="vs-dialogo">
+      <div class="p-6">
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <h2 id="seletor-titulo" class="text-lg font-bold text-ativo-roxo">Selecionar tutor e animal</h2>
+          <button type="button" class="vs-nav" data-fechar-dialogo><span aria-hidden="true">✕</span><span class="sr-only">Fechar</span></button>
+        </div>
+
+        <div role="tablist" aria-label="Procurar por" class="flex gap-2 border-b border-gray-200 mb-4">
+          <button type="button" role="tab" id="aba-tutor" aria-controls="painel-tutor" aria-selected="true" class="vs-aba">Tutor</button>
+          <button type="button" role="tab" id="aba-animal" aria-controls="painel-animal" aria-selected="false" tabindex="-1" class="vs-aba">Animal</button>
+        </div>
+
+        <!-- Aba Tutor: filtra tutores; ao escolher, lista os animais dele -->
+        <div role="tabpanel" id="painel-tutor" aria-labelledby="aba-tutor">
+          <label for="filtro-tutor" class="block text-sm font-semibold text-gray-700 mb-1">Nome, telefone, CPF ou e-mail do tutor</label>
+          <input id="filtro-tutor" type="search" autocomplete="off" aria-describedby="status-tutor"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <p id="status-tutor" role="status" class="text-xs text-gray-600 mt-1"></p>
+          <ul id="lista-tutores" aria-label="Tutores encontrados" class="mt-2 max-h-60 overflow-auto"></ul>
+          <div id="animais-do-tutor" class="mt-4 border-t border-gray-100 pt-4" hidden>
+            <h3 id="titulo-animais-tutor" tabindex="-1" class="text-sm font-bold text-ativo-roxo mb-2"></h3>
+            <ul id="lista-animais-tutor" aria-labelledby="titulo-animais-tutor" class="max-h-48 overflow-auto"></ul>
+            <a id="link-novo-animal" href="{% url 'agendamentos:animal-create' %}?fluxo=agendamento"
+               class="inline-block mt-2 text-sm font-semibold hover:underline" style="color:#1E7579;">Cadastrar outro animal para este tutor</a>
+          </div>
+        </div>
+
+        <!-- Aba Animal: filtra por nome (do animal ou do tutor) e espécie -->
+        <div role="tabpanel" id="painel-animal" aria-labelledby="aba-animal" hidden>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label for="filtro-animal" class="block text-sm font-semibold text-gray-700 mb-1">Nome do animal ou do tutor</label>
+              <input id="filtro-animal" type="search" autocomplete="off" aria-describedby="status-animal"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+              <label for="filtro-especie" class="block text-sm font-semibold text-gray-700 mb-1">Espécie</label>
+              <select id="filtro-especie" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">Todas</option>
+                {% for valor, rotulo in especies %}<option value="{{ valor }}">{{ rotulo }}</option>{% endfor %}
+              </select>
+            </div>
+          </div>
+          <p id="status-animal" role="status" class="text-xs text-gray-600 mt-1"></p>
+          <ul id="lista-animais" aria-label="Animais encontrados" class="mt-2 max-h-72 overflow-auto"></ul>
+        </div>
+      </div>
+    </dialog>
+    ```
+  - No `extra_js`, inclua `{% static 'js/seletor_cadastro.js' %}` **antes** de `consulta_form.js`.
+  - Sem JavaScript, o botão continua `hidden` e o `<dialog>` nunca abre: o formulário de reserva da Fase 6 segue igual.
+- [x] **6B.6 CSS** (`static/css/vetsystem.css`, depois do bloco do autocomplete):
+  ```css
+  /* Seletor de tutor/animal (Fase 6B): <dialog> modal com abas WAI-ARIA */
+  .vs-dialogo { width: min(42rem, calc(100vw - 2rem)); max-height: calc(100vh - 4rem); padding: 0; border: 0;
+                border-radius: 1rem; box-shadow: 0 20px 40px rgba(0, 0, 0, .25); }
+  .vs-dialogo::backdrop { background: rgba(27, 27, 27, .55); }
+  .vs-aba { padding: .5rem 1rem; font-weight: 600; color: #4B5563; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+  .vs-aba[aria-selected="true"] { color: #1E7579; border-bottom-color: #1E7579; }
+  .vs-item { display: block; width: 100%; text-align: left; padding: .5rem .75rem; border-radius: .5rem; }
+  .vs-item:hover { background: #EAF7F7; }
+  ```
+  `#4B5563` dá 7,56:1 e `#1E7579` dá 5,42:1 sobre o branco. A aba ativa também se distingue pela borda, não só pela cor.
+- [x] **6B.7 `static/js/seletor_cadastro.js`** (cabeçalho padrão; fluxograma: etapa 2 — "Sugerir proprietário e animal"):
+  ```js
+  (function () {
+    'use strict';
+
+    function textoAnimal(animal) {
+      var partes = ['Tutor: ' + animal.proprietario_nome];
+      if (animal.raca) partes.push(animal.raca);
+      if (animal.peso) partes.push(String(animal.peso).replace('.', ',') + ' kg');
+      return partes.join(' · ');
+    }
+
+    function resumo(dados, singular, plural) {
+      var total = dados.count, mostrados = dados.results.length;
+      if (!total) return 'Nenhum ' + singular + ' encontrado.';
+      var texto = total + ' ' + (total === 1 ? singular + ' encontrado' : plural + ' encontrados') + '.';
+      if (mostrados < total) texto += ' Mostrando os ' + mostrados + ' primeiros; refine o filtro.';
+      return texto;
+    }
+
+    /* Item de lista = botão (Tab/Enter/Espaço funcionam sem código extra). Dados da API só via textContent. */
+    function item(titulo, detalhe, aoClicar) {
+      var li = document.createElement('li');
+      var botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'vs-item';
+      var t = document.createElement('span');
+      t.className = 'font-semibold';
+      t.textContent = titulo;
+      var d = document.createElement('span');
+      d.className = 'block text-xs text-gray-600';
+      d.textContent = detalhe;
+      botao.appendChild(t);
+      botao.appendChild(d);
+      botao.addEventListener('click', aoClicar);
+      li.appendChild(botao);
+      return li;
+    }
+
+    function VetSeletor(o) {
+      this.dialogo = document.getElementById(o.dialogoId);
+      this.abridor = document.getElementById(o.abridorId);
+      this.urlTutores = o.urlTutores;
+      this.urlAnimais = o.urlAnimais;
+      this.urlNovoAnimal = o.urlNovoAnimal;   // animal-create?fluxo=agendamento
+      this.aoEscolher = o.aoEscolher;
+      this.versoes = {};
+      this.temporizadores = {};
+      if (!this.dialogo || typeof this.dialogo.showModal !== 'function') return;   // sem <dialog>: fica só a busca rápida
+      this.abas = Array.prototype.slice.call(this.dialogo.querySelectorAll('[role="tab"]'));
+      var self = this;
+      this.abridor.hidden = false;
+      this.abridor.addEventListener('click', function () { self.abrir(); });
+      this.dialogo.querySelectorAll('[data-fechar-dialogo]').forEach(function (b) {
+        b.addEventListener('click', function () { self.dialogo.close(); });
+      });
+      this.dialogo.addEventListener('click', function (e) { if (e.target === self.dialogo) self.dialogo.close(); });  // clique no fundo
+      this.dialogo.addEventListener('close', function () { self.abridor.focus(); });   // Esc também cai aqui
+      this.abas.forEach(function (aba) {
+        aba.addEventListener('click', function () { self.mostrarAba(aba); });
+        aba.addEventListener('keydown', function (e) { self._tecladoAbas(e, aba); });
+      });
+      this._aoDigitar('filtro-tutor', function () { self.buscarTutores(); });
+      this._aoDigitar('filtro-animal', function () { self.buscarAnimais(); });
+      document.getElementById('filtro-especie').addEventListener('change', function () { self.buscarAnimais(); });
+    }
+
+    VetSeletor.prototype._aoDigitar = function (id, buscar) {
+      var self = this;
+      document.getElementById(id).addEventListener('input', function () {
+        window.clearTimeout(self.temporizadores[id]);
+        self.temporizadores[id] = window.setTimeout(buscar, 250);
+      });
+    };
+
+    VetSeletor.prototype.abrir = function () {
+      this.dialogo.showModal();
+      this.mostrarAba(this.abas[0]);
+      document.getElementById('filtro-tutor').focus();
+    };
+
+    /* Abas WAI-ARIA com ativação automática: setas, Home e End trocam de aba. */
+    VetSeletor.prototype.mostrarAba = function (escolhida) {
+      this.abas.forEach(function (aba) {
+        var ativa = aba === escolhida;
+        aba.setAttribute('aria-selected', String(ativa));
+        aba.tabIndex = ativa ? 0 : -1;
+        document.getElementById(aba.getAttribute('aria-controls')).hidden = !ativa;
+      });
+      if (escolhida.id === 'aba-tutor') this.buscarTutores(); else this.buscarAnimais();
+    };
+
+    VetSeletor.prototype._tecladoAbas = function (e, aba) {
+      var i = this.abas.indexOf(aba), n = this.abas.length, destino = null;
+      if (e.key === 'ArrowRight') destino = this.abas[(i + 1) % n];
+      else if (e.key === 'ArrowLeft') destino = this.abas[(i - 1 + n) % n];
+      else if (e.key === 'Home') destino = this.abas[0];
+      else if (e.key === 'End') destino = this.abas[n - 1];
+      if (!destino) return;
+      e.preventDefault();
+      this.mostrarAba(destino);
+      destino.focus();
+    };
+
+    /* GET com controle de versão: uma resposta atrasada não sobrescreve a busca mais nova. */
+    VetSeletor.prototype._buscar = async function (chave, url, statusId) {
+      var versao = (this.versoes[chave] || 0) + 1;
+      this.versoes[chave] = versao;
+      var status = document.getElementById(statusId);
+      status.textContent = 'Buscando…';
+      try {
+        var dados = await VetAPI.get(url);
+        return versao === this.versoes[chave] ? dados : null;
+      } catch (erro) {
+        if (versao === this.versoes[chave]) status.textContent = 'Não foi possível buscar agora. Tente novamente.';
+        return null;
+      }
+    };
+
+    VetSeletor.prototype.buscarTutores = async function () {
+      var termo = document.getElementById('filtro-tutor').value.trim();
+      document.getElementById('animais-do-tutor').hidden = true;
+      var dados = await this._buscar('tutor',
+        this.urlTutores + '?search=' + encodeURIComponent(termo) + '&limit=20', 'status-tutor');
+      if (!dados) return;
+      var self = this, lista = document.getElementById('lista-tutores');
+      lista.textContent = '';
+      dados.results.forEach(function (tutor) {
+        var animais = tutor.total_animais + (tutor.total_animais === 1 ? ' animal' : ' animais');
+        lista.appendChild(item(tutor.nome, tutor.telefone + ' · ' + animais,
+          function () { self.mostrarAnimaisDoTutor(tutor); }));
+      });
+      document.getElementById('status-tutor').textContent = resumo(dados, 'tutor', 'tutores');
+    };
+
+    VetSeletor.prototype.mostrarAnimaisDoTutor = async function (tutor) {
+      var dados = await this._buscar('tutor', this.urlAnimais + '?proprietario=' + tutor.id + '&limit=50', 'status-tutor');
+      if (!dados) return;
+      var self = this, lista = document.getElementById('lista-animais-tutor');
+      var titulo = document.getElementById('titulo-animais-tutor');
+      lista.textContent = '';
+      dados.results.forEach(function (animal) {
+        lista.appendChild(item(animal.nome + ' (' + animal.especie_display + ')', textoAnimal(animal),
+          function () { self.escolher(animal); }));
+      });
+      titulo.textContent = 'Animais de ' + tutor.nome + ' (' + dados.count + ')';
+      document.getElementById('link-novo-animal').href = this.urlNovoAnimal + '&proprietario=' + tutor.id;
+      document.getElementById('status-tutor').textContent =
+        dados.count ? 'Escolha o animal.' : 'Este tutor ainda não tem animal cadastrado.';
+      document.getElementById('animais-do-tutor').hidden = false;
+      titulo.focus();
+    };
+
+    VetSeletor.prototype.buscarAnimais = async function () {
+      var termo = document.getElementById('filtro-animal').value.trim();
+      var especie = document.getElementById('filtro-especie').value;
+      var url = this.urlAnimais + '?search=' + encodeURIComponent(termo) + '&limit=20' +
+        (especie ? '&especie=' + encodeURIComponent(especie) : '');
+      var dados = await this._buscar('animal', url, 'status-animal');
+      if (!dados) return;
+      var self = this, lista = document.getElementById('lista-animais');
+      lista.textContent = '';
+      dados.results.forEach(function (animal) {
+        lista.appendChild(item(animal.nome + ' (' + animal.especie_display + ')', textoAnimal(animal),
+          function () { self.escolher(animal); }));
+      });
+      document.getElementById('status-animal').textContent = resumo(dados, 'animal', 'animais');
+    };
+
+    VetSeletor.prototype.escolher = function (animal) {
+      this.dialogo.close();        // fecha antes: com o modal aberto, o resto da página fica inerte
+      this.aoEscolher(animal);
+    };
+
+    window.VetSeletor = VetSeletor;
+  }());
+  ```
+- [x] **6B.8 Ligar o modal ao formulário.**
+  - `autocomplete.js`: separe a parte final de `escolher` num método público, usado também pelo modal:
+    ```js
+    VetAutocomplete.prototype.escolher = function (indice) {
+      var animal = this.itens[indice];
+      if (animal) this.selecionar(animal);
+    };
+
+    /* Também usado pelo seletor em modal (seletor_cadastro.js). */
+    VetAutocomplete.prototype.selecionar = function (animal) {
+      this.select.value = String(animal.id);
+      this.campo.value = animal.nome + ' (' + animal.especie_display + ') — ' + animal.proprietario_nome;
+      this.campo.removeAttribute('aria-invalid');
+      this.fechar();
+      this._anunciar('Selecionado: ' + this.campo.value + '.');
+    };
+    ```
+  - `consulta_form.js`: guarde a instância (`var busca = new VetAutocomplete({...});`) e, logo depois:
+    ```js
+    if (window.VetSeletor) {
+      new VetSeletor({
+        dialogoId: 'seletor-cadastro', abridorId: 'abrir-seletor',
+        urlTutores: form.dataset.urlProprietarios, urlAnimais: form.dataset.urlAnimais,
+        urlNovoAnimal: form.dataset.urlNovoAnimal,
+        aoEscolher: function (animal) { busca.selecionar(animal); }
+      });
+    }
+    ```
+  - Atualize o comentário de cabeçalho de `consulta_form.html`: a etapa 2 agora tem busca rápida **ou** lista em modal.
+- [x] **6B.9 Testes** (`test_models.py`, `test_services.py`, `test_views.py`, `test_api.py`):
+  - criar animal com peso → 1 registro com a data de hoje; criar sem peso → 0;
+  - mudar o peso no mesmo dia → continua 1 registro, com o valor novo;
+  - mudar o peso em outro dia (mova o 1º registro para ontem com `animal.pesos.update(data=hoje - timedelta(days=1))`) → 2 registros;
+  - salvar o animal sem mudar o peso (ex.: só o nome) → nenhum registro novo;
+  - `historico_peso`: 3 pesagens (10,00 → 10,50 → 10,20) → ordem do mais recente, variações `-0.30`, `0.50` e `None`;
+  - POST em `animal-update` com peso novo → registro criado; `animal-detail` mostra "Histórico de peso" e "primeira pesagem";
+  - API: `GET /api/animais/<id>/pesos/` → 200 com a lista; `PATCH /api/animais/<id>/` com peso novo → histórico atualizado; sem login → 403;
+  - `consulta-create` contém `id="seletor-cadastro"`, `role="tablist"`, `data-url-proprietarios` e uma `<option value="gato">`;
+  - os testes de acessibilidade continuam verdes (rótulos dos filtros, `aria-controls` das abas e ids únicos);
+  - API: `/api/proprietarios/?search=Silva` e `/api/animais/?especie=cao&search=Rex` (os filtros usados pelo modal).
+- [x] **6B.10 Documentação desta fase.**
+  - `CLAUDE.md`, na linha do DER: acrescente "Animal 1:N RegistroPeso (histórico, gravado por `Animal.save()` via `services.registrar_peso`)".
+  - O passo do modal no checklist manual já está no item **6.10** (passo 7).
+  - Registre falhas e correções em `docs/metricas/registro_testes.md`.
+- [x] **6B.11 Verificação:**
+  - pytest verde, `check` e `makemigrations --check --dry-run` sem mudanças;
+  - no `runserver`:
+    - agende escolhendo o animal pela aba **Tutor** e depois pela aba **Animal**, com filtro de espécie;
+    - edite o peso de um animal duas vezes e confira a tabela na tela do animal;
+  - PR com CI verde e merge. O deploy roda a migração `0004` no Render (o `start.sh` já faz `migrate`).
 
 ## Fase 7 — Extras (análise de dados, agenda semanal, home pública, dados demo)
 
@@ -2426,7 +2910,8 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
   - Recusa rodar com `DEBUG=False`, a menos que receba `--forcar`.
   - Chama `criar_horarios_padrao` antes.
   - Usa `random.Random(2026)`.
-  - Cria 8 tutores (e-mail `@demo.vetsystem.local`) e 12 animais com `data_nascimento`.
+  - Cria 8 tutores (e-mail `@demo.vetsystem.local`) e 12 animais com `data_nascimento` e `peso`.
+  - (Fase 6B) Para cada animal, cria de 3 a 5 `RegistroPeso` mensais nos últimos 180 dias, variando até ±5% do peso atual (o de hoje já nasce pelo `Animal.save()`).
   - Nos dias úteis dos últimos 180 dias, cria de 0 a 3 consultas em horas distintas entre 8 e 18. Status: realizado 85%, cancelado 15%. Tipos: fisioterapia 50%, consulta 30%, acupuntura 20%. Observação `[demo]`.
   - Nos próximos 14 dias úteis, cria de 0 a 2 consultas, agendado ou confirmado.
   - `--apagar` remove só os tutores `@demo.vetsystem.local` (o cascade leva animais e consultas).
@@ -2480,7 +2965,9 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
     2. cadastrar tutor e animal novos e agendar;
     3. confirmar e avisar pelo WhatsApp;
     4. registrar atendimento e ausência;
-    5. ler a análise de dados.
+    5. ler a análise de dados;
+    6. achar um animal pela lista com filtros (modal, aba Tutor ou Animal) e agendar;
+    7. atualizar o peso de um animal e conferir o histórico.
   - **Anotar:** tempo, número de cliques, erros e comentários.
   - **SUS** (escala de 1 a 5):
     1. Eu gostaria de usar este sistema com frequência.
@@ -2496,7 +2983,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
   - **Nota SUS:** some (resposta − 1) nos itens ímpares e (5 − resposta) nos pares, e multiplique por 2,5.
 - [ ] **8.5 Documentação:**
   - **README:** PI II, funcionalidades novas, stack (DRF, Neon, pytest, GitHub Actions), link `/api/docs/`, como rodar os testes e o selo `![CI](https://github.com/edlucaz/vetsystem/actions/workflows/ci.yml/badge.svg)`.
-  - **`docs/documentacao_tecnica.md`:** models (FK "verifica" e `data_nascimento`), tabela de endpoints, `services.py`, testes, acessibilidade, decisões de projeto (Neon × Render DB, JS puro, melhoria progressiva) e "Trabalhos futuros" sem os itens já feitos.
+  - **`docs/documentacao_tecnica.md`:** models (FK "verifica", `data_nascimento` e `RegistroPeso`), tabela de endpoints, `services.py`, testes, acessibilidade, decisões de projeto (Neon × Render DB, JS puro, melhoria progressiva) e "Trabalhos futuros" sem os itens já feitos.
   - **`CLAUDE.md`:** atualize se algo mudou.
   - **Opcional:** em `/mnt/backup500gb/Projetos/Web/CLAUDE.md`, acrescente à linha do `vetsystem/` "PI II; tem CLAUDE.md próprio".
 - [ ] **8.6 `docs/diagramas/atualizacoes_relatorio_final.md`.** Copie o Apêndice A, que é o que **você** muda no DER e no fluxograma para a versão final.
@@ -2516,7 +3003,8 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
 | Elemento do DER (v2) | No código | Ação no DER v3 (você) |
 |---|---|---|
 | PROPRIETÁRIO (id, nome, cpf, telefone, email) | `Proprietario` | nenhuma |
-| ANIMAL (id, nome, especie, raca, data_nascimento, id_proprietario FK) | `Animal` com `data_nascimento` (idade calculada) | acrescentar `peso` e `queixa` |
+| ANIMAL (id, nome, especie, raca, data_nascimento, id_proprietario FK) | `Animal` com `data_nascimento` (idade calculada) | acrescentar `peso` (peso atual) e `queixa` |
+| — (não existe no v2) | **`RegistroPeso`** (id, data, peso, FK animal; um por dia), Fase 6B | **nova entidade HISTÓRICO_PESO** (id, data, peso, id_animal FK) e relacionamento **"registra" Animal 1:N Histórico de peso**; legenda "Novo no PI2" |
 | CONSULTA (id, data_hora, tipo_atendimento, status, observacoes, id_animal FK) | `Consulta` (`tipo` = tipo_atendimento) | acrescentar `duracao_minutos` e **`id_disponibilidade (FK)`** |
 | DISPONIBILIDADE (id, dia_semana, hora_inicio, hora_fim) | `Disponibilidade` (`dia_da_semana` = dia_semana) | acrescentar `ativo` |
 | possui (Proprietário 1:N Animal) | FK `Animal.proprietario` | nenhuma |
@@ -2529,7 +3017,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
 |---|---|---|
 | Solicitar agendamento (Tutor) | home: CTA e horários livres pelo WhatsApp | "telefone, WhatsApp ou presencial (vê horários livres no site)" |
 | Realizar login / ① Autenticar | login do Django; API com sessão + CSRF | nenhum |
-| Buscar proprietário / ② Sugerir proprietário e animal | combobox + `GET /api/animais/?search=` | nenhum |
+| Buscar proprietário / ② Sugerir proprietário e animal | combobox + `GET /api/animais/?search=`; ou modal com abas Tutor/Animal e filtros (`/api/proprietarios/?search=`, `/api/animais/?proprietario=&especie=`), Fase 6B | "Sugerir proprietário e animal (busca rápida ou lista com filtros)" |
 | Cadastrado? Não → Cadastrar proprietário e animal | fluxo `?fluxo=agendamento` que volta ao agendamento | opcional: "(volta direto ao agendamento)" |
 | ③ Consultar horários livres | `GET /api/horarios-livres/` (Consulta × Disponibilidade) | nenhum |
 | ④ Exibir agenda interativa / Selecionar horário | `agenda.js` (dias + horários) | nenhum |
@@ -2537,6 +3025,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
 | Registrar consulta (status: agendado) | `POST /api/consultas/` | nenhum |
 | Confirmar agendamento (avisa o tutor) → Receber confirmação | botão "Confirmar e avisar tutor" (status confirmado + WhatsApp) | "status: confirmado · aviso pelo WhatsApp" |
 | Realizar atendimento ou registrar ausência → Atualizar status | botões "Atendimento realizado" / "Registrar ausência" (`POST …/status/`) | "cancelado (ausência)" |
+| (novo) Atualizar peso do animal | editar o animal grava a pesagem em `RegistroPeso`; histórico na tela do animal e em `GET /api/animais/<id>/pesos/` (Fase 6B) | opcional: "Atualizar peso (histórico)" junto de "Realizar atendimento" |
 | Transversal | WCAG 2.1 AA, testes, deploy automático, branches + PR | acrescentar "análise de dados" e "nuvem: Render + Neon" |
 
 ## Apêndice B — Pedido técnico do professor × evidência gerada
@@ -2546,14 +3035,15 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
 | Citar a nuvem | Render (web) + Neon (Postgres), URL pública, deploy automático | 1 |
 | Citar Git/GitHub | branches por fase, PRs, CI, tags `v1.0-pi1`/`v2.0-pi2`, release | 0–8 |
 | PostgreSQL continua? | Neon em produção; CI testa em PostgreSQL 16 | 1, 2 |
-| Quais endpoints? | 12 rotas e ~30 operações em `/api/docs/` e `docs/api-openapi.json` | 4, 8 |
+| Quais endpoints? | 12 rotas e ~30 operações em `/api/docs/` e `docs/api-openapi.json`, mais `/api/animais/<id>/pesos/` (Fase 6B) | 4, 6B, 8 |
 | O que a Disponibilidade permite? | FK "verifica", validação de expediente/conflito, horários livres, ocupação | 2, 4, 7 |
 | Horários em tempo real | `/api/horarios-livres/` + agenda em JS | 4, 6 |
 | Análise de dados (opcional) | `/api/estatisticas/` + painel acessível | 7 |
 | Quantos testes, resultados, falhas | pytest (~80 testes), cobertura, CI, `registro_testes.md` | 2–8 |
 | Métricas (tempo, endpoints) | `medir_desempenho`, Lighthouse antes/depois, recarregamentos | 0, 8 |
 | Alterações visuais da WCAG | paleta 3,09 → 5,42:1, foco visível, menu no celular, testes a11y | 5 |
-| JavaScript no front-end | `api.js`, `autocomplete.js`, `agenda.js`, `status.js`, gráficos | 6, 7 |
+| JavaScript no front-end | `api.js`, `autocomplete.js`, `agenda.js`, `status.js`, `seletor_cadastro.js` (modal com abas), gráficos | 6, 6B, 7 |
+| Acompanhamento do paciente | histórico de peso com variação (`RegistroPeso`), na tela e na API | 6B |
 | Tipos de teste | unitário (services/models), integração (views/API), acessibilidade automatizada, manual (teclado/leitor), usabilidade (SUS) | 2–8 |
 | Validação com a clínica | roteiro + SUS + tempos | 8 |
 | Próximos passos | "Trabalhos futuros" da documentação | 8 |

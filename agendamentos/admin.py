@@ -10,7 +10,13 @@ Data    : 2026-03-11
 """
 
 from django.contrib import admin
-from .models import Proprietario, Animal, Consulta, Disponibilidade
+from .models import Proprietario, Animal, Consulta, Disponibilidade, RegistroPeso
+
+
+class RegistroPesoInline(admin.TabularInline):
+    model = RegistroPeso
+    extra = 0
+    fields = ('data', 'peso')
 
 
 @admin.register(Proprietario)
@@ -24,6 +30,7 @@ class AnimalAdmin(admin.ModelAdmin):
     list_display  = ('nome', 'especie', 'raca', 'data_nascimento', 'peso', 'proprietario')
     search_fields = ('nome', 'proprietario__nome')
     list_filter   = ('especie',)
+    inlines       = [RegistroPesoInline]
 
 
 @admin.register(Consulta)

@@ -1,4 +1,7 @@
 """Testes das regras de negócio do agendamento (agendamentos/services.py)."""
+import datetime
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import pytest
@@ -99,3 +102,15 @@ def test_atualizar_status_rejeita_transicao_invalida(consulta_futura):
 def test_validar_telefone_rejeita_numero_curto():
     with pytest.raises(ValidationError):
         services.validar_telefone('1234')
+
+
+def test_historico_peso_ordem_e_variacao(animal):
+    hoje = timezone.localdate()
+    p1 = animal.pesos.create(peso=Decimal('10.00'), data=hoje - datetime.timedelta(days=10))
+    p2 = animal.pesos.create(peso=Decimal('10.50'), data=hoje - datetime.timedelta(days=5))
+    p3 = animal.pesos.create(peso=Decimal('10.20'), data=hoje)
+
+    historico = services.historico_peso(animal)
+    assert [p.pk for p in historico] == [p3.pk, p2.pk, p1.pk]
+    assert [p.variacao for p in historico] == [Decimal('-0.30'), Decimal('0.50'), None]
+

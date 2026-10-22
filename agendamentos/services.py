@@ -19,7 +19,7 @@ import datetime
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from .models import Consulta, Disponibilidade
+from .models import Consulta, Disponibilidade, RegistroPeso
 
 INTERVALO_GRADE_MINUTOS = 30   # de quanto em quanto tempo a agenda oferece horários
 DURACAO_PADRAO_MINUTOS = 60    # duração padrão das sessões da ATIVO PET
@@ -150,3 +150,27 @@ def atualizar_status(consulta, novo_status, observacao=''):
         consulta.observacoes = f'{consulta.observacoes}\n{linha}' if consulta.observacoes else linha
     consulta.save(update_fields=['status', 'observacoes'])
     return consulta
+
+
+def registrar_peso(animal, data=None):
+    """
+    Guarda o peso atual do animal no histórico. Um registro por dia: se o peso for
+    corrigido no mesmo dia, o registro do dia é atualizado (não duplica).
+    Chamado por Animal.save() quando o peso muda.
+    """
+    if animal.peso is None:
+        return None
+    registro, _criado = RegistroPeso.objects.update_or_create(
+        animal=animal, data=data or timezone.localdate(), defaults={'peso': animal.peso})
+    return registro
+
+
+def historico_peso(animal):
+    """Pesagens do animal, da mais recente à mais antiga, com a variação (kg) em relação à anterior."""
+    registros = list(animal.pesos.order_by('data'))
+    anterior = None
+    for registro in registros:
+        registro.variacao = None if anterior is None else registro.peso - anterior
+        anterior = registro.peso
+    return list(reversed(registros))
+
