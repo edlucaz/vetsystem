@@ -11,11 +11,13 @@ Função  : Define as tabelas do banco de dados do sistema de agendamento.
           Entidades modeladas:
             - Proprietario  : tutor/dono do animal
             - Animal        : paciente da ATIVO PET
+            - RegistroPeso  : histórico de pesagens do animal
             - Consulta      : agendamento de atendimento
             - Disponibilidade: horários de funcionamento da clínica
 
           Relacionamentos (DER):
             - Proprietario 1:N Animal 1:N Consulta
+            - Animal 1:N RegistroPeso
             - Consulta N:1 Disponibilidade ("verifica"): FK Consulta.disponibilidade,
               preenchida automaticamente em Consulta.save() pelo dia da semana.
 
@@ -105,7 +107,7 @@ class Animal(models.Model):
         especie     -- Espécie: cão, gato ou outro (obrigatório).
         raca        -- Raça do animal (opcional).
         data_nascimento -- Data de nascimento (opcional); a idade é calculada.
-        peso        -- Peso em kg com duas casas decimais (opcional).
+        peso        -- Peso atual em kg com duas casas decimais (opcional; o histórico fica em animal.pesos).
         queixa      -- Motivo principal do atendimento — sintomas relatados (opcional).
         proprietario-- Tutor responsável pelo animal (obrigatório, FK).
     """
@@ -199,6 +201,44 @@ class Animal(models.Model):
         nasc = self.data_nascimento
         meses = max((hoje.year - nasc.year) * 12 + hoje.month - nasc.month - (hoje.day < nasc.day), 0)
         return '1 mês' if meses == 1 else f'{meses} meses'
+
+    def save(self, *args, **kwargs):
+        """Salva o animal; se o peso mudou, guarda a pesagem no histórico (RegistroPeso)."""
+        from . import services  # import local: services importa models
+        peso_anterior = (Animal.objects.filter(pk=self.pk).values_list('peso', flat=True).first()
+                         if self.pk else None)
+        super().save(*args, **kwargs)
+        if self.peso is not None and self.peso != peso_anterior:
+            services.registrar_peso(self)
+
+
+# =============================================================================
+# MODEL: RegistroPeso
+# =============================================================================
+
+class RegistroPeso(models.Model):
+    """
+    Histórico de peso do Animal (relação 1:N). Gravado por Animal.save() sempre que
+    o peso muda — vale para a tela, a API e o admin (regra em services.registrar_peso).
+    Um registro por dia: corrigir o peso no mesmo dia atualiza o registro do dia.
+    """
+    animal = models.ForeignKey(
+        Animal,
+        on_delete=models.CASCADE,
+        related_name='pesos',
+        verbose_name='Animal',
+    )
+    peso = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Peso (kg)')
+    data = models.DateField(default=timezone.localdate, verbose_name='Data da pesagem')
+
+    class Meta:
+        verbose_name = 'Registro de peso'
+        verbose_name_plural = 'Histórico de peso'
+        ordering = ['-data']
+        constraints = [models.UniqueConstraint(fields=['animal', 'data'], name='peso_unico_por_dia')]
+
+    def __str__(self):
+        return f'{self.animal.nome}: {self.peso} kg em {self.data:%d/%m/%Y}'
 
 
 # =============================================================================

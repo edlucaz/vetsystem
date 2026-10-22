@@ -4,9 +4,9 @@ ATIVO PET | Projeto Integrador UNIVESP 2026 — PI II
 
 Arquivo : agendamentos/api/urls.py
 Função  : Rotas da API REST (namespace 'api'), incluídas em /api/:
-            /api/proprietarios/, /api/animais/, /api/consultas/
-            (+ /api/consultas/<id>/status/), /api/disponibilidades/
-            e /api/horarios-livres/.
+            /api/proprietarios/, /api/animais/ (+ /api/animais/<id>/pesos/),
+            /api/consultas/ (+ /api/consultas/<id>/status/),
+            /api/disponibilidades/ e /api/horarios-livres/.
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
 Data    : 2026-10-13

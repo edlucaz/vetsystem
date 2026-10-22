@@ -32,7 +32,7 @@ from django.views.generic import (
 
 from .models import Proprietario, Animal, Consulta, Disponibilidade
 from .forms import ProprietarioForm, AnimalForm, ConsultaForm, DisponibilidadeForm
-from .services import atualizar_status
+from .services import atualizar_status, historico_peso
 
 
 # =============================================================================
@@ -270,7 +270,7 @@ class AnimalDetailView(LoginRequiredMixin, DetailView):
 
     Rota    : GET /animais/<pk>/
     Template: agendamentos/animal_detail.html
-    Contexto: animal, consultas (do mais recente ao mais antigo)
+    Contexto: animal, consultas (do mais recente ao mais antigo), historico_peso
     """
     model = Animal
     template_name = 'agendamentos/animal_detail.html'
@@ -282,6 +282,7 @@ class AnimalDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['consultas'] = self.object.consultas.order_by('-data_hora')
+        ctx['historico_peso'] = historico_peso(self.object)
         return ctx
 
 
@@ -429,6 +430,11 @@ class ConsultaCreateView(LoginRequiredMixin, CreateView):
         kwargs['animal_pk'] = self.request.GET.get('animal')
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['especies'] = Animal.ESPECIE_CHOICES
+        return ctx
+
     def form_valid(self, form):
         messages.success(self.request, 'Consulta agendada com sucesso!')
         return super().form_valid(form)
@@ -452,6 +458,11 @@ class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['animal_pk'] = None
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['especies'] = Animal.ESPECIE_CHOICES
+        return ctx
 
     def form_valid(self, form):
         messages.success(self.request, 'Consulta atualizada com sucesso!')

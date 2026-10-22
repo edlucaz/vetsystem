@@ -6,6 +6,7 @@ Função  : Testes da API REST (DRF): autenticação por sessão + CSRF, CRUD,
 Autor   : Lucas Eduardo Rocha (RA 24217901) | 2026-10-13
 """
 import datetime
+from decimal import Decimal
 
 from django.urls import reverse
 from django.utils import timezone
@@ -159,3 +160,40 @@ def test_disponibilidade_duplicada_retorna_400(api, horario_comercial):
 def test_schema_openapi_responde(api):
     resposta = api.get(reverse('schema'))
     assert resposta.status_code == 200
+
+
+def test_pesos_do_animal_requer_login():
+    cliente_anonimo = APIClient()
+    resposta = cliente_anonimo.get('/api/animais/1/pesos/')
+    assert resposta.status_code == 403
+
+
+def test_pesos_do_animal_retorna_lista(api, animal):
+    animal.peso = Decimal('11.50')
+    animal.save()
+    resposta = api.get(reverse('api:animal-pesos', args=[animal.pk]))
+    assert resposta.status_code == 200
+    dados = resposta.json()
+    assert len(dados) == 1
+    assert dados[0]['peso'] == '11.50'
+    assert 'data' in dados[0]
+
+
+def test_patch_animal_com_peso_atualiza_historico(api, animal):
+    resposta = api.patch(reverse('api:animal-detail', args=[animal.pk]), {'peso': '13.25'}, format='json')
+    assert resposta.status_code == 200
+    assert animal.pesos.count() == 1
+    assert animal.pesos.first().peso == Decimal('13.25')
+
+
+def test_busca_proprietarios_por_termo(api, proprietario):
+    resposta = api.get(reverse('api:proprietario-list'), {'search': 'Silva'})
+    assert resposta.status_code == 200
+    assert [p['nome'] for p in _resultados(resposta)] == ['João Silva']
+
+
+def test_filtro_animal_por_especie_e_termo(api, animal):
+    resposta = api.get(reverse('api:animal-list'), {'especie': 'cao', 'search': 'Rex'})
+    assert resposta.status_code == 200
+    assert [a['nome'] for a in _resultados(resposta)] == ['Rex']
+

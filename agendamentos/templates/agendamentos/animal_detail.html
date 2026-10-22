@@ -51,6 +51,7 @@
         <div>
           <span class="text-gray-600 font-medium block">Peso</span>
           <p class="font-semibold">{{ animal.peso|default:"—" }}{% if animal.peso %} kg{% endif %}</p>
+          {% if historico_peso %}<span class="block text-xs text-gray-600">pesado em {{ historico_peso.0.data|date:"d/m/Y" }}</span>{% endif %}
         </div>
         <div class="col-span-2">
           <span class="text-gray-600 font-medium block">Proprietário</span>
@@ -84,6 +85,36 @@
     </div>
   </div>
 </div>
+
+<!-- ===== HISTÓRICO DE PESO (Fase 6B) ===== -->
+<section aria-labelledby="titulo-peso" class="mb-8">
+  <h2 id="titulo-peso" class="text-lg font-bold text-ativo-roxo mb-4">Histórico de peso ({{ historico_peso|length }})</h2>
+  {% if historico_peso %}
+  <div class="bg-white rounded-xl shadow overflow-x-auto">
+    <table class="w-full text-sm">
+      <caption class="sr-only">Pesagens de {{ animal.nome }}, da mais recente à mais antiga</caption>
+      <thead class="bg-ativo-fundo text-left">
+        <tr>
+          <th scope="col" class="px-4 py-2">Data</th>
+          <th scope="col" class="px-4 py-2">Peso</th>
+          <th scope="col" class="px-4 py-2">Variação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for registro in historico_peso %}
+        <tr class="border-t border-gray-100">
+          <th scope="row" class="px-4 py-2 font-medium text-left">{{ registro.data|date:"d/m/Y" }}</th>
+          <td class="px-4 py-2">{{ registro.peso }} kg</td>
+          <td class="px-4 py-2">{% if registro.variacao is None %}primeira pesagem{% elif registro.variacao > 0 %}+{{ registro.variacao }} kg{% elif registro.variacao < 0 %}{{ registro.variacao }} kg{% else %}sem alteração{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-sm text-gray-600 bg-white rounded-xl shadow p-4">Nenhuma pesagem registrada. Informe o peso em "Editar".</p>
+  {% endif %}
+</section>
 
 <!-- ===== HISTÓRICO DE CONSULTAS ===== -->
 <h2 class="text-lg font-bold text-ativo-roxo mb-4">

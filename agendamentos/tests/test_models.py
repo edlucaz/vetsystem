@@ -5,7 +5,9 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 import pytest
 
-from agendamentos.models import Animal, Consulta, Disponibilidade
+from decimal import Decimal
+
+from agendamentos.models import Animal, Consulta, Disponibilidade, RegistroPeso
 from agendamentos.tests.utils import em
 
 HOJE_FIXO = datetime.date(2026, 10, 13)
@@ -55,3 +57,43 @@ def test_link_whatsapp(consulta_futura):
 def test_link_whatsapp_vazio_com_telefone_de_8_digitos(consulta_futura):
     consulta_futura.animal.proprietario.telefone = '9999-9999'
     assert consulta_futura.link_whatsapp == ''
+
+
+def test_criar_animal_com_peso_grava_historico(db, proprietario):
+    animal = Animal.objects.create(nome='Rex', especie='cao', proprietario=proprietario, peso=Decimal('12.50'))
+    assert animal.pesos.count() == 1
+    registro = animal.pesos.first()
+    assert registro.peso == Decimal('12.50')
+    assert registro.data == timezone.localdate()
+
+
+def test_criar_animal_sem_peso_nao_grava_historico(db, proprietario):
+    animal = Animal.objects.create(nome='Rex', especie='cao', proprietario=proprietario)
+    assert animal.pesos.count() == 0
+
+
+def test_mudar_peso_no_mesmo_dia_atualiza_registro(db, proprietario):
+    animal = Animal.objects.create(nome='Rex', especie='cao', proprietario=proprietario, peso=Decimal('12.50'))
+    animal.peso = Decimal('12.80')
+    animal.save()
+    assert animal.pesos.count() == 1
+    assert animal.pesos.first().peso == Decimal('12.80')
+
+
+def test_mudar_peso_em_outro_dia_cria_novo_registro(db, proprietario):
+    animal = Animal.objects.create(nome='Rex', especie='cao', proprietario=proprietario, peso=Decimal('12.50'))
+    ontem = timezone.localdate() - datetime.timedelta(days=1)
+    animal.pesos.update(data=ontem)
+
+    animal.peso = Decimal('13.00')
+    animal.save()
+    assert animal.pesos.count() == 2
+    assert list(animal.pesos.values_list('peso', flat=True)) == [Decimal('13.00'), Decimal('12.50')]
+
+
+def test_salvar_animal_sem_mudar_peso_nao_cria_registro(db, proprietario):
+    animal = Animal.objects.create(nome='Rex', especie='cao', proprietario=proprietario, peso=Decimal('12.50'))
+    animal.nome = 'Rex Silva'
+    animal.save()
+    assert animal.pesos.count() == 1
+

@@ -14,7 +14,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from .. import services
-from ..models import Animal, Consulta, Disponibilidade, Proprietario
+from ..models import Animal, Consulta, Disponibilidade, Proprietario, RegistroPeso
 
 
 class ProprietarioSerializer(serializers.ModelSerializer):
@@ -41,6 +41,12 @@ class AnimalSerializer(serializers.ModelSerializer):
 
     def validate_data_nascimento(self, valor):
         return services.validar_data_nascimento(valor)
+
+
+class RegistroPesoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegistroPeso
+        fields = ['id', 'data', 'peso']
 
 
 class ConsultaSerializer(serializers.ModelSerializer):
