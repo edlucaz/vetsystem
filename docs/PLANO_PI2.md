@@ -2933,7 +2933,7 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
 
 ## Fase 8 — Métricas finais, documentação, diagramas e release
 
-- [ ] **8.1 Comando `medir_desempenho`** (`agendamentos/management/commands/medir_desempenho.py`):
+- [x] **8.1 Comando `medir_desempenho`** (`agendamentos/management/commands/medir_desempenho.py`):
   - Usa `django.test.Client(HTTP_HOST='localhost')`, `force_login` no 1º superusuário e `--repeticoes` (padrão 30).
   - Mede `time.perf_counter()` e imprime uma tabela Markdown: média, mediana, p95 e tamanho em KB.
   - Alvos:
@@ -2949,8 +2949,8 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
     for i in $(seq 20); do curl -s -o /dev/null -w "%{time_total}\n" https://vetsystem-gky6.onrender.com/api/horarios-publicos/; done \
       | python3 -c "import sys,statistics as s;t=[float(x)*1000 for x in sys.stdin];print(f'média {s.mean(t):.0f} ms · mediana {s.median(t):.0f} ms')"
     ```
-- [ ] **8.2 Lighthouse "depois":** `ROTAS_EXTRAS="/consultas/agenda/" scripts/lighthouse.sh depois`, com o servidor local rodando.
-- [ ] **8.3 Números finais.** Gere `docs/metricas/resultados_pi2.md` com:
+- [x] **8.2 Lighthouse "depois":** `ROTAS_EXTRAS="/consultas/agenda/" scripts/lighthouse.sh depois`, com o servidor local rodando.
+- [x] **8.3 Números finais.** Gere `docs/metricas/resultados_pi2.md` com:
   - Lighthouse antes × depois, por tela;
   - contraste antes × depois (Apêndice C);
   - testes (`pytest --cov`: total, aprovados e cobertura por arquivo) e o link para o histórico do CI;
@@ -2981,12 +2981,12 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
     9. Eu me senti confiante ao usar o sistema.
     10. Precisei aprender várias coisas antes de usar o sistema.
   - **Nota SUS:** some (resposta − 1) nos itens ímpares e (5 − resposta) nos pares, e multiplique por 2,5.
-- [ ] **8.5 Documentação:**
+- [x] **8.5 Documentação:**
   - **README:** PI II, funcionalidades novas, stack (DRF, Neon, pytest, GitHub Actions), link `/api/docs/`, como rodar os testes e o selo `![CI](https://github.com/edlucaz/vetsystem/actions/workflows/ci.yml/badge.svg)`.
   - **`docs/documentacao_tecnica.md`:** models (FK "verifica", `data_nascimento` e `RegistroPeso`), tabela de endpoints, `services.py`, testes, acessibilidade, decisões de projeto (Neon × Render DB, JS puro, melhoria progressiva) e "Trabalhos futuros" sem os itens já feitos.
   - **`CLAUDE.md`:** atualize se algo mudou.
   - **Opcional:** em `/mnt/backup500gb/Projetos/Web/CLAUDE.md`, acrescente à linha do `vetsystem/` "PI II; tem CLAUDE.md próprio".
-- [ ] **8.6 `docs/diagramas/atualizacoes_relatorio_final.md`.** Copie o Apêndice A, que é o que **você** muda no DER e no fluxograma para a versão final.
+- [x] **8.6 `docs/diagramas/atualizacoes_relatorio_final.md`.** Copie o Apêndice A, que é o que **você** muda no DER e no fluxograma para a versão final.
 - [ ] **8.7 Release:**
   ```bash
   git tag -a v2.0-pi2 -m "VETSystem 2.0 — Projeto Integrador II"

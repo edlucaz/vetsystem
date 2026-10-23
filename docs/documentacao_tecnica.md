@@ -1,6 +1,6 @@
 # VETSystem — Documentação Técnica
 
-**Versão:** 1.0 | **Data:** Março 2026 | **Projeto:** PJI110 — UNIVESP
+**Versão:** 2.0 (PI II) | **Data:** Outubro 2026 | **Projeto:** PJI110 — UNIVESP
 
 ---
 
@@ -24,10 +24,13 @@ O VETSystem é um sistema web de agendamento desenvolvido para a clínica **ATIV
 |--------|-----------|--------|
 | Linguagem | Python | 3.12 |
 | Framework web | Django | 6.x |
-| Frontend | Tailwind CSS (CDN) | 3.x |
+| API | Django REST Framework + drf-spectacular | 3.18 |
+| Frontend | Tailwind CSS (CDN) + JavaScript puro | 3.x |
 | Formulários | django-crispy-forms | 2.6 |
 | Banco (dev) | SQLite | — |
-| Banco (prod) | PostgreSQL | 15 |
+| Banco (prod) | PostgreSQL (Neon) | — |
+| Testes | pytest, pytest-django, pytest-cov | — |
+| CI | GitHub Actions (PostgreSQL 16) | — |
 | Servidor WSGI | Gunicorn | 21.2 |
 | Estáticos (prod) | WhiteNoise | 6.8 |
 | Deploy | Render | — |
@@ -77,9 +80,9 @@ vetsystem/
 ### 3.1 Diagrama de entidades
 
 ```
-Proprietario (1) ──────── (N) Animal (1) ──────── (N) Consulta
-                                                         │
-Disponibilidade ─────────────────────────────── valida horário
+Proprietario (1) ──────── (N) Animal (1) ──────── (N) Consulta (N) ──── (1) Disponibilidade
+                             │                                     "verifica" (FK)
+                             └── (N) RegistroPeso
 ```
 
 ### 3.2 Models
@@ -104,10 +107,19 @@ Representa o paciente atendido pela ATIVO PET.
 | `nome` | CharField(100) | ✓ | Nome do animal |
 | `especie` | CharField (choices) | ✓ | `cao`, `gato` ou `outro` |
 | `raca` | CharField(100) | — | Raça (vazio = SRD) |
-| `idade` | PositiveIntegerField | — | Idade em anos |
-| `peso` | DecimalField(5,2) | — | Peso em kg |
+| `data_nascimento` | DateField | — | Data de nascimento; a idade é calculada (`idade`, `idade_formatada`) |
+| `peso` | DecimalField(5,2) | — | Peso atual em kg; ao salvar, grava um `RegistroPeso` (`services.registrar_peso`) |
 | `queixa` | TextField | — | Motivo do atendimento |
 | `proprietario` | FK → Proprietario | ✓ | Tutor responsável (CASCADE) |
+
+#### RegistroPeso
+Histórico de pesagens do animal (um registro por dia).
+
+| Campo | Tipo | Obrigatório | Descrição |
+|-------|------|:-----------:|-----------|
+| `animal` | FK → Animal | ✓ | Animal pesado (CASCADE) |
+| `data` | DateField | ✓ | Dia da pesagem (único por animal e dia) |
+| `peso` | DecimalField(5,2) | ✓ | Peso em kg |
 
 #### Consulta
 Representa um agendamento de atendimento — model central do sistema.
@@ -121,6 +133,7 @@ Representa um agendamento de atendimento — model central do sistema.
 | `status` | CharField (choices) | ✓ | `agendado`, `confirmado`, `realizado`, `cancelado` |
 | `observacoes` | TextField | — | Anotações da veterinária |
 | `duracao_minutos` | PositiveIntegerField | ✓ | Duração estimada (padrão: 60) |
+| `disponibilidade` | FK → Disponibilidade | — | Relacionamento "verifica": preenchida em `save()` pelo dia da semana |
 
 #### Disponibilidade
 Define os horários de funcionamento da clínica por dia da semana.
@@ -154,6 +167,7 @@ Define os horários de funcionamento da clínica por dia da semana.
 | GET/POST | `/animais/<pk>/editar/` | AnimalUpdateView | Edição |
 | GET/POST | `/animais/<pk>/excluir/` | AnimalDeleteView | Exclusão |
 | GET | `/consultas/` | ConsultaListView | Lista de consultas |
+| GET | `/consultas/agenda/` | AgendaSemanalView | Agenda semanal |
 | GET | `/consultas/<pk>/` | ConsultaDetailView | Detalhe da consulta |
 | GET/POST | `/consultas/nova/` | ConsultaCreateView | Agendamento |
 | GET/POST | `/consultas/<pk>/editar/` | ConsultaUpdateView | Edição |
@@ -163,6 +177,42 @@ Define os horários de funcionamento da clínica por dia da semana.
 | GET/POST | `/disponibilidade/<pk>/editar/` | DisponibilidadeUpdateView | Edição |
 | GET/POST | `/disponibilidade/<pk>/excluir/` | DisponibilidadeDeleteView | Exclusão |
 | GET | `/admin/` | Django Admin | Painel administrativo |
+
+### 4.1 API REST (`/api/`)
+
+Autenticação por sessão + CSRF. Documentação interativa em `/api/docs/`; esquema em `docs/api-openapi.json`.
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET/POST | `/api/proprietarios/` | Lista (`?search=`) e cria tutores |
+| GET/PUT/PATCH/DELETE | `/api/proprietarios/<id>/` | Detalhe, edição e exclusão |
+| GET/POST | `/api/animais/` | Lista (`?search=`, `?proprietario=`, `?especie=`) e cria animais |
+| GET/PUT/PATCH/DELETE | `/api/animais/<id>/` | Detalhe, edição e exclusão |
+| GET | `/api/animais/<id>/pesos/` | Histórico de peso com variação |
+| GET/POST | `/api/consultas/` | Lista (filtros) e agenda consultas (valida expediente e conflito) |
+| GET/PUT/PATCH/DELETE | `/api/consultas/<id>/` | Detalhe, edição e exclusão |
+| POST | `/api/consultas/<id>/status/` | Atualiza o status (confirmar, realizar, ausência) |
+| GET/POST | `/api/disponibilidades/` | Expediente por dia da semana |
+| GET/PUT/PATCH/DELETE | `/api/disponibilidades/<id>/` | Detalhe, edição e exclusão |
+| GET | `/api/horarios-livres/` | Horários livres de uma data |
+| GET | `/api/estatisticas/` | Dados do painel de análise |
+| GET | `/api/horarios-publicos/` | Horários livres para a home pública |
+
+### 4.2 `services.py`
+
+Única fonte das regras de negócio; formulários, views e API chamam estas funções: `horarios_livres`, `validar_agendamento` ("Horário disponível?"), `atualizar_status`, `registrar_peso`, `historico_peso`, `estatisticas`, `validar_telefone`, `validar_data_nascimento`.
+
+### 4.3 JavaScript (`static/js/`)
+
+JS puro consumindo `/api/`, como melhoria progressiva (as telas funcionam sem JS): `api.js`, `autocomplete.js`, `agenda.js`, `consulta_form.js`, `status.js`, `seletor_cadastro.js`, `agenda_semanal.js`, `dashboard_analise.js`, `horarios_publicos.js`.
+
+### 4.4 Testes
+
+pytest com pytest-django: unitários (models, services, forms), integração (views, API, comandos) e acessibilidade automatizada (`test_acessibilidade.py`). Resultados e cobertura em `docs/metricas/resultados_pi2.md`; falhas e correções em `docs/metricas/registro_testes.md`. O CI roda a suíte em PostgreSQL 16.
+
+### 4.5 Acessibilidade (WCAG 2.1 AA)
+
+Paleta com contraste mínimo 4,5:1 (turquesa #1E7579, laranja #B9471A, texto secundário gray-600), foco visível, link "Pular para o conteúdo", `<main id="conteudo">`, tabelas com `scope`/`caption`, rótulos em todos os filtros e `aria-describedby` nos formulários. Lighthouse ≥ 95 em todas as telas medidas.
 
 ---
 
@@ -295,6 +345,10 @@ Acesse `/admin/` para gerenciar usuários do sistema, alterar senhas e acessar d
 | Cores inline com `style=""` | Tailwind CDN não processa classes customizadas (`bg-ativo-turquesa`) — inline é mais seguro |
 | SQLite em dev, PostgreSQL em prod | SQLite é zero-config para desenvolvimento; PostgreSQL é mais robusto para produção |
 | Render em vez de Railway | Plano gratuito permanente do Render vs. trial de 30 dias do Railway |
+| Neon em vez do banco do Render | O PostgreSQL gratuito do Render expira; o Neon mantém os dados e é acessado só por `DATABASE_URL` |
+| JavaScript puro, sem framework | Sem build step; poucos scripts pequenos; a API é consumida com `fetch` |
+| Melhoria progressiva | Todas as telas funcionam sem JS; o JS só acelera (agenda, autocomplete, status) |
+| Regras em `services.py` | Formulários e API compartilham a mesma validação, sem duplicar regras |
 | WhiteNoise para estáticos | Serve arquivos estáticos sem precisar de CDN ou nginx separado |
 | `criar_superusuario` command | O Render não oferece Shell no plano gratuito — comando garante admin sem interação manual |
 
@@ -302,11 +356,12 @@ Acesse `/admin/` para gerenciar usuários do sistema, alterar senhas e acessar d
 
 ## 8. Trabalhos Futuros
 
-- Validação de horário de agendamento contra a `Disponibilidade` cadastrada
-- Notificação por WhatsApp/e-mail para confirmação de consultas
-- Relatório de atendimentos por período
+- Envio automático de notificação por WhatsApp/e-mail (hoje o aviso é manual, pelo botão "Confirmar e avisar tutor")
 - Histórico de alterações de status por consulta
 - Suporte a múltiplas veterinárias/profissionais
+- Exportação de relatórios (PDF/CSV) além do painel de análise
+- Gráfico de evolução do peso na tela do animal
+- Autoagendamento pelo tutor, com confirmação da clínica
 
 ---
 

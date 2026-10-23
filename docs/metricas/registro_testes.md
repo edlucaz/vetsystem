@@ -14,3 +14,5 @@
 | 2026-10-22 | 6B | `test_models.py::test_mudar_peso_no_mesmo_dia_atualiza_registro` falhou: `assert Decimal('12.80') == 12.8` | Comparação direta entre `DecimalField` do ORM e float `12.80` falha devido à representação em ponto flutuante binário. | Uso de `Decimal('12.80')` nos testes. 14 novos testes adicionados em `test_models.py`, `test_services.py`, `test_views.py` e `test_api.py`. Todos os **119 testes aprovados**. |
 
 
+| 2026-10-23 | 8 | `spectacular --file` gerou YAML e sobrescreveu `docs/api-openapi.json` (JSON). | Formato padrão do comando é YAML. | Regerado com `--format openapi-json`. Suíte: **129 aprovados**, cobertura 89%. 3 avisos do spectacular (views sem serializer: horarios-livres, estatisticas, horarios-publicos), não fatais. |
+| 2026-10-23 | 8 | Nenhuma falha nos passos 8.5–8.6 (somente documentação). 8.4 (validação com a Sra. Fernanda) e 8.7 (release) seguem pendentes. | — | — |

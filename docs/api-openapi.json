@@ -309,6 +309,100 @@
                 }
             }
         },
+        "/api/animais/{id}/pesos/": {
+            "get": {
+                "operationId": "animais_pesos_list",
+                "description": "Histórico de peso do animal, da pesagem mais recente à mais antiga.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "especie",
+                        "schema": {
+                            "type": "string",
+                            "title": "Espécie",
+                            "enum": [
+                                "cao",
+                                "gato",
+                                "outro"
+                            ]
+                        },
+                        "description": "* `cao` - Cão\n* `gato` - Gato\n* `outro` - Outro"
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Um valor inteiro único que identifica este Animal.",
+                        "required": true
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "description": "Número de resultados a serem retornados por página.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "required": false,
+                        "in": "query",
+                        "description": "O índice inicial a partir do qual retornar os resultados.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Qual campo usar ao ordenar os resultados.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "proprietario",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "Um termo de busca.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "animais"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedRegistroPesoList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/consultas/": {
             "get": {
                 "operationId": "consultas_list",
@@ -974,6 +1068,25 @@
                 }
             }
         },
+        "/api/estatisticas/": {
+            "get": {
+                "operationId": "estatisticas_retrieve",
+                "description": "Painel de análise de dados — GET /api/estatisticas/?meses=N (1 a 24; padrão 6).",
+                "tags": [
+                    "estatisticas"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/horarios-livres/": {
             "get": {
                 "operationId": "horarios_livres_retrieve",
@@ -1013,6 +1126,23 @@
                     {
                         "cookieAuth": []
                     }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/horarios-publicos/": {
+            "get": {
+                "operationId": "horarios_publicos_retrieve",
+                "description": "Raia do Tutor — GET /api/horarios-publicos/: até 3 dias com horário livre nos\npróximos 14 dias (até 8 horários cada). Público, sem dados pessoais.",
+                "tags": [
+                    "horarios-publicos"
+                ],
+                "security": [
+                    {}
                 ],
                 "responses": {
                     "200": {
@@ -1646,6 +1776,37 @@
                     }
                 }
             },
+            "PaginatedRegistroPesoList": {
+                "type": "object",
+                "required": [
+                    "count",
+                    "results"
+                ],
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=400&limit=100"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?offset=200&limit=100"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RegistroPeso"
+                        }
+                    }
+                }
+            },
             "PatchedAnimal": {
                 "type": "object",
                 "properties": {
@@ -1918,6 +2079,30 @@
                     "nome",
                     "telefone",
                     "total_animais"
+                ]
+            },
+            "RegistroPeso": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "data": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Data da pesagem"
+                    },
+                    "peso": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "title": "Peso (kg)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "peso"
                 ]
             },
             "StatusEnum": {
