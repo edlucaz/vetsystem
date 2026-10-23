@@ -2933,7 +2933,7 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
 
 ## Fase 8 — Métricas finais, documentação, diagramas e release
 
-- [ ] **8.1 Comando `medir_desempenho`** (`agendamentos/management/commands/medir_desempenho.py`):
+- [x] **8.1 Comando `medir_desempenho`** (`agendamentos/management/commands/medir_desempenho.py`):
   - Usa `django.test.Client(HTTP_HOST='localhost')`, `force_login` no 1º superusuário e `--repeticoes` (padrão 30).
   - Mede `time.perf_counter()` e imprime uma tabela Markdown: média, mediana, p95 e tamanho em KB.
   - Alvos:
@@ -2949,8 +2949,8 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
     for i in $(seq 20); do curl -s -o /dev/null -w "%{time_total}\n" https://vetsystem-gky6.onrender.com/api/horarios-publicos/; done \
       | python3 -c "import sys,statistics as s;t=[float(x)*1000 for x in sys.stdin];print(f'média {s.mean(t):.0f} ms · mediana {s.median(t):.0f} ms')"
     ```
-- [ ] **8.2 Lighthouse "depois":** `ROTAS_EXTRAS="/consultas/agenda/" scripts/lighthouse.sh depois`, com o servidor local rodando.
-- [ ] **8.3 Números finais.** Gere `docs/metricas/resultados_pi2.md` com:
+- [x] **8.2 Lighthouse "depois":** `ROTAS_EXTRAS="/consultas/agenda/" scripts/lighthouse.sh depois`, com o servidor local rodando.
+- [x] **8.3 Números finais.** Gere `docs/metricas/resultados_pi2.md` com:
   - Lighthouse antes × depois, por tela;
   - contraste antes × depois (Apêndice C);
   - testes (`pytest --cov`: total, aprovados e cobertura por arquivo) e o link para o histórico do CI;
