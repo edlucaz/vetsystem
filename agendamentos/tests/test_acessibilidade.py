@@ -76,7 +76,7 @@ def problemas_de_acessibilidade(html):
 
 PAGINAS_PUBLICAS = ['agendamentos:home', 'login']
 PAGINAS_INTERNAS = [
-    ('agendamentos:dashboard', None), ('agendamentos:consulta-list', None),
+    ('agendamentos:dashboard', None), ('agendamentos:agenda-semanal', None), ('agendamentos:consulta-list', None),
     ('agendamentos:consulta-create', None), ('agendamentos:consulta-detail', 'consulta'),
     ('agendamentos:consulta-update', 'consulta'), ('agendamentos:consulta-cancelar', 'consulta'),
     ('agendamentos:consulta-delete', 'consulta'), ('agendamentos:proprietario-list', None),

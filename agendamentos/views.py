@@ -14,6 +14,7 @@ Função  : Views (controladores) do sistema. Cada view processa uma requisiçã
             Proprietário         : List, Detail, Create, Update, Delete
             Animal               : List, Detail, Create, Update, Delete
             Consulta             : List, Detail, Create, Update, Cancelar, Delete
+            Agenda semanal       : AgendaSemanalView (Fase 7)
             Disponibilidade      : List, Create, Update, Delete
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
@@ -109,6 +110,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         ctx['hoje'] = hoje
         return ctx
+
+
+# =============================================================================
+# AGENDA SEMANAL (Fase 7)
+# =============================================================================
+
+class AgendaSemanalView(LoginRequiredMixin, TemplateView):
+    """
+    Agenda da semana, dia a dia. A página é uma casca: static/js/agenda_semanal.js
+    busca as consultas e o expediente na API e desenha a semana.
+
+    Rota    : GET /consultas/agenda/
+    Template: agendamentos/agenda_semanal.html
+    """
+    template_name = 'agendamentos/agenda_semanal.html'
 
 
 # =============================================================================

@@ -1,0 +1,42 @@
+<!--
+  VETSystem — ATIVO PET | Projeto Integrador UNIVESP 2026 — PI II
+  Arquivo : agendamentos/templates/agendamentos/agenda_semanal.html
+  Função  : Agenda semanal — um bloco por dia, desenhado por static/js/agenda_semanal.js.
+  Autor   : Lucas Eduardo Rocha (RA 24217901) | 2026-10-23
+-->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Agenda semanal — VETSystem{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-3xl font-bold" style="color:#4A2C7A;">Agenda semanal</h1>
+    <p class="text-gray-600 text-sm mt-1">Consultas da semana, dia a dia</p>
+  </div>
+  <a href="{% url 'agendamentos:consulta-create' %}"
+     class="inline-flex items-center gap-2 text-white font-bold px-5 py-2.5 rounded-xl shadow hover:opacity-90 transition"
+     style="background:#1E7579;">+ Nova consulta</a>
+</div>
+
+<section id="agenda-semanal" aria-labelledby="titulo-semana"
+         data-url-consultas="{% url 'api:consulta-list' %}"
+         data-url-disponibilidades="{% url 'api:disponibilidade-list' %}"
+         data-url-detalhe="{% url 'agendamentos:consulta-detail' 0 %}">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h2 id="titulo-semana" aria-live="polite" class="text-xl font-bold" style="color:#4A2C7A;">Semana atual</h2>
+    <div class="flex gap-2" role="group" aria-label="Navegar entre semanas">
+      <button type="button" id="semana-anterior" class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-semibold">Semana anterior</button>
+      <button type="button" id="semana-hoje" class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-semibold">Hoje</button>
+      <button type="button" id="semana-proxima" class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-semibold">Próxima semana</button>
+    </div>
+  </div>
+  <p id="agenda-erro" class="text-red-700 mb-4" hidden></p>
+  <div id="dias-semana" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity">
+    <noscript><p class="text-gray-600">A agenda semanal precisa de JavaScript. Use a <a href="{% url 'agendamentos:consulta-list' %}" class="underline" style="color:#1E7579;">lista de consultas</a>.</p></noscript>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/agenda_semanal.js' %}"></script>
+{% endblock %}

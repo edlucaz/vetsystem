@@ -114,3 +114,20 @@ def test_historico_peso_ordem_e_variacao(animal):
     assert [p.pk for p in historico] == [p3.pk, p2.pk, p1.pk]
     assert [p.variacao for p in historico] == [Decimal('-0.30'), Decimal('0.50'), None]
 
+
+
+def test_estatisticas_do_periodo(horario_comercial, animal):
+    """Fase 7.1 — total, cancelamento, por tipo e ocupação ("verifica") das consultas passadas."""
+    duas_semanas = proxima_data(0) - datetime.timedelta(days=14)
+    tres_semanas = proxima_data(0) - datetime.timedelta(days=21)
+    Consulta.objects.create(animal=animal, data_hora=em(duas_semanas, 9), tipo='fisioterapia', status='realizado')
+    Consulta.objects.create(animal=animal, data_hora=em(duas_semanas, 11), tipo='fisioterapia', status='realizado')
+    Consulta.objects.create(animal=animal, data_hora=em(tres_semanas, 9), tipo='consulta', status='cancelado')
+
+    resultado = services.estatisticas()
+
+    assert resultado['total_consultas'] == 3
+    assert resultado['taxa_cancelamento'] == 33.3
+    assert {t['chave']: t['total'] for t in resultado['por_tipo']}['fisioterapia'] == 2
+    assert resultado['ocupacao_por_dia'][0]['minutos_agendados'] == 120
+    assert len(resultado['por_mes']) == 6
