@@ -2925,10 +2925,10 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
   - Home contém `id="horarios"` e `wa.me`.
   - Agenda semanal: 200 e entra na lista de páginas do teste de acessibilidade.
   - `popular_demo --forcar` cria dados e `--apagar` remove.
-- [ ] **7.7 Verificação:** (pytest, smoke local e PR feitos; falta a decisão [VOCÊ] sobre produção)
+- [x] **7.7 Verificação:** (pytest, smoke local e PR feitos; decisão sobre produção tomada)
   - pytest verde.
   - No `runserver`: `popular_demo` local, depois dashboard, agenda semanal e home.
-  - **[VOCÊ]** decida se roda `popular_demo --forcar` em produção para a apresentação. Se rodar, apague com `--apagar` antes de a clínica usar de verdade.
+  - **[VOCÊ]** decisão: o Lucas roda `popular_demo --forcar` em produção para a apresentação, pelo Shell do Render: `python manage.py popular_demo --forcar`. Antes do uso real pela clínica, rodar `python manage.py popular_demo --apagar`. (Feito pelo Lucas; a sessão do Claude não acessa o banco de produção.)
   - PR com CI verde.
 
 ## Fase 8 — Métricas finais, documentação, diagramas e release
