@@ -2773,7 +2773,7 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
 
 ## Fase 7 — Extras (análise de dados, agenda semanal, home pública, dados demo)
 
-- [ ] **7.1 Análise de dados — regra.** Acrescente ao `services.py`. Imports novos: `from collections import Counter`, `from django.db.models import Count, Sum` e `from django.db.models.functions import TruncMonth`.
+- [x] **7.1 Análise de dados — regra.** Acrescente ao `services.py`. Imports novos: `from collections import Counter`, `from django.db.models import Count, Sum` e `from django.db.models.functions import TruncMonth`.
   ```python
   def _primeiro_dia_do_periodo(hoje, meses):
       ano, mes = hoje.year, hoje.month - (meses - 1)
@@ -2828,7 +2828,7 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
       }
   ```
   Na API, crie `EstatisticasView(APIView)` em `GET /api/estatisticas/?meses=N` (nome `estatisticas`). Ela lê `meses` com `int()`, usa 6 quando inválido, limita entre 1 e 24 e devolve `Response(services.estatisticas(meses))`.
-- [ ] **7.2 Análise de dados — painel** em `dashboard.html`, depois das tabelas. Segue as regras da skill de dataviz:
+- [x] **7.2 Análise de dados — painel** em `dashboard.html`, depois das tabelas. Segue as regras da skill de dataviz:
   - **Forma:**
     - indicadores (cards) para os números-chave;
     - colunas para "consultas por mês";
@@ -2888,7 +2888,7 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
     - ocupação: cada `<li>` com texto visível ("Segunda-feira — 42% (7 h de 17 h)") e a barra decorativa `aria-hidden="true"`;
     - estado vazio: "Ainda não há consultas no período selecionado.";
     - ao terminar, `VetAPI.anunciar('Análise atualizada: N consultas no período.')`.
-- [ ] **7.3 Agenda semanal:**
+- [x] **7.3 Agenda semanal:**
   - `AgendaSemanalView(LoginRequiredMixin, TemplateView)`, rota `consultas/agenda/` (nome `agenda-semanal`), template `agenda_semanal.html`, mais o link "Agenda" no `partials/menu_principal.html` (`aria-current` quando `nome == 'agenda-semanal'`).
   - `static/js/agenda_semanal.js`:
     - estado `segunda` (segunda-feira da semana atual);
@@ -2899,14 +2899,14 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
     - cada item é um link para o detalhe ("09:00 · Rex (João) · Fisioterapia") com o selo `badge-<status>`;
     - dia vazio mostra "Sem consultas";
     - enquanto carrega, mantém o desenho anterior com `opacity-50` e anuncia "N consultas na semana".
-- [ ] **7.4 Horários livres na página pública** (raia do Tutor):
+- [x] **7.4 Horários livres na página pública** (raia do Tutor):
   - `HorariosPublicosView(APIView)` em `GET /api/horarios-publicos/` (nome `horarios-publicos`), com `permission_classes = [AllowAny]`, `authentication_classes = []` e `throttle_classes = [AnonRateThrottle]`. Ela percorre os próximos 14 dias com `services.horarios_livres(data)`, guarda até 3 dias com horário (até 8 horários cada) e devolve `{'dias': [{'data': 'AAAA-MM-DD', 'horarios': ['09:00', …]}]}`, sem dados pessoais.
   - `home.html`: `<section id="horarios" aria-labelledby="titulo-horarios" data-url="{% url 'api:horarios-publicos' %}" data-whatsapp="5519987286814">` com o título "Próximos horários livres". O conteúdo de reserva, sem JS, é "Consulte os horários pelo WhatsApp (19) 98728-6814".
   - `static/js/horarios_publicos.js`:
     - por dia, um `<h3>` "terça-feira, 14/10" e uma lista de links `https://wa.me/5519987286814?text=` + `encodeURIComponent('Olá! Gostaria de agendar um atendimento em 14/10 às 09:00 para meu pet.')`;
     - cada link com texto "09:00" + `<span class="sr-only"> — pedir este horário pelo WhatsApp (abre em nova aba)</span>`, `target="_blank"` e `rel="noopener"`.
   - No hero, acrescente o link "Ver horários livres" → `#horarios`.
-- [ ] **7.5 Comando `popular_demo`** (para a apresentação e os gráficos):
+- [x] **7.5 Comando `popular_demo`** (para a apresentação e os gráficos):
   - Recusa rodar com `DEBUG=False`, a menos que receba `--forcar`.
   - Chama `criar_horarios_padrao` antes.
   - Usa `random.Random(2026)`.
@@ -2916,7 +2916,7 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
   - Nos próximos 14 dias úteis, cria de 0 a 2 consultas, agendado ou confirmado.
   - `--apagar` remove só os tutores `@demo.vetsystem.local` (o cascade leva animais e consultas).
   - Imprime o resumo.
-- [ ] **7.6 Testes:**
+- [x] **7.6 Testes:**
   - `estatisticas`:
     - 3 consultas em segundas-feiras passadas (`proxima_data(0) - timedelta(days=14)` e `- 21`): 2 de fisioterapia realizadas e 1 consulta cancelada;
     - o resultado deve ter total 3, `taxa_cancelamento` 33.3, `por_tipo` com fisioterapia 2 e `ocupacao_por_dia[0]['minutos_agendados'] == 120`.
@@ -2925,10 +2925,10 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
   - Home contém `id="horarios"` e `wa.me`.
   - Agenda semanal: 200 e entra na lista de páginas do teste de acessibilidade.
   - `popular_demo --forcar` cria dados e `--apagar` remove.
-- [ ] **7.7 Verificação:**
+- [x] **7.7 Verificação:** (pytest, smoke local e PR feitos; decisão sobre produção tomada)
   - pytest verde.
   - No `runserver`: `popular_demo` local, depois dashboard, agenda semanal e home.
-  - **[VOCÊ]** decida se roda `popular_demo --forcar` em produção para a apresentação. Se rodar, apague com `--apagar` antes de a clínica usar de verdade.
+  - **[VOCÊ]** decisão: o Lucas roda `popular_demo --forcar` em produção para a apresentação, pelo Shell do Render: `python manage.py popular_demo --forcar`. Antes do uso real pela clínica, rodar `python manage.py popular_demo --apagar`. (Feito pelo Lucas; a sessão do Claude não acessa o banco de produção.)
   - PR com CI verde.
 
 ## Fase 8 — Métricas finais, documentação, diagramas e release

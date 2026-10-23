@@ -164,3 +164,22 @@ def test_consulta_create_contem_seletor_em_modal(cliente_logado):
     assert 'data-url-proprietarios' in html
     assert '<option value="gato">' in html
 
+
+
+# --- Fase 7: home pública e agenda semanal ------------------------------------
+
+@pytest.mark.django_db
+def test_home_tem_horarios_livres_e_whatsapp(client):
+    html = client.get(reverse('agendamentos:home')).content.decode()
+    assert 'id="horarios"' in html and 'wa.me' in html
+
+
+def test_agenda_semanal(cliente_logado):
+    resposta = cliente_logado.get(reverse('agendamentos:agenda-semanal'))
+    assert resposta.status_code == 200
+    assert 'id="titulo-semana"' in resposta.content.decode()
+
+
+@pytest.mark.django_db
+def test_agenda_semanal_exige_login(client):
+    assert client.get(reverse('agendamentos:agenda-semanal')).status_code == 302

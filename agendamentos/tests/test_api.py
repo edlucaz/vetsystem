@@ -197,3 +197,27 @@ def test_filtro_animal_por_especie_e_termo(api, animal):
     assert resposta.status_code == 200
     assert [a['nome'] for a in _resultados(resposta)] == ['Rex']
 
+
+
+# --- Fase 7: estatísticas e horários públicos ---------------------------------
+
+@pytest.mark.django_db
+def test_estatisticas_exige_login():
+    assert APIClient().get(reverse('api:estatisticas')).status_code == 403
+
+
+def test_estatisticas_devolve_indicadores(api, horario_comercial):
+    resposta = api.get(reverse('api:estatisticas'), {'meses': 'abc'})
+    assert resposta.status_code == 200
+    assert resposta.json()['periodo']['meses'] == 6
+    assert api.get(reverse('api:estatisticas'), {'meses': 99}).json()['periodo']['meses'] == 24
+
+
+def test_horarios_publicos_anonimo_sem_dados_pessoais(horario_comercial, consulta_futura):
+    resposta = APIClient().get(reverse('api:horarios-publicos'))
+    assert resposta.status_code == 200
+    texto = resposta.content.decode()
+    assert 'animal' not in texto and 'proprietario' not in texto and consulta_futura.animal.nome not in texto
+    dias = resposta.json()['dias']
+    assert dias and len(dias) <= 3
+    assert all(len(d['horarios']) <= 8 for d in dias)

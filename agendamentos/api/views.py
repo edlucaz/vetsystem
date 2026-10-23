@@ -5,18 +5,24 @@ ATIVO PET | Projeto Integrador UNIVESP 2026 — PI II
 Arquivo : agendamentos/api/views.py
 Função  : ViewSets da API REST (CRUD de proprietários, animais, consultas e
           disponibilidades), ação de status da consulta e horários livres
-          do dia — etapas do fluxograma swimlane v2.
+          do dia — etapas do fluxograma swimlane v2. Fase 7: estatísticas do
+          painel de análise e horários livres públicos (raia do Tutor).
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
 Data    : 2026-10-13
 """
 from django.core.exceptions import ValidationError as DjangoValidationError
+import datetime
+
 from django.db.models import Count
+from django.utils import timezone
 from django_filters import rest_framework as filtros
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 
 from .. import services
@@ -113,3 +119,37 @@ class HorariosLivresView(APIView):
             'duracao': duracao,
             'horarios': [f'{h:%H:%M}' for h in livres],
         })
+
+
+class EstatisticasView(APIView):
+    """Painel de análise de dados — GET /api/estatisticas/?meses=N (1 a 24; padrão 6)."""
+
+    def get(self, request):
+        try:
+            meses = int(request.query_params.get('meses', 6))
+        except (TypeError, ValueError):
+            meses = 6
+        meses = max(1, min(24, meses))
+        return Response(services.estatisticas(meses))
+
+
+class HorariosPublicosView(APIView):
+    """
+    Raia do Tutor — GET /api/horarios-publicos/: até 3 dias com horário livre nos
+    próximos 14 dias (até 8 horários cada). Público, sem dados pessoais.
+    """
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [AnonRateThrottle]
+
+    def get(self, request):
+        hoje = timezone.localdate()
+        dias = []
+        for i in range(14):
+            data = hoje + datetime.timedelta(days=i)
+            livres = services.horarios_livres(data)
+            if livres:
+                dias.append({'data': data.isoformat(), 'horarios': [f'{h:%H:%M}' for h in livres[:8]]})
+            if len(dias) == 3:
+                break
+        return Response({'dias': dias})

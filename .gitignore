@@ -53,3 +53,12 @@ build/
 .pytest_cache/
 coverage.xml
 docs/metricas/lighthouse/**/*.report.*
+
+# Ruflo (estado local dos plugins — não versionar)
+.claude-flow/
+.swarm/
+ruvector.db
+.claude/proven-config.json
+.claude/.proven-config-version
+agentdb.rvf
+agentdb.rvf.lock

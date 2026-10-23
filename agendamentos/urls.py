@@ -38,6 +38,8 @@ urlpatterns = [
     # =========================================================================
     # Lista com filtros: /consultas/?status=agendado&data=2026-04-10
     path('consultas/', views.ConsultaListView.as_view(), name='consulta-list'),
+    # Agenda da semana (Fase 7) — desenhada pelo static/js/agenda_semanal.js
+    path('consultas/agenda/', views.AgendaSemanalView.as_view(), name='agenda-semanal'),
     # Detalhe com dados do animal e proprietário
     path('consultas/<int:pk>/', views.ConsultaDetailView.as_view(), name='consulta-detail'),
     # Agendamento: /consultas/nova/ ou /consultas/nova/?animal=1

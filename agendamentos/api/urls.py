@@ -6,7 +6,8 @@ Arquivo : agendamentos/api/urls.py
 Função  : Rotas da API REST (namespace 'api'), incluídas em /api/:
             /api/proprietarios/, /api/animais/ (+ /api/animais/<id>/pesos/),
             /api/consultas/ (+ /api/consultas/<id>/status/),
-            /api/disponibilidades/ e /api/horarios-livres/.
+            /api/disponibilidades/, /api/horarios-livres/,
+            /api/estatisticas/ e /api/horarios-publicos/ (Fase 7).
 
 Autor   : Lucas Eduardo Rocha (RA 24217901)
 Data    : 2026-10-13
@@ -26,5 +27,7 @@ roteador.register('disponibilidades', views.DisponibilidadeViewSet, basename='di
 
 urlpatterns = [
     path('horarios-livres/', views.HorariosLivresView.as_view(), name='horarios-livres'),
+    path('estatisticas/', views.EstatisticasView.as_view(), name='estatisticas'),
+    path('horarios-publicos/', views.HorariosPublicosView.as_view(), name='horarios-publicos'),
     path('', include(roteador.urls)),
 ]

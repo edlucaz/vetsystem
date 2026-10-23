@@ -10,6 +10,7 @@
   Data    : 2026-03-11
 -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}ATIVO PET — Fisioterapia e Bem-Estar Animal{% endblock %}
 
@@ -85,6 +86,11 @@
          class="bg-black/25 hover:bg-black/35 text-white font-semibold
                 text-base py-4 px-8 rounded-xl transition-all">
         Conheça os serviços <span aria-hidden="true">↓</span>
+      </a>
+      <a href="#horarios"
+         class="bg-black/25 hover:bg-black/35 text-white font-semibold
+                text-base py-4 px-8 rounded-xl transition-all">
+        Ver horários livres <span aria-hidden="true">↓</span>
       </a>
     </div>
 
@@ -235,6 +241,19 @@
 
 
 <!-- ============================================================
+     PRÓXIMOS HORÁRIOS LIVRES (Fase 7 — raia do Tutor)
+     Preenchida por static/js/horarios_publicos.js; sem JS fica o WhatsApp.
+     ============================================================ -->
+<section id="horarios" aria-labelledby="titulo-horarios" class="mb-20 bg-white rounded-3xl shadow-sm p-10"
+         data-url="{% url 'api:horarios-publicos' %}" data-whatsapp="5519987286814">
+  <h2 id="titulo-horarios" class="text-3xl font-bold mb-6" style="color: #4A2C7A;">Próximos horários livres</h2>
+  <div id="horarios-conteudo">
+    <p class="text-gray-600">Consulte os horários pelo WhatsApp (19) 98728-6814</p>
+  </div>
+</section>
+
+
+<!-- ============================================================
      SEÇÃO 4 — CTA FINAL
      ============================================================ -->
 <section class="mb-4 rounded-3xl p-12 text-center" style="background: #4A2C7A;">
@@ -253,4 +272,8 @@
   <p class="text-white/50 text-sm mt-4">Agendamento online rápido e sem filas.</p>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/horarios_publicos.js' %}"></script>
 {% endblock %}
