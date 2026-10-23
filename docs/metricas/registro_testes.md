@@ -15,3 +15,4 @@
 
 
 | 2026-10-23 | 8 | `spectacular --file` gerou YAML e sobrescreveu `docs/api-openapi.json` (JSON). | Formato padrão do comando é YAML. | Regerado com `--format openapi-json`. Suíte: **129 aprovados**, cobertura 89%. 3 avisos do spectacular (views sem serializer: horarios-livres, estatisticas, horarios-publicos), não fatais. |
+| 2026-10-23 | 8 | Nenhuma falha nos passos 8.5–8.6 (somente documentação). 8.4 (validação com a Sra. Fernanda) e 8.7 (release) seguem pendentes. | — | — |

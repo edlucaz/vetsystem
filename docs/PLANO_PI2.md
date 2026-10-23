@@ -2981,12 +2981,12 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
     9. Eu me senti confiante ao usar o sistema.
     10. Precisei aprender várias coisas antes de usar o sistema.
   - **Nota SUS:** some (resposta − 1) nos itens ímpares e (5 − resposta) nos pares, e multiplique por 2,5.
-- [ ] **8.5 Documentação:**
+- [x] **8.5 Documentação:**
   - **README:** PI II, funcionalidades novas, stack (DRF, Neon, pytest, GitHub Actions), link `/api/docs/`, como rodar os testes e o selo `![CI](https://github.com/edlucaz/vetsystem/actions/workflows/ci.yml/badge.svg)`.
   - **`docs/documentacao_tecnica.md`:** models (FK "verifica", `data_nascimento` e `RegistroPeso`), tabela de endpoints, `services.py`, testes, acessibilidade, decisões de projeto (Neon × Render DB, JS puro, melhoria progressiva) e "Trabalhos futuros" sem os itens já feitos.
   - **`CLAUDE.md`:** atualize se algo mudou.
   - **Opcional:** em `/mnt/backup500gb/Projetos/Web/CLAUDE.md`, acrescente à linha do `vetsystem/` "PI II; tem CLAUDE.md próprio".
-- [ ] **8.6 `docs/diagramas/atualizacoes_relatorio_final.md`.** Copie o Apêndice A, que é o que **você** muda no DER e no fluxograma para a versão final.
+- [x] **8.6 `docs/diagramas/atualizacoes_relatorio_final.md`.** Copie o Apêndice A, que é o que **você** muda no DER e no fluxograma para a versão final.
 - [ ] **8.7 Release:**
   ```bash
   git tag -a v2.0-pi2 -m "VETSystem 2.0 — Projeto Integrador II"

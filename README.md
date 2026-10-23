@@ -1,6 +1,8 @@
 # VETSystem — Sistema de Agendamento Veterinário
 
-> Projeto Integrador em Computação I (PJI110) — UNIVESP 2026
+![CI](https://github.com/edlucaz/vetsystem/actions/workflows/ci.yml/badge.svg)
+
+> Projeto Integrador em Computação I (PJI110) e II — UNIVESP 2026
 > Clínica ATIVO PET — Fisioterapia e Bem-Estar Animal, Limeira/SP
 
 ## Sobre o projeto
@@ -19,6 +21,17 @@ O VETSystem substitui o controle manual de agendamentos via WhatsApp da clínica
 - Frontpage pública da ATIVO PET com CTA de agendamento
 - Autenticação com login/logout
 
+**Novidades do PI II**
+
+- Validação de agendamento contra a `Disponibilidade` (FK "verifica"), com bloqueio de conflitos
+- API REST (Django REST Framework, sessão + CSRF) documentada em `/api/docs/`
+- Agenda interativa em JavaScript puro (horários livres em tempo real, sem recarregar a página)
+- Confirmação pelo WhatsApp e ações de status ("Atendimento realizado", "Registrar ausência")
+- Histórico de peso do animal (`RegistroPeso`) e idade calculada a partir de `data_nascimento`
+- Painel de análise de dados (`/api/estatisticas/`), agenda semanal e horários públicos na home
+- Acessibilidade WCAG 2.1 AA (paleta, foco visível, "pular para o conteúdo", testes automatizados)
+- Banco Neon (PostgreSQL) em produção, testes com pytest e CI no GitHub Actions
+
 ## Stack
 
 | Camada | Tecnologia |
@@ -27,8 +40,12 @@ O VETSystem substitui o controle manual de agendamentos via WhatsApp da clínica
 | Frontend | Tailwind CSS via CDN |
 | Formulários | django-crispy-forms + crispy-tailwind |
 | Banco (dev) | SQLite |
-| Banco (prod) | PostgreSQL (Render) |
-| Deploy | Render (plano gratuito) |
+| Banco (prod) | PostgreSQL no Neon (`DATABASE_URL`) |
+| API | Django REST Framework + drf-spectacular (`/api/docs/`) |
+| JavaScript | JS puro em `static/js/` (melhoria progressiva) |
+| Testes | pytest, pytest-django, pytest-cov |
+| CI | GitHub Actions (PostgreSQL 16) |
+| Deploy | Render (web), deploy automático a cada merge na `main` |
 | Servidor WSGI | Gunicorn |
 | Estáticos | WhiteNoise |
 
@@ -88,6 +105,16 @@ python manage.py runserver
 
 Acesse em: http://127.0.0.1:8000
 
+## Testes
+
+```bash
+.venv/bin/pip install -r requirements-dev.txt
+.venv/bin/pytest            # suíte completa
+.venv/bin/pytest --cov      # com cobertura (meta ≥ 85% em agendamentos/)
+```
+
+Métricas e resultados do PI II: `docs/metricas/resultados_pi2.md`. Documentação técnica: `docs/documentacao_tecnica.md`.
+
 ## Variáveis de ambiente
 
 | Variável | Descrição | Padrão (dev) |
@@ -106,7 +133,7 @@ O projeto está configurado para deploy automático no Render via `render.yaml`.
 
 1. Acesse dashboard.render.com → New → Blueprint
 2. Conecte o repositório `edlucaz/vetsystem`
-3. O Render cria automaticamente o web service + PostgreSQL gratuito
+3. O Render cria o web service; o banco PostgreSQL é o Neon, informado em `DATABASE_URL`
 4. O `start.sh` executa migrações e cria o superusuário automaticamente
 
 **URL de produção:** https://vetsystem-gky6.onrender.com
@@ -123,6 +150,8 @@ O projeto está configurado para deploy automático no Render via `render.yaml`.
 | `/animais/` | Lista de animais | Sim |
 | `/consultas/` | Lista de consultas | Sim |
 | `/disponibilidade/` | Horários de funcionamento | Sim |
+| `/consultas/agenda/` | Agenda semanal | Sim |
+| `/api/docs/` | Documentação interativa da API | Sim |
 | `/admin/` | Painel administrativo Django | Sim (staff) |
 
 ## Grupo
