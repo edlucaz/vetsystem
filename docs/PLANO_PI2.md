@@ -1642,7 +1642,7 @@ git switch main && git pull # o Render publica sozinho a main
       assert problemas_de_acessibilidade(html) == []
   ```
   Se aparecer um problema, conserte o template, não o teste. Anote cada correção em `registro_testes.md`: isso vira evidência de "falhas encontradas e corrigidas".
-- [ ] **5.9 Verificação:** (pytest e CI feitos; checklist de teclado pendente)
+- [x] **5.9 Verificação:** (pytest e CI feitos; checklist de teclado conferido no Chrome por `scripts/checklist_automatico.py` em 23/10 — 2 defeitos corrigidos; itens 5 e 7 ainda à mão)
   - pytest verde.
   - **[VOCÊ]** checklist de teclado: navegue pelas telas só com Tab, Shift+Tab, Enter e Esc; confira que o foco é sempre visível e que o menu funciona no celular (DevTools, 375 px).
   - Crie `docs/metricas/checklist_manual.md` com o resultado.
@@ -2280,7 +2280,7 @@ Todos os arquivos ficam em `static/js/`, com cabeçalho em comentário (arquivo,
   - os testes de acessibilidade continuam verdes (combobox rotulado e `aria-controls` válido);
   - `consulta-create` contém `data-url-horarios` e o `<select id="id_animal">` de reserva;
   - o dashboard mostra `data-acoes-consulta` para a consulta de hoje (crie uma consulta para hoje às 23:00 pelo ORM).
-- [ ] **6.10 [VOCÊ] Checklist manual.** (pendente — adiado para o fim do PI II, junto com o 5.9) Anote em `docs/metricas/checklist_manual.md`:
+- [x] **6.10 [VOCÊ] Checklist manual.** (itens 1–5 automáticos em 23/10; item 6, leitor de tela, opcional e pendente) Anote em `docs/metricas/checklist_manual.md`:
   1. Agendar só com o teclado: autocomplete, setas, Enter, Tab até a agenda, setas nos horários e Enter.
   2. Forçar um conflito: abra duas abas e agende o mesmo horário. A segunda mostra o erro e recarrega a agenda.
   3. Desativar o JavaScript (DevTools → Disable JavaScript) e agendar pelo formulário de reserva.
@@ -2959,7 +2959,7 @@ Arquivos: `models.py`, `services.py`, `views.py`, `admin.py`, `forms.py`, `api/s
   - recarregamentos para agendar: tutor existente 2 → 1; tutor novo 6 → 3 (o envio final não recarrega);
   - conflitos e expediente: antes aceitos, agora bloqueados (testes que provam);
   - falhas registradas em `registro_testes.md`.
-- [ ] **8.4 [VOCÊ] Validação com a Sra. Fernanda.** O Claude cria o modelo `docs/metricas/validacao_clinica.md`.
+- [ ] **8.4 [VOCÊ] Validação com a Sra. Fernanda.** O Claude cria o modelo `docs/metricas/validacao_clinica.md` (feito: roteiro da sessão + TCLE em `docs/metricas/tcle.md`).
   - **Tarefas cronometradas:**
     1. agendar para tutor já cadastrado;
     2. cadastrar tutor e animal novos e agendar;

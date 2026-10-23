@@ -48,15 +48,18 @@ O Django segue o padrão MTV, equivalente ao MVC:
 ```
 vetsystem/
 ├── agendamentos/               # App principal do sistema
-│   ├── management/commands/    # Comando criar_superusuario (deploy)
+│   ├── api/                    # API REST (DRF): serializers, views, urls (13 rotas, 29 operações)
+│   ├── management/commands/    # criar_superusuario, criar_horarios_padrao, popular_demo, medir_desempenho
 │   ├── migrations/             # Histórico de alterações no banco
-│   ├── templates/agendamentos/ # Templates do app (14 arquivos HTML)
+│   ├── templates/agendamentos/ # Templates do app (19 arquivos HTML)
+│   ├── tests/                  # Suíte pytest (129 testes)
 │   ├── admin.py                # Registro dos models no Django Admin
 │   ├── apps.py                 # Configuração do app
 │   ├── forms.py                # 4 formulários com validação
-│   ├── models.py               # 4 models: Proprietario, Animal, Consulta, Disponibilidade
-│   ├── urls.py                 # 18 rotas do app
-│   └── views.py                # 18 CBVs
+│   ├── models.py               # 5 models: Proprietario, Animal, RegistroPeso, Consulta, Disponibilidade
+│   ├── services.py             # Regras de negócio (horários livres, validação, status, estatísticas)
+│   ├── urls.py                 # 23 rotas do app
+│   └── views.py                # 23 CBVs
 ├── templates/                  # Templates globais compartilhados
 │   ├── base.html               # Layout base com navbar e footer
 │   ├── dashboard.html          # Dashboard pós-login

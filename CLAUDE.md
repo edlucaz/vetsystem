@@ -9,6 +9,7 @@ Plano do PI II: `docs/PLANO_PI2.md` — execute uma fase por vez (`/fase-N`, eff
 - Testes: `.venv/bin/pytest` · cobertura: `.venv/bin/pytest --cov` · um teste: `.venv/bin/pytest agendamentos/tests/test_services.py::test_nome`
 - Verificações: `.venv/bin/python manage.py check && .venv/bin/python manage.py makemigrations --check --dry-run`
 - Expediente padrão: `.venv/bin/python manage.py criar_horarios_padrao`
+- Checklist teclado/375 px no Chrome: `.venv/bin/python scripts/checklist_automatico.py` · vídeo da parte técnica: `scripts/video/ROTEIRO.md`
 - Dados demo: `.venv/bin/python manage.py popular_demo` · desempenho: `.venv/bin/python manage.py medir_desempenho` · Lighthouse: `scripts/lighthouse.sh antes|depois`
 
 ## Arquitetura

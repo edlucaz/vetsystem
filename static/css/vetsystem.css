@@ -1,9 +1,11 @@
 /* VETSystem — static/css/vetsystem.css
    Componentes e acessibilidade (WCAG 2.1 AA). Todas as cores com contraste ≥ 4,5:1. */
 
-/* 2.4.7 Foco visível: anel escuro com halo branco (aparece no fundo claro e no menu turquesa) */
-:focus-visible { outline: 3px solid #1B1B1B !important; outline-offset: 2px !important; box-shadow: 0 0 0 5px #FFFFFF !important; }
+/* 2.4.7 Foco visível: anel escuro com halo branco (aparece no fundo claro e no menu turquesa).
+   O campo de data recebe o foco num subcampo interno, por isso também input[type="date"]:focus. */
+:focus-visible, input[type="date"]:focus { outline: 3px solid #1B1B1B !important; outline-offset: 2px !important; box-shadow: 0 0 0 5px #FFFFFF !important; }
 main:focus-visible { outline: none !important; box-shadow: none !important; }
+::-webkit-calendar-picker-indicator:focus-visible { outline: 3px solid #1B1B1B; outline-offset: 2px; }
 
 /* O atributo hidden (usado pelo JavaScript da Fase 6) vence classes de display como .grid e .btn-acao */
 [hidden] { display: none !important; }

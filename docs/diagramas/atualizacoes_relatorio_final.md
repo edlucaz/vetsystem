@@ -2,6 +2,10 @@
 
 O que o código faz × o que o grupo muda nos diagramas (versão final).
 
+> **v3 gerada (2026-10-23):** `der_v3.svg/png` e `fluxograma_v3.svg/png` nesta pasta, criados por
+> `scripts/diagramas/gerar_v3.py` com todos os ajustes abaixo aplicados. Os elementos têm ids
+> (`der-*`, `flx-*`) usados pelo roteiro de vídeo (`scripts/video/`).
+
 **DER**
 
 | Elemento do DER (v2) | No código | Ação no DER v3 (você) |

@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="970" viewBox="0 0 1000 970">
+<rect width="1000" height="970" fill="#FFFFFF"/>
+<text x="500" y="26" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="14" font-weight="bold" fill="#000000">Figura 2 – Diagrama de Entidade-Relacionamento do VETSystem (versão final, PI II)</text>
+<g id="der-proprietario" class="der-item">
+<line x1="165" y1="280" x2="110" y2="137" stroke="#000000" stroke-width="1.5"/>
+<line x1="165" y1="280" x2="62" y2="208" stroke="#000000" stroke-width="1.5"/>
+<line x1="165" y1="280" x2="50" y2="280" stroke="#000000" stroke-width="1.5"/>
+<line x1="165" y1="280" x2="65" y2="353" stroke="#000000" stroke-width="1.5"/>
+<line x1="165" y1="280" x2="112" y2="417" stroke="#000000" stroke-width="1.5"/>
+<rect x="90.0" y="260" width="150" height="40" fill="#DBEAFE" stroke="#000000" stroke-width="1.5"/>
+<text x="165" y="280" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="14" font-weight="bold" fill="#000000">PROPRIETÁRIO</text>
+<ellipse cx="110" cy="137" rx="62.0" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="110" y="137" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000" text-decoration="underline">id_proprietario</text>
+<ellipse cx="62" cy="208" rx="22.8" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="62" y="208" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">nome</text>
+<ellipse cx="50" cy="280" rx="22.8" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="50" y="280" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">cpf</text>
+<ellipse cx="65" cy="353" rx="36.8" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="65" y="353" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">telefone</text>
+<ellipse cx="112" cy="417" rx="26.0" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="112" y="417" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">email</text>
+</g>
+<g id="der-animal" class="der-item">
+<line x1="470" y1="280" x2="470" y2="115" stroke="#000000" stroke-width="1.5"/>
+<line x1="470" y1="280" x2="385" y2="135" stroke="#000000" stroke-width="1.5"/>
+<line x1="470" y1="280" x2="545" y2="125" stroke="#000000" stroke-width="1.5"/>
+<line x1="470" y1="280" x2="365" y2="195" stroke="#000000" stroke-width="1.5"/>
+<line x1="470" y1="280" x2="610" y2="215" stroke="#000000" stroke-width="1.5"/>
+<line x1="470" y1="280" x2="340" y2="385" stroke="#000000" stroke-width="1.5"/>
+<line x1="470" y1="280" x2="560" y2="340" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="470" y1="280" x2="585" y2="395" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<rect x="415.0" y="260" width="110" height="40" fill="#DBEAFE" stroke="#000000" stroke-width="1.5"/>
+<text x="470" y="280" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="14" font-weight="bold" fill="#000000">ANIMAL</text>
+<ellipse cx="470" cy="115" rx="40.4" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="470" y="115" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000" text-decoration="underline">id_animal</text>
+<ellipse cx="385" cy="135" rx="22.8" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="385" y="135" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">nome</text>
+<ellipse cx="545" cy="125" rx="33.2" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="545" y="125" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">especie</text>
+<ellipse cx="365" cy="195" rx="22.8" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="365" y="195" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">raca</text>
+<ellipse cx="610" cy="215" rx="62.0" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="610" y="215" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">data_nascimento</text>
+<ellipse cx="340" cy="385" rx="80.0" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="340" y="385" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">id_proprietario (FK)</text>
+<ellipse cx="560" cy="340" rx="22.8" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="560" y="340" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">peso</text>
+<ellipse cx="585" cy="395" rx="29.6" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="585" y="395" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">queixa</text>
+</g>
+<g id="der-consulta" class="der-item">
+<line x1="775" y1="280" x2="775" y2="133" stroke="#000000" stroke-width="1.5"/>
+<line x1="775" y1="280" x2="890" y2="170" stroke="#000000" stroke-width="1.5"/>
+<line x1="775" y1="280" x2="912" y2="243" stroke="#000000" stroke-width="1.5"/>
+<line x1="775" y1="280" x2="912" y2="318" stroke="#000000" stroke-width="1.5"/>
+<line x1="775" y1="280" x2="900" y2="385" stroke="#000000" stroke-width="1.5"/>
+<line x1="775" y1="280" x2="690" y2="375" stroke="#000000" stroke-width="1.5"/>
+<line x1="775" y1="280" x2="665" y2="150" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="775" y1="280" x2="870" y2="505" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<rect x="715.0" y="260" width="120" height="40" fill="#DBEAFE" stroke="#000000" stroke-width="1.5"/>
+<text x="775" y="280" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="14" font-weight="bold" fill="#000000">CONSULTA</text>
+<ellipse cx="775" cy="133" rx="47.6" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="775" y="133" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000" text-decoration="underline">id_consulta</text>
+<ellipse cx="890" cy="170" rx="40.4" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="890" y="170" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">data_hora</text>
+<ellipse cx="912" cy="243" rx="65.6" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="912" y="243" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">tipo_atendimento</text>
+<ellipse cx="912" cy="318" rx="29.6" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="912" y="318" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">status</text>
+<ellipse cx="900" cy="385" rx="47.6" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="900" y="385" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">observacoes</text>
+<ellipse cx="690" cy="375" rx="58.4" ry="14" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
+<text x="690" y="375" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">id_animal (FK)</text>
+<ellipse cx="665" cy="150" rx="62.0" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="665" y="150" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">duracao_minutos</text>
+<ellipse cx="870" cy="505" rx="90.8" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="870" y="505" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">id_disponibilidade (FK)</text>
+</g>
+<g id="der-disponibilidade" class="der-item">
+<line x1="775" y1="600" x2="640" y2="670" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="775" y1="600" x2="925" y2="560" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="775" y1="600" x2="705" y2="730" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="775" y1="600" x2="860" y2="730" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="775" y1="600" x2="930" y2="650" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<rect x="690.0" y="580" width="170" height="40" fill="#DBEAFE" stroke="#2563EB" stroke-width="2.2" stroke-dasharray="3 3"/>
+<text x="775" y="600" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="14" font-weight="bold" fill="#000000">DISPONIBILIDADE</text>
+<ellipse cx="640" cy="670" rx="72.8" ry="14" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.2" stroke-dasharray="3 3"/>
+<text x="640" y="670" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000" text-decoration="underline">id_disponibilidade</text>
+<ellipse cx="925" cy="560" rx="44.0" ry="14" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.2" stroke-dasharray="3 3"/>
+<text x="925" y="560" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">dia_semana</text>
+<ellipse cx="705" cy="730" rx="47.6" ry="14" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.2" stroke-dasharray="3 3"/>
+<text x="705" y="730" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">hora_inicio</text>
+<ellipse cx="860" cy="730" rx="36.8" ry="14" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.2" stroke-dasharray="3 3"/>
+<text x="860" y="730" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">hora_fim</text>
+<ellipse cx="930" cy="650" rx="26.0" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="930" y="650" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">ativo</text>
+</g>
+<g id="der-historico_peso" class="der-item">
+<line x1="470" y1="640" x2="290" y2="610" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="470" y1="640" x2="300" y2="680" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="470" y1="640" x2="560" y2="730" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<line x1="470" y1="640" x2="400" y2="740" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<rect x="385.0" y="620" width="170" height="40" fill="#DBEAFE" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="470" y="640" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="14" font-weight="bold" fill="#000000">HISTÓRICO_PESO</text>
+<ellipse cx="290" cy="610" rx="47.6" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="290" y="610" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000" text-decoration="underline">id_registro</text>
+<ellipse cx="300" cy="680" rx="22.8" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="300" y="680" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">data</text>
+<ellipse cx="560" cy="730" rx="22.8" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="560" y="730" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">peso</text>
+<ellipse cx="400" cy="740" rx="58.4" ry="14" fill="#FFFFFF" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="400" y="740" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">id_animal (FK)</text>
+</g>
+<g id="der-possui" class="der-item">
+<line x1="240" y1="280" x2="295" y2="280" stroke="#000000" stroke-width="2"/>
+<line x1="375" y1="280" x2="415" y2="280" stroke="#000000" stroke-width="2"/>
+<polygon points="295,280 335,250 375,280 335,310" fill="#FEF9C3" stroke="#000000" stroke-width="1.5"/>
+<text x="335" y="280" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="normal" fill="#000000">possui</text>
+<text x="270" y="266" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">1</text>
+<text x="395" y="266" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">N</text>
+</g>
+<g id="der-realiza" class="der-item">
+<line x1="525" y1="280" x2="600" y2="280" stroke="#000000" stroke-width="2"/>
+<line x1="680" y1="280" x2="715" y2="280" stroke="#000000" stroke-width="2"/>
+<polygon points="600,280 640,250 680,280 640,310" fill="#FEF9C3" stroke="#000000" stroke-width="1.5"/>
+<text x="640" y="280" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="normal" fill="#000000">realiza</text>
+<text x="565" y="266" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">1</text>
+<text x="698" y="266" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">N</text>
+</g>
+<g id="der-verifica" class="der-item">
+<line x1="775" y1="300" x2="775" y2="420" stroke="#16A34A" stroke-width="2"/>
+<line x1="775" y1="480" x2="775" y2="580" stroke="#16A34A" stroke-width="2"/>
+<polygon points="735,450 775,420 815,450 775,480" fill="#FEF9C3" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="775" y="450" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="normal" fill="#000000">verifica</text>
+<text x="790" y="330" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">N</text>
+<text x="790" y="560" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">1</text>
+<text x="728" y="444" text-anchor="end" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="10.5" font-weight="normal" fill="#15803D">FK Consulta.disponibilidade</text>
+<text x="728" y="458" text-anchor="end" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="10.5" font-weight="normal" fill="#15803D">+ endpoint de horários livres</text>
+</g>
+<g id="der-registra" class="der-item">
+<line x1="470" y1="300" x2="470" y2="480" stroke="#16A34A" stroke-width="2"/>
+<line x1="470" y1="540" x2="470" y2="620" stroke="#16A34A" stroke-width="2"/>
+<polygon points="430,510 470,480 510,510 470,540" fill="#FEF9C3" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/>
+<text x="470" y="510" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="normal" fill="#000000">registra</text>
+<text x="484" y="320" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">1</text>
+<text x="484" y="595" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">N</text>
+</g>
+<g id="der-legenda">
+<rect x="30" y="790" width="940" height="140" rx="8" fill="#F9F9F7" stroke="#888780" stroke-width="0.8"/>
+<text x="500" y="808" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000">Legenda</text>
+<line x1="50" y1="822" x2="950" y2="822" stroke="#D3D1C7" stroke-width="0.8"/>
+<rect x="50" y="835" width="32" height="20" fill="#DBEAFE" stroke="#000000" stroke-width="1.5"/><text x="90" y="845" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Entidade</text>
+<ellipse cx="190" cy="845" rx="22" ry="10" fill="#fff" stroke="#000000" stroke-width="1.5"/><text x="220" y="845" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Atributo</text>
+<ellipse cx="310" cy="845" rx="22" ry="10" fill="#fff" stroke="#000000" stroke-width="1.5"/><text x="310" y="845" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="10" font-weight="normal" fill="#000000" text-decoration="underline">PK</text>
+<text x="340" y="845" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Chave primária (sublinhado)</text>
+<text x="530" y="845" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="bold" fill="#000000">(FK)</text><text x="565" y="845" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Chave estrangeira</text>
+<polygon points="720,835 740,845 720,855 700,845" fill="#FEF9C3" stroke="#000000" stroke-width="1.5"/><text x="750" y="845" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Relacionamento</text>
+<rect x="50" y="869" width="32" height="20" fill="#DBEAFE" stroke="#000000" stroke-width="1.5"/><text x="90" y="879" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Herdado do PI1</text>
+<rect x="230" y="869" width="32" height="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="2.2" stroke-dasharray="3 3"/><text x="270" y="879" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Incluído no DER no PI2 (já existia no código do PI1)</text>
+<rect x="640" y="869" width="32" height="20" fill="#FEF9C3" stroke="#16A34A" stroke-width="2.2" stroke-dasharray="7 4"/><text x="680" y="879" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="12" font-weight="normal" fill="#000000">Novo no PI2</text>
+<text x="680" y="900" text-anchor="start" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="11" font-weight="normal" fill="#444444">FK verifica, histórico de peso e novos atributos</text>
+</g>
+<text x="500" y="950" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans','DejaVu Sans',Arial,sans-serif" font-size="11" font-weight="normal" fill="#444444">Fonte: elaborado pelos autores (2026).</text>
+</svg>

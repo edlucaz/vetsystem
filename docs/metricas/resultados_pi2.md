@@ -62,12 +62,12 @@ Tabela completa em `desempenho.md` (30 repetições, SQLite local, dados demo).
 
 | Alvo | Média (ms) | p95 (ms) | KB |
 |---|---|---|---|
-| `/consultas/nova/` | 6,1 | 6,7 | 20,4 |
-| `/consultas/` | 75,7 | 79,2 | 290,0 |
-| `/api/horarios-livres/` | 3,5 | 3,9 | 0,2 |
-| `/api/animais/?search=a&limit=8` | 4,1 | 4,8 | 2,0 |
-| `/api/consultas/` (semana) | 6,0 | 6,9 | 1,6 |
-| `/api/estatisticas/?meses=6` | 10,0 | 10,4 | 1,2 |
+| `/consultas/nova/` | 5,8 | 5,8 | 20,4 |
+| `/consultas/` | 73,4 | 75,8 | 290,0 |
+| `/api/horarios-livres/` | 3,4 | 3,5 | 0,2 |
+| `/api/animais/?search=a&limit=8` | 4,3 | 5,5 | 2,0 |
+| `/api/consultas/` (semana) | 5,8 | 6,3 | 1,6 |
+| `/api/estatisticas/?meses=6` | 9,8 | 10,1 | 1,2 |
 
 Produção (Render + Neon), `/api/horarios-publicos/`, 20 requisições após acordar o site: **média 468 ms · mediana 316 ms**. A 1ª requisição levou ~57 s (plano gratuito do Render hiberna).
 

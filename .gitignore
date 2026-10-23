@@ -62,3 +62,6 @@ ruvector.db
 .claude/.proven-config-version
 agentdb.rvf
 agentdb.rvf.lock
+
+# Gravação do vídeo da parte técnica (scripts/video)
+video_saida/

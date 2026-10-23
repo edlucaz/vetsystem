@@ -1,0 +1,101 @@
+<!doctype html>
+<!--
+VETSystem — ATIVO PET | Projeto Integrador UNIVESP 2026 — PI II
+Arquivo : scripts/video/palco.html
+Função  : "Palco" 1920x1080 do vídeo da parte técnica: à esquerda o sistema (iframe), à direita
+          o fluxograma v3 e o DER v3 com zoom/destaque na etapa e nas entidades da cena, e um
+          espaço reservado para a câmera. Servido pelo gravar_video.py em /__palco__.
+Autor   : Lucas Eduardo Rocha (RA 24217901) | 2026-10-23
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>VETSystem — vídeo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1920px; height: 1080px; overflow: hidden; background: #F5F6F7;
+         font-family: 'Noto Sans', 'DejaVu Sans', Arial, sans-serif; color: #1B1B1B;
+         display: grid; grid-template-columns: 1240px 680px; }
+  #app { width: 1240px; height: 1080px; border: 0; background: #fff; box-shadow: 4px 0 12px rgba(0,0,0,.12); }
+  #painel { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; height: 1080px; }
+  #cabeca { background: #4A2C7A; color: #fff; border-radius: 12px; padding: 12px 16px; }
+  #cabeca small { display: block; font-size: 15px; opacity: .85; }
+  #titulo { font-size: 26px; font-weight: 700; line-height: 1.2; }
+  #legenda { font-size: 17px; color: #2C2C2A; background: #fff; border-left: 6px solid #B9471A;
+             border-radius: 8px; padding: 8px 12px; min-height: 48px; }
+  .caixa { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.1);
+           position: relative; overflow: hidden; flex: 1 1 0; min-height: 0; }
+  .caixa > span { position: absolute; top: 6px; left: 10px; z-index: 2; font-size: 13px; font-weight: 700;
+                  color: #1E7579; background: rgba(255,255,255,.9); padding: 2px 8px; border-radius: 6px; }
+  .caixa svg { width: 100%; height: 100%; display: block; }
+  #caixa-fluxo { flex-grow: 1.15; }
+  #camera { height: 190px; flex: 0 0 auto; border: 3px dashed #1E7579; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; color: #1E7579; font-size: 18px; }
+  body.sem-camera #camera { display: none; }
+  /* Destaque: com foco ativo, só os itens da cena ficam opacos e com brilho */
+  svg .flx-item, svg .der-item { transition: opacity .5s; }
+  svg.foco .flx-item, svg.foco .der-item { opacity: .22; }
+  svg.foco .ativo { opacity: 1; filter: drop-shadow(0 0 6px #B9471A) drop-shadow(0 0 2px #B9471A); }
+  .caixa.vazia svg { opacity: .35; }
+</style>
+</head>
+<body>
+<iframe id="app" name="app" title="VETSystem"></iframe>
+<aside id="painel">
+  <div id="cabeca"><small id="cena">Cena</small><div id="titulo">VETSystem</div></div>
+  <p id="legenda"></p>
+  <div class="caixa" id="caixa-fluxo"><span>Fluxograma (v3)</span>{{FLUXO}}</div>
+  <div class="caixa" id="caixa-der"><span>DER (v3)</span>{{DER}}</div>
+  <div id="camera">câmera</div>
+</aside>
+<script>
+  // Anima o viewBox do SVG até o retângulo que envolve os ids pedidos (ou o desenho todo)
+  function enquadrar(svg, ids) {
+    var cheio = svg.dataset.cheio.split(' ').map(Number);
+    var alvo = cheio.slice();
+    var itens = ids.map(function (id) { return svg.getElementById(id); }).filter(Boolean);
+    svg.querySelectorAll('.ativo').forEach(function (el) { el.classList.remove('ativo'); });
+    svg.classList.toggle('foco', itens.length > 0);
+    if (itens.length) {
+      var x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+      itens.forEach(function (el) {
+        el.classList.add('ativo');
+        var b = el.getBBox();
+        x1 = Math.min(x1, b.x); y1 = Math.min(y1, b.y);
+        x2 = Math.max(x2, b.x + b.width); y2 = Math.max(y2, b.y + b.height);
+      });
+      var caixa = svg.getBoundingClientRect(), proporcao = caixa.width / caixa.height;
+      var w = Math.max(x2 - x1 + 120, cheio[2] * 0.35), h = Math.max(y2 - y1 + 120, w / proporcao);
+      w = Math.max(w, h * proporcao);
+      alvo = [(x1 + x2) / 2 - w / 2, (y1 + y2) / 2 - h / 2, w, h];
+    }
+    var inicio = svg.getAttribute('viewBox').split(' ').map(Number), t0 = performance.now();
+    function passo(agora) {
+      var t = Math.min(1, (agora - t0) / 900), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      svg.setAttribute('viewBox', inicio.map(function (v, i) { return v + (alvo[i] - v) * e; }).join(' '));
+      if (t < 1) requestAnimationFrame(passo);
+    }
+    requestAnimationFrame(passo);
+  }
+
+  // Chamado pelo gravar_video.py a cada cena e a cada passo dentro da cena
+  window.palco = function (dados) {
+    if (dados.cena) document.getElementById('cena').textContent = dados.cena;
+    if (dados.titulo) document.getElementById('titulo').textContent = dados.titulo;
+    if ('legenda' in dados) document.getElementById('legenda').textContent = dados.legenda;
+    if (dados.flx) enquadrar(document.querySelector('#caixa-fluxo svg'), dados.flx);
+    if (dados.der) {
+      enquadrar(document.querySelector('#caixa-der svg'), dados.der);
+      document.getElementById('caixa-der').classList.toggle('vazia', dados.der.length === 0);
+    }
+  };
+
+  document.querySelectorAll('.caixa svg').forEach(function (svg) {
+    svg.removeAttribute('width'); svg.removeAttribute('height');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.dataset.cheio = svg.getAttribute('viewBox');
+  });
+  if (location.search.indexOf('sem-camera') >= 0) document.body.classList.add('sem-camera');
+</script>
+</body>
+</html>
